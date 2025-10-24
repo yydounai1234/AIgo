@@ -42,42 +42,65 @@ public class TextToImageService {
     }
     
     public String generateImageForScene(Scene scene, Map<String, String> characterAppearances) {
+        logger.debug("[TextToImageService] generateImageForScene called for scene {}", scene.getSceneNumber());
+        logger.debug("[TextToImageService] API Key configured: {}", apiKey != null && !apiKey.isEmpty() ? "Yes" : "No");
+        
         if ("demo-key".equals(apiKey)) {
+            logger.info("[TextToImageService] Using demo mode (demo-key detected) for scene {}", scene.getSceneNumber());
             return createDemoImageUrl(scene);
         }
         
         try {
             String characterDesc = characterAppearances.getOrDefault(scene.getCharacter(), scene.getCharacter());
             characterDescriptions.putIfAbsent(scene.getCharacter(), characterDesc);
+            logger.debug("[TextToImageService] Character description for {}: {}", scene.getCharacter(), characterDesc);
             
             String prompt = buildImagePrompt(scene, characterDesc);
+            logger.debug("[TextToImageService] Built prompt for scene {}", scene.getSceneNumber());
             
+            logger.info("[TextToImageService] Calling text-to-image API for scene {}", scene.getSceneNumber());
             String imageData = callTextToImageApi(prompt);
+            logger.info("[TextToImageService] API call successful for scene {}, image data length: {}",
+                scene.getSceneNumber(), imageData != null ? imageData.length() : 0);
             
             return imageData;
             
         } catch (Exception e) {
-            logger.error("Failed to generate image for scene {}", scene.getSceneNumber(), e);
+            logger.error("[TextToImageService] Failed to generate image for scene {}", scene.getSceneNumber(), e);
+            logger.error("[TextToImageService] Exception type: {}, message: {}",
+                e.getClass().getName(), e.getMessage());
             throw new RuntimeException("图片生成失败: " + e.getMessage(), e);
         }
     }
     
     public List<String> generateImagesForScenes(List<Scene> scenes, Map<String, String> characterAppearances) {
+        logger.info("[TextToImageService] generateImagesForScenes called for {} scenes", scenes.size());
+        logger.debug("[TextToImageService] Character appearances provided: {}", 
+            characterAppearances != null ? characterAppearances.keySet() : "null");
+        
         List<String> imageUrls = new ArrayList<>();
         
         for (Scene scene : scenes) {
             try {
+                logger.debug("[TextToImageService] Processing scene {} of {}", 
+                    scene.getSceneNumber(), scenes.size());
+                
                 String imageUrl = generateImageForScene(scene, characterAppearances);
                 imageUrls.add(imageUrl);
+                logger.debug("[TextToImageService] Added image URL for scene {}", scene.getSceneNumber());
                 
                 Thread.sleep(500);
                 
             } catch (Exception e) {
-                logger.error("Failed to generate image for scene {}, using placeholder", scene.getSceneNumber(), e);
-                imageUrls.add(createDemoImageUrl(scene));
+                logger.error("[TextToImageService] Failed to generate image for scene {}, using placeholder", 
+                    scene.getSceneNumber(), e);
+                String placeholder = createDemoImageUrl(scene);
+                imageUrls.add(placeholder);
+                logger.debug("[TextToImageService] Added placeholder for scene {}", scene.getSceneNumber());
             }
         }
         
+        logger.info("[TextToImageService] Completed image generation, returning {} URLs", imageUrls.size());
         return imageUrls;
     }
     
@@ -109,6 +132,9 @@ public class TextToImageService {
     
     private String callTextToImageApi(String prompt) throws Exception {
         String url = baseUrl + "/images/generations";
+        logger.debug("[TextToImageService] API URL: {}", url);
+        logger.debug("[TextToImageService] Model: {}", modelName);
+        logger.debug("[TextToImageService] Prompt length: {}", prompt != null ? prompt.length() : 0);
         
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + apiKey);
@@ -123,6 +149,7 @@ public class TextToImageService {
         
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
         
+        logger.debug("[TextToImageService] Sending request to Qiniu API");
         ResponseEntity<String> response = restTemplate.exchange(
             url,
             HttpMethod.POST,
@@ -130,19 +157,27 @@ public class TextToImageService {
             String.class
         );
         
+        logger.debug("[TextToImageService] Received response with status: {}", response.getStatusCode());
+        logger.debug("[TextToImageService] Response body length: {}", 
+            response.getBody() != null ? response.getBody().length() : 0);
+        
         JsonNode responseJson = objectMapper.readTree(response.getBody());
         JsonNode dataArray = responseJson.get("data");
         
         if (dataArray != null && dataArray.isArray() && dataArray.size() > 0) {
+            logger.debug("[TextToImageService] Found {} images in response", dataArray.size());
             JsonNode firstImage = dataArray.get(0);
             
             if (firstImage.has("b64_json")) {
+                logger.debug("[TextToImageService] Returning base64 encoded image");
                 return "data:image/png;base64," + firstImage.get("b64_json").asText();
             } else if (firstImage.has("url")) {
+                logger.debug("[TextToImageService] Returning image URL");
                 return firstImage.get("url").asText();
             }
         }
         
+        logger.error("[TextToImageService] No image data found in API response");
         throw new RuntimeException("API 返回的响应中没有图片数据");
     }
     
