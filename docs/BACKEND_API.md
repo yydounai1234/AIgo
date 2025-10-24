@@ -5,9 +5,8 @@
 本文档定义了 AIgo 智能动漫生成系统的生产环境后端 API 规范。
 
 **基本信息:**
-- **Base URL**: `https://api.yourdomain.com` (生产环境)
-- **Base URL**: `http://localhost:3000` (开发环境)
-- **协议**: HTTPS (生产环境必须)
+- **Base URL**: `http://localhost:8080` (开发/生产环境)
+- **协议**: HTTP
 - **数据格式**: JSON
 - **字符编码**: UTF-8
 - **认证方式**: JWT (JSON Web Token)
