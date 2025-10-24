@@ -60,7 +60,13 @@ public class NovelParseService {
         prompt.append("你是一个专业的动漫脚本分析师。请深度理解以下小说文本,并将其转换为动漫桥段。\n\n");
         prompt.append("请提取以下信息:\n");
         prompt.append("1. 角色信息 (姓名、描述、外貌、性格)\n");
-        prompt.append("2. 场景分镜 (场景编号、画面描述、氛围、对话、动作)\n");
+        prompt.append("2. 场景分镜 - 重要: 每个角色的每句对话都应该是一个独立的场景,用于生成独立的漫画图片\n");
+        prompt.append("   - 场景编号: 连续递增的数字\n");
+        prompt.append("   - 角色: 说话的角色名称\n");
+        prompt.append("   - 对话: 该角色在这个场景中说的话\n");
+        prompt.append("   - 画面描述: 这个场景的视觉画面,包括人物动作、表情、背景等\n");
+        prompt.append("   - 氛围: 场景的情绪氛围\n");
+        prompt.append("   - 动作: 角色的具体动作描述\n");
         prompt.append("3. 剧情总结\n");
         prompt.append("4. 类型和情绪基调\n\n");
         
@@ -75,11 +81,15 @@ public class NovelParseService {
         prompt.append("请以 JSON 格式返回结果,结构如下:\n");
         prompt.append("{\n");
         prompt.append("  \"characters\": [{\"name\": \"角色名\", \"description\": \"描述\", \"appearance\": \"外貌\", \"personality\": \"性格\"}],\n");
-        prompt.append("  \"scenes\": [{\"sceneNumber\": 1, \"visualDescription\": \"画面描述\", \"atmosphere\": \"氛围\", \"dialogues\": [\"对话1\", \"对话2\"], \"action\": \"动作描述\"}],\n");
+        prompt.append("  \"scenes\": [\n");
+        prompt.append("    {\"sceneNumber\": 1, \"character\": \"角色名\", \"dialogue\": \"该角色说的话\", \"visualDescription\": \"画面描述\", \"atmosphere\": \"氛围\", \"action\": \"动作描述\"},\n");
+        prompt.append("    {\"sceneNumber\": 2, \"character\": \"另一个角色名\", \"dialogue\": \"该角色说的话\", \"visualDescription\": \"画面描述\", \"atmosphere\": \"氛围\", \"action\": \"动作描述\"}\n");
+        prompt.append("  ],\n");
         prompt.append("  \"plotSummary\": \"剧情总结\",\n");
         prompt.append("  \"genre\": \"类型\",\n");
         prompt.append("  \"mood\": \"情绪基调\"\n");
-        prompt.append("}\n");
+        prompt.append("}\n\n");
+        prompt.append("注意: 每个角色的每句对话都必须是一个独立的场景对象,这样才能为每句对话生成对应的漫画图片。\n");
         
         return prompt.toString();
     }
@@ -107,11 +117,14 @@ public class NovelParseService {
         
         List<Character> characters = new ArrayList<>();
         characters.add(new Character("主角", "故事的主人公", "年轻、充满活力", "勇敢、善良"));
+        characters.add(new Character("旁白", "叙述者", "无形", "客观"));
         segment.setCharacters(characters);
         
         List<Scene> scenes = new ArrayList<>();
-        scenes.add(new Scene(1, "清晨的城市街道,阳光洒在街道上", "宁静、温暖", 
-            List.of("主角: 新的一天开始了!"), "主角走在街道上"));
+        scenes.add(new Scene(1, "旁白", "新的一天开始了。", 
+            "清晨的城市街道,阳光洒在街道上", "宁静、温暖", "镜头从天空慢慢拉近街道"));
+        scenes.add(new Scene(2, "主角", "今天会是美好的一天!", 
+            "主角站在街道上,面带微笑仰望天空", "充满希望", "主角伸展双臂,深呼吸"));
         segment.setScenes(scenes);
         
         segment.setPlotSummary("这是一个关于" + text.substring(0, Math.min(20, text.length())) + "...的故事");
