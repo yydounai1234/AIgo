@@ -1,142 +1,45 @@
-import { useState } from 'react'
-import TextInput from './components/TextInput'
-import CharacterLibrary from './components/CharacterLibrary'
-import SceneGenerator from './components/SceneGenerator'
-import VoiceControls from './components/VoiceControls'
-import ExportPanel from './components/ExportPanel'
+import { useState, useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import Navigation from './components/Navigation'
+import Home from './pages/Home'
+import WorkEditor from './pages/WorkEditor'
+import MyWorks from './pages/MyWorks'
+import Gallery from './pages/Gallery'
+import EpisodeViewer from './pages/EpisodeViewer'
+import api from './services/api'
 import './App.css'
 
 function App() {
-  const [novelText, setNovelText] = useState('')
-  const [characters, setCharacters] = useState([])
-  const [scenes, setScenes] = useState([])
-  const [voiceSettings, setVoiceSettings] = useState({
-    voiceType: 'female',
-    speed: 1.0
-  })
+  const [userBalance, setUserBalance] = useState(500)
 
-  const handleTextSubmit = (text) => {
-    setNovelText(text)
-    processNovelText(text)
-  }
+  useEffect(() => {
+    loadUserBalance()
+  }, [])
 
-  const processNovelText = (text) => {
-    const paragraphs = text.split('\n').filter(p => p.trim().length > 0)
-    
-    const extractedCharacters = extractCharacters(text)
-    setCharacters(extractedCharacters)
-    
-    const generatedScenes = paragraphs.map((paragraph, index) => ({
-      id: index,
-      text: paragraph,
-      imageUrl: null,
-      characters: extractedCharacters.filter(char => paragraph.includes(char.name)),
-      audioUrl: null
-    }))
-    
-    setScenes(generatedScenes)
-  }
-
-  const extractCharacters = (text) => {
-    const characterNames = new Set()
-    const namePattern = /[A-Z][a-z]+|[\u4e00-\u9fa5]{2,4}/g
-    const matches = text.match(namePattern) || []
-    
-    matches.forEach(name => {
-      if (name.length >= 2) {
-        characterNames.add(name)
+  const loadUserBalance = async () => {
+    try {
+      const result = await api.getUserBalance()
+      if (result.success) {
+        setUserBalance(result.data.balance)
       }
-    })
-    
-    return Array.from(characterNames).slice(0, 10).map((name, index) => ({
-      id: index,
-      name: name,
-      appearance: {
-        style: 'anime',
-        gender: 'unknown',
-        age: 'young'
-      },
-      imageUrl: null
-    }))
-  }
-
-  const updateCharacter = (characterId, updates) => {
-    setCharacters(prev => 
-      prev.map(char => 
-        char.id === characterId ? { ...char, ...updates } : char
-      )
-    )
-  }
-
-  const generateSceneImage = async (sceneId) => {
-    setScenes(prev => 
-      prev.map(scene => 
-        scene.id === sceneId 
-          ? { ...scene, imageUrl: `https://via.placeholder.com/800x450?text=Scene+${sceneId + 1}` }
-          : scene
-      )
-    )
-  }
-
-  const generateSceneAudio = async (sceneId) => {
-    setScenes(prev => 
-      prev.map(scene => 
-        scene.id === sceneId 
-          ? { ...scene, audioUrl: 'mock-audio-url' }
-          : scene
-      )
-    )
+    } catch (err) {
+      console.error('Failed to load user balance', err)
+    }
   }
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <h1>AIgo - 智能动漫生成系统</h1>
-        <p>将小说文本转换为精美动漫作品</p>
-      </header>
-
-      <main className="app-main">
-        <section className="input-section">
-          <TextInput onSubmit={handleTextSubmit} />
-        </section>
-
-        {characters.length > 0 && (
-          <section className="character-section">
-            <CharacterLibrary 
-              characters={characters}
-              onUpdateCharacter={updateCharacter}
-            />
-          </section>
-        )}
-
-        {scenes.length > 0 && (
-          <>
-            <section className="scene-section">
-              <SceneGenerator 
-                scenes={scenes}
-                onGenerateImage={generateSceneImage}
-                onGenerateAudio={generateSceneAudio}
-              />
-            </section>
-
-            <section className="controls-section">
-              <VoiceControls 
-                settings={voiceSettings}
-                onChange={setVoiceSettings}
-              />
-            </section>
-
-            <section className="export-section">
-              <ExportPanel 
-                scenes={scenes}
-                characters={characters}
-                voiceSettings={voiceSettings}
-              />
-            </section>
-          </>
-        )}
-      </main>
-    </div>
+    <Router>
+      <div className="app">
+        <Navigation userBalance={userBalance} />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/work/:workId/edit" element={<WorkEditor />} />
+          <Route path="/my-works" element={<MyWorks />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/episode/:episodeId" element={<EpisodeViewer />} />
+        </Routes>
+      </div>
+    </Router>
   )
 }
 

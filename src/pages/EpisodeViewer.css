@@ -1,0 +1,349 @@
+.episode-viewer-page {
+  min-height: calc(100vh - 80px);
+  background: #1a1a1a;
+  color: white;
+}
+
+.viewer-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.viewer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #333;
+}
+
+.btn-back {
+  background: #333;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s ease;
+}
+
+.btn-back:hover {
+  background: #444;
+}
+
+.episode-info {
+  flex: 1;
+  text-align: center;
+}
+
+.work-title {
+  display: block;
+  color: #999;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.episode-info h2 {
+  color: white;
+  margin: 0;
+}
+
+.episode-meta {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.no-scenes {
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.no-scenes p {
+  color: #999;
+  font-size: 1.2rem;
+}
+
+.scene-viewer {
+  background: #2a2a2a;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.scene-image {
+  width: 100%;
+  height: 500px;
+  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scene-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.scene-placeholder {
+  text-align: center;
+  color: #666;
+}
+
+.scene-placeholder span {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.scene-text {
+  padding: 2rem;
+  background: #2a2a2a;
+}
+
+.scene-number {
+  color: #999;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.scene-content {
+  color: white;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin: 0;
+}
+
+.viewer-controls {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #2a2a2a;
+  border-radius: 12px;
+}
+
+.btn-control {
+  padding: 0.75rem 1.5rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-control:hover:not(:disabled) {
+  background: #764ba2;
+  transform: translateY(-2px);
+}
+
+.btn-control:disabled {
+  background: #444;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.scene-progress {
+  flex: 1;
+  max-width: 400px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #444;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  display: block;
+  text-align: center;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.scene-thumbnails {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 1rem;
+  background: #2a2a2a;
+  border-radius: 12px;
+}
+
+.thumbnail {
+  flex-shrink: 0;
+  width: 120px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.thumbnail:hover {
+  border-color: #667eea;
+  transform: scale(1.05);
+}
+
+.thumbnail.active {
+  border-color: #667eea;
+  box-shadow: 0 0 12px rgba(102, 126, 234, 0.5);
+}
+
+.thumbnail-number {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  z-index: 1;
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+}
+
+.thumbnail-placeholder {
+  width: 100%;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a1a;
+  font-size: 2rem;
+}
+
+.purchase-prompt {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.purchase-card {
+  background: #2a2a2a;
+  border-radius: 12px;
+  padding: 3rem;
+  text-align: center;
+  max-width: 500px;
+}
+
+.purchase-card h2 {
+  color: white;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.purchase-card h3 {
+  color: #999;
+  font-size: 1.3rem;
+  margin-bottom: 2rem;
+}
+
+.price-info {
+  color: white;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.price-info strong {
+  color: #667eea;
+  font-size: 1.5rem;
+}
+
+.exchange-info {
+  color: #999;
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+}
+
+.purchase-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.btn-large {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+}
+
+.error-page {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  color: white;
+  font-size: 1.3rem;
+}
+
+@media (max-width: 768px) {
+  .viewer-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .episode-info {
+    text-align: left;
+  }
+  
+  .scene-image {
+    height: 300px;
+  }
+  
+  .viewer-controls {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .btn-control {
+    width: 100%;
+  }
+  
+  .scene-progress {
+    width: 100%;
+    max-width: none;
+  }
+  
+  .purchase-card {
+    padding: 2rem;
+  }
+  
+  .purchase-actions {
+    flex-direction: column;
+  }
+  
+  .purchase-actions .btn {
+    width: 100%;
+  }
+}
