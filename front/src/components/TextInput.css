@@ -1,0 +1,37 @@
+.text-input h2 {
+  margin-bottom: 1rem;
+}
+
+.text-input-area {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 200px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.text-input-area:focus {
+  border-color: var(--primary-color);
+}
+
+.text-input-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.text-input-info {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.text-input-info p {
+  margin: 0;
+}
