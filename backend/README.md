@@ -201,6 +201,77 @@ java -jar target/aigo-backend-1.0.0.jar
 - **OpenAiChatModel** - OpenAI 集成
 - 更多功能参考 [LangChain4j 文档](https://github.com/langchain4j/langchain4j)
 
+## DeepSeek-R1-0528 集成 (七牛云)
+
+### 功能说明
+本项目已集成七牛云提供的 DeepSeek-R1-0528 大语言模型,用于将小说文本转换为动漫桥段。
+
+### API 接口
+
+#### 解析小说文本
+**端点**: `POST /api/novel/parse`
+
+**请求体**:
+```json
+{
+  "text": "这是一段小说文本...",
+  "style": "热血动漫",
+  "targetAudience": "青少年"
+}
+```
+
+**响应**:
+```json
+{
+  "characters": [
+    {
+      "name": "角色名称",
+      "description": "角色描述",
+      "appearance": "外貌特征",
+      "personality": "性格特点"
+    }
+  ],
+  "scenes": [
+    {
+      "sceneNumber": 1,
+      "visualDescription": "画面描述,用于 AI 图像生成",
+      "atmosphere": "场景氛围",
+      "dialogues": ["对话1", "对话2"],
+      "action": "动作描述"
+    }
+  ],
+  "plotSummary": "剧情总结",
+  "genre": "类型",
+  "mood": "情绪基调"
+}
+```
+
+### 配置 DeepSeek API
+
+创建 `.env` 文件并配置:
+```bash
+DEEPSEEK_API_KEY=your-qiniu-deepseek-api-key
+DEEPSEEK_API_BASE_URL=https://api.deepseek.com/v1
+DEEPSEEK_MODEL_NAME=deepseek-reasoner
+```
+
+运行时加载环境变量:
+```bash
+export $(cat .env | xargs) && mvn spring-boot:run
+```
+
+### 测试示例
+
+```bash
+curl -X POST http://localhost:8080/api/novel/parse \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "夜幕降临,城市的霓虹灯开始闪烁。李明站在天台上,望着远方的天空,心中充满了对未来的期待。",
+    "style": "都市青春",
+    "targetAudience": "青少年"
+  }'
+```
+
 ## 下一步
 
 - [ ] 实现用户认证系统
