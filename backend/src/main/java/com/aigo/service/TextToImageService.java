@@ -10,6 +10,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -29,9 +30,16 @@ public class TextToImageService {
     @Value("${qiniu.text2img.model.name:gemini-2.5-flash-image}")
     private String modelName;
     
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Map<String, String> characterDescriptions = new HashMap<>();
+    
+    public TextToImageService() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(10000);
+        factory.setReadTimeout(30000);
+        this.restTemplate = new RestTemplate(factory);
+    }
     
     public String generateImageForScene(Scene scene, Map<String, String> characterAppearances) {
         if ("demo-key".equals(apiKey)) {

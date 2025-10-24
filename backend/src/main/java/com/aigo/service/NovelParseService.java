@@ -39,7 +39,9 @@ public class NovelParseService {
     
     public AnimeSegment parseNovelText(String text, String style, String targetAudience) {
         if ("demo-key".equals(apiKey)) {
-            return createDemoResponse(text);
+            AnimeSegment segment = createDemoResponse(text);
+            generateImagesForSegment(segment);
+            return segment;
         }
         
         try {
