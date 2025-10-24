@@ -33,77 +33,11 @@ backend/
 - JDK 17+
 - Maven 3.6+
 
-### 环境配置
-
-项目使用环境变量来管理敏感配置信息（如 API 密钥）。
-
-#### 1. 创建环境变量文件
-
-根据你的环境（开发或生产），创建相应的 `.env` 文件：
-
-**开发环境（.env.dev）：**
-```bash
-# 复制示例文件
-cp .env.example .env.dev
-
-# 编辑文件，填入你的 OpenAI API 密钥
-# .env.dev
-OPENAI_API_KEY=your-openai-api-key-here
-SPRING_PROFILES_ACTIVE=dev
-```
-
-**生产环境（.env.prod）：**
-```bash
-# 复制示例文件
-cp .env.example .env.prod
-
-# 编辑文件，填入你的生产环境 API 密钥
-# .env.prod
-OPENAI_API_KEY=your-production-api-key-here
-SPRING_PROFILES_ACTIVE=prod
-```
-
-#### 2. 获取 OpenAI API 密钥
-
-1. 访问 [OpenAI Platform](https://platform.openai.com/api-keys)
-2. 登录或注册账号
-3. 创建新的 API 密钥
-4. 将密钥复制到对应的 `.env` 文件中
-
-⚠️ **重要提示**：
-- `.env` 文件包含敏感信息，已在 `.gitignore` 中排除，不会被提交到 Git
-- 不要将真实的 API 密钥提交到代码仓库
-- 生产环境建议使用更安全的密钥管理方式（如 Vault、云服务密钥管理等）
-
 ### 运行应用
 
-#### 开发环境
-
 ```bash
 cd backend
-
-# 方式 1: 使用环境变量文件
-export $(cat .env.dev | xargs) && mvn spring-boot:run
-
-# 方式 2: 直接设置环境变量
-export OPENAI_API_KEY=your-api-key
-export SPRING_PROFILES_ACTIVE=dev
 mvn spring-boot:run
-
-# 方式 3: 使用 Maven 传递环境变量
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
-```
-
-#### 生产环境
-
-```bash
-cd backend
-
-# 使用生产环境配置
-export $(cat .env.prod | xargs) && mvn spring-boot:run
-
-# 或者运行打包后的 JAR
-java -jar -Dspring.profiles.active=prod target/aigo-backend-1.0.0.jar
 ```
 
 应用将在 `http://localhost:8080` 启动。
@@ -156,59 +90,36 @@ curl -X POST http://localhost:8080/api/langchain/chat \
 
 ## 配置说明
 
-### 环境配置文件
+### application.properties
 
-项目支持多环境配置，通过 Spring Profiles 机制切换：
-
-#### application.properties（基础配置）
 ```properties
+# 应用配置
 spring.application.name=aigo-backend
 server.port=8080
 
-# OpenAI API Key (use environment variable)
-openai.api.key=${OPENAI_API_KEY:demo-key}
+# OpenAI API密钥（需要配置真实的密钥）
+openai.api.key=demo-key
 
-spring.jackson.time-zone=Asia/Shanghai
-spring.jackson.date-format=yyyy-MM-dd HH:mm:ss
-
-# Default logging configuration
+# 日志配置
 logging.level.root=INFO
 logging.level.com.aigo=DEBUG
 ```
 
-#### application-dev.properties（开发环境）
-```properties
-# OpenAI API Key (from environment variable)
-openai.api.key=${OPENAI_API_KEY:demo-key}
+### 配置 OpenAI API
 
-# Development logging
-logging.level.root=INFO
-logging.level.com.aigo=DEBUG
+要使用真实的 AI 功能，需要配置 OpenAI API 密钥：
+
+1. 获取 OpenAI API 密钥
+2. 在 `application.properties` 中设置：
+   ```properties
+   openai.api.key=your-real-api-key
+   ```
+
+或者通过环境变量：
+```bash
+export OPENAI_API_KEY=your-real-api-key
+mvn spring-boot:run
 ```
-
-#### application-prod.properties（生产环境）
-```properties
-# OpenAI API Key (from environment variable)
-openai.api.key=${OPENAI_API_KEY}
-
-# Production logging
-logging.level.root=WARN
-logging.level.com.aigo=INFO
-```
-
-### 环境变量说明
-
-| 环境变量 | 说明 | 必需 | 默认值 |
-|---------|------|------|--------|
-| `OPENAI_API_KEY` | OpenAI API 密钥 | 是（生产环境） | demo-key（开发环境） |
-| `SPRING_PROFILES_ACTIVE` | 激活的配置文件（dev/prod） | 否 | 无 |
-
-### Demo 模式
-
-如果不配置 `OPENAI_API_KEY` 或使用 `demo-key`，应用将以 Demo 模式运行：
-- `/api/langchain/chat` 接口将返回回声响应
-- 不会调用真实的 OpenAI API
-- 适用于开发和测试场景
 
 ## 构建部署
 
