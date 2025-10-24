@@ -1,12 +1,13 @@
 package com.aigo.controller;
 
+import com.aigo.dto.ApiResponse;
+import com.aigo.dto.ErrorCode;
+import com.aigo.exception.BusinessException;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/langchain")
@@ -16,42 +17,56 @@ public class LangChainTestController {
     private String openaiApiKey;
 
     @GetMapping("/test")
-    public Map<String, String> testLangChain() {
-        Map<String, String> response = new HashMap<>();
-        response.put("status", "ready");
-        response.put("message", "LangChain4j is integrated and ready to use");
-        response.put("note", "Please configure openai.api.key in application.properties to use AI features");
-        return response;
+    public ApiResponse<LangChainStatus> testLangChain() {
+        LangChainStatus status = new LangChainStatus();
+        status.setStatus("ready");
+        status.setMessage("LangChain4j is integrated and ready to use");
+        status.setNote("Please configure openai.api.key in application.properties to use AI features");
+        return ApiResponse.success(status);
     }
 
     @PostMapping("/chat")
-    public Map<String, String> chat(@RequestBody Map<String, String> request) {
-        String userMessage = request.get("message");
-        
-        if (userMessage == null || userMessage.trim().isEmpty()) {
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "Message cannot be empty");
-            return error;
+    public ApiResponse<ChatResponse> chat(@RequestBody ChatRequest request) {
+        if (request.getMessage() == null || request.getMessage().trim().isEmpty()) {
+            throw new BusinessException(ErrorCode.VALIDATION_ERROR, "Message cannot be empty");
         }
 
-        Map<String, String> response = new HashMap<>();
+        ChatResponse chatResponse = new ChatResponse();
         
         if ("demo-key".equals(openaiApiKey)) {
-            response.put("response", "Demo mode: Echo - " + userMessage);
-            response.put("note", "Configure openai.api.key to enable real AI chat");
+            chatResponse.setResponse("Demo mode: Echo - " + request.getMessage());
+            chatResponse.setNote("Configure openai.api.key to enable real AI chat");
         } else {
             try {
                 ChatLanguageModel model = OpenAiChatModel.builder()
                     .apiKey(openaiApiKey)
                     .build();
                 
-                String aiResponse = model.generate(userMessage);
-                response.put("response", aiResponse);
+                String aiResponse = model.generate(request.getMessage());
+                chatResponse.setResponse(aiResponse);
             } catch (Exception e) {
-                response.put("error", "Failed to get AI response: " + e.getMessage());
+                throw new BusinessException(ErrorCode.INTERNAL_ERROR, "Failed to get AI response: " + e.getMessage());
             }
         }
         
-        return response;
+        return ApiResponse.success(chatResponse);
+    }
+    
+    @Data
+    public static class LangChainStatus {
+        private String status;
+        private String message;
+        private String note;
+    }
+    
+    @Data
+    public static class ChatRequest {
+        private String message;
+    }
+    
+    @Data
+    public static class ChatResponse {
+        private String response;
+        private String note;
     }
 }
