@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Navigation from './components/Navigation'
+import ProtectedRoute from './components/ProtectedRoute'
 import Home from './pages/Home'
+import Login from './pages/Login'
+import Register from './pages/Register'
 import WorkEditor from './pages/WorkEditor'
 import MyWorks from './pages/MyWorks'
 import Gallery from './pages/Gallery'
@@ -9,12 +13,15 @@ import EpisodeViewer from './pages/EpisodeViewer'
 import api from './services/api'
 import './App.css'
 
-function App() {
-  const [userBalance, setUserBalance] = useState(500)
+function AppContent() {
+  const [userBalance, setUserBalance] = useState(0)
+  const { isAuthenticated, user } = useAuth()
 
   useEffect(() => {
-    loadUserBalance()
-  }, [])
+    if (isAuthenticated()) {
+      loadUserBalance()
+    }
+  }, [isAuthenticated, user])
 
   const loadUserBalance = async () => {
     try {
@@ -28,17 +35,55 @@ function App() {
   }
 
   return (
+    <div className="app">
+      <Navigation userBalance={userBalance} />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route 
+          path="/work/:workId/edit" 
+          element={
+            <ProtectedRoute>
+              <WorkEditor />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/my-works" 
+          element={
+            <ProtectedRoute>
+              <MyWorks />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/gallery" 
+          element={
+            <ProtectedRoute>
+              <Gallery />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/episode/:episodeId" 
+          element={
+            <ProtectedRoute>
+              <EpisodeViewer />
+            </ProtectedRoute>
+          } 
+        />
+      </Routes>
+    </div>
+  )
+}
+
+function App() {
+  return (
     <Router>
-      <div className="app">
-        <Navigation userBalance={userBalance} />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/work/:workId/edit" element={<WorkEditor />} />
-          <Route path="/my-works" element={<MyWorks />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/episode/:episodeId" element={<EpisodeViewer />} />
-        </Routes>
-      </div>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </Router>
   )
 }

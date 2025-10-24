@@ -52,10 +52,57 @@
   gap: 1rem;
 }
 
+.user-info {
+  color: white;
+  font-weight: 500;
+}
+
 .coin-balance {
   color: white;
   font-weight: 500;
   background: rgba(255, 255, 255, 0.2);
   padding: 0.5rem 1rem;
   border-radius: 20px;
+}
+
+.btn-logout {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.3s;
+}
+
+.btn-logout:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.btn-login,
+.btn-register {
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background 0.3s;
+}
+
+.btn-login {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-login:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.btn-register {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.btn-register:hover {
+  background: rgba(255, 255, 255, 0.4);
 }
