@@ -24,3 +24,9 @@ target/
 .classpath
 
 application-local.properties
+
+# Environment variable files (contains sensitive API keys)
+.env
+.env.dev
+.env.prod
+.env.local

@@ -107,18 +107,66 @@ logging.level.com.aigo=DEBUG
 
 ### 配置 OpenAI API
 
-要使用真实的 AI 功能，需要配置 OpenAI API 密钥：
+要使用真实的 AI 功能，需要配置 OpenAI API 密钥。推荐使用环境变量方式，避免将敏感信息提交到代码仓库。
 
-1. 获取 OpenAI API 密钥
-2. 在 `application.properties` 中设置：
-   ```properties
-   openai.api.key=your-real-api-key
+#### 方式一：使用环境变量（推荐）
+
+**开发环境：**
+
+1. 在项目根目录创建 `.env.dev` 文件（该文件已在 `.gitignore` 中，不会被提交到 Git）：
+   ```bash
+   # 创建 .env.dev 文件
+   cat > backend/.env.dev << 'EOF'
+   OPENAI_API_KEY=your-openai-api-key-here
+   SPRING_PROFILES_ACTIVE=dev
+   EOF
    ```
 
-或者通过环境变量：
+2. 运行应用时加载环境变量：
+   ```bash
+   cd backend
+   export $(cat .env.dev | xargs) && mvn spring-boot:run
+   ```
+
+**生产环境：**
+
+1. 创建 `.env.prod` 文件：
+   ```bash
+   cat > backend/.env.prod << 'EOF'
+   OPENAI_API_KEY=your-production-api-key-here
+   SPRING_PROFILES_ACTIVE=prod
+   EOF
+   ```
+
+2. 运行应用：
+   ```bash
+   cd backend
+   export $(cat .env.prod | xargs) && mvn spring-boot:run
+   ```
+
+**获取 OpenAI API 密钥：**
+1. 访问 [OpenAI Platform](https://platform.openai.com/api-keys)
+2. 登录或注册账号
+3. 创建新的 API 密钥
+4. 将密钥复制到对应的 `.env` 文件中
+
+⚠️ **安全提示**：
+- `.env*` 文件已添加到 `.gitignore`，不会被提交到代码仓库
+- 不要将真实的 API 密钥直接写入 `application.properties`
+- 生产环境建议使用更安全的密钥管理方式（如 Vault、云服务密钥管理等）
+
+#### 方式二：直接设置环境变量
+
 ```bash
 export OPENAI_API_KEY=your-real-api-key
 mvn spring-boot:run
+```
+
+#### 方式三：修改 application.properties（不推荐）
+
+仅用于本地测试，不要提交到 Git：
+```properties
+openai.api.key=your-real-api-key
 ```
 
 ## 构建部署
