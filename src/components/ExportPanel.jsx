@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import './ExportPanel.css'
 
-function ExportPanel({ scenes, characters, voiceSettings, musicSettings }) {
+function ExportPanel({ scenes, characters, voiceSettings }) {
   const [exporting, setExporting] = useState(false)
   const [exportFormat, setExportFormat] = useState('video')
 
@@ -12,7 +12,6 @@ function ExportPanel({ scenes, characters, voiceSettings, musicSettings }) {
       scenes,
       characters,
       voiceSettings,
-      musicSettings,
       format: exportFormat,
       timestamp: new Date().toISOString()
     }

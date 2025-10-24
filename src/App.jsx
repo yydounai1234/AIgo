@@ -3,7 +3,6 @@ import TextInput from './components/TextInput'
 import CharacterLibrary from './components/CharacterLibrary'
 import SceneGenerator from './components/SceneGenerator'
 import VoiceControls from './components/VoiceControls'
-import MusicControls from './components/MusicControls'
 import ExportPanel from './components/ExportPanel'
 import './App.css'
 
@@ -14,11 +13,6 @@ function App() {
   const [voiceSettings, setVoiceSettings] = useState({
     voiceType: 'female',
     speed: 1.0
-  })
-  const [musicSettings, setMusicSettings] = useState({
-    enabled: true,
-    volume: 0.5,
-    type: 'background'
   })
 
   const handleTextSubmit = (text) => {
@@ -130,10 +124,6 @@ function App() {
                 settings={voiceSettings}
                 onChange={setVoiceSettings}
               />
-              <MusicControls 
-                settings={musicSettings}
-                onChange={setMusicSettings}
-              />
             </section>
 
             <section className="export-section">
@@ -141,7 +131,6 @@ function App() {
                 scenes={scenes}
                 characters={characters}
                 voiceSettings={voiceSettings}
-                musicSettings={musicSettings}
               />
             </section>
           </>
