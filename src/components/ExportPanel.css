@@ -1,0 +1,59 @@
+.export-panel h2 {
+  margin-bottom: 0.5rem;
+}
+
+.export-desc {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.export-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.export-options .control-select {
+  width: 100%;
+}
+
+.export-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1.25rem;
+  background-color: var(--bg-color);
+  border-radius: 0.5rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.export-options > button {
+  align-self: flex-start;
+}
+
+@media (max-width: 768px) {
+  .export-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .export-options > button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,17 @@
+.voice-controls {
+  background-color: var(--surface-color);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+.voice-controls h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  color: var(--text-primary);
+}
+
+.voice-controls .control-select {
+  width: 100%;
+}
