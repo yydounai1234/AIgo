@@ -272,6 +272,64 @@ curl -X POST http://localhost:8080/api/novel/parse \
   }'
 ```
 
+## 文生图功能 (七牛云)
+
+### 功能说明
+系统已集成七牛云文生图大模型,可以自动为每个场景生成对应的图片。图片生成与小说解析流程无缝集成,无需额外 API 调用。
+
+### 工作流程
+1. 调用 `/api/novel/parse` 解析小说文本
+2. 系统自动提取角色信息和场景描述
+3. 为每个 `sceneNumber` 生成一张图片
+4. 图片 URL 保存在场景的 `imageUrl` 字段中
+
+### 角色一致性保证
+为确保同一角色在不同场景中外观一致,系统采用以下策略:
+- 提取角色的外貌 (appearance) 和描述 (description) 作为固定提示词
+- 每次生成图片时,始终包含该角色的完整描述
+- 使用较低的 temperature (0.3) 参数减少生成的随机性
+- 根据 visualDescription、atmosphere 和 action 综合生成场景图片
+
+### 配置文生图 API
+
+在 `.env` 文件中添加:
+```bash
+# 七牛云文生图 API 配置
+QINIU_TEXT2IMG_API_KEY=your-qiniu-text2img-api-key
+QINIU_TEXT2IMG_API_BASE_URL=https://openai.qiniu.com/v1
+QINIU_TEXT2IMG_MODEL_NAME=gemini-2.5-flash-image
+```
+
+参考 `.env.example` 查看完整配置示例。
+
+### API 响应示例
+
+```json
+{
+  "characters": [...],
+  "scenes": [
+    {
+      "sceneNumber": 1,
+      "character": "李明",
+      "dialogue": "今天会是美好的一天!",
+      "visualDescription": "李明站在天台上,面带微笑仰望天空",
+      "atmosphere": "充满希望",
+      "action": "伸展双臂,深呼吸",
+      "imageUrl": "data:image/png;base64,iVBORw0KG..."
+    }
+  ],
+  "plotSummary": "...",
+  "genre": "...",
+  "mood": "..."
+}
+```
+
+### 注意事项
+- Demo 模式 (API key 为 `demo-key`) 会返回占位图片
+- 生产环境需配置真实的七牛云 API 密钥
+- 图片生成为串行处理,场景较多时可能需要较长时间
+- 图片以 base64 格式返回,前端可直接显示
+
 ## 下一步
 
 - [ ] 实现用户认证系统

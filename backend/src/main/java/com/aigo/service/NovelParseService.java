@@ -9,11 +9,14 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class NovelParseService {
@@ -28,6 +31,9 @@ public class NovelParseService {
     
     @Value("${deepseek.model.name}")
     private String modelName;
+    
+    @Autowired
+    private TextToImageService textToImageService;
     
     private final ObjectMapper objectMapper = new ObjectMapper();
     
@@ -47,11 +53,44 @@ public class NovelParseService {
             String prompt = buildPrompt(text, style, targetAudience);
             String response = model.generate(prompt);
             
-            return parseResponse(response);
+            AnimeSegment segment = parseResponse(response);
+            
+            generateImagesForSegment(segment);
+            
+            return segment;
             
         } catch (Exception e) {
             logger.error("Failed to parse novel text with DeepSeek", e);
             throw new RuntimeException("LLM 处理失败: " + e.getMessage(), e);
+        }
+    }
+    
+    private void generateImagesForSegment(AnimeSegment segment) {
+        if (segment.getScenes() == null || segment.getScenes().isEmpty()) {
+            return;
+        }
+        
+        Map<String, String> characterAppearances = new HashMap<>();
+        if (segment.getCharacters() != null) {
+            for (Character character : segment.getCharacters()) {
+                String fullDesc = String.format("%s,%s", 
+                    character.getAppearance(), 
+                    character.getDescription());
+                characterAppearances.put(character.getName(), fullDesc);
+            }
+        }
+        
+        try {
+            List<String> imageUrls = textToImageService.generateImagesForScenes(
+                segment.getScenes(), 
+                characterAppearances
+            );
+            
+            for (int i = 0; i < segment.getScenes().size() && i < imageUrls.size(); i++) {
+                segment.getScenes().get(i).setImageUrl(imageUrls.get(i));
+            }
+        } catch (Exception e) {
+            logger.error("Failed to generate images for scenes", e);
         }
     }
     
