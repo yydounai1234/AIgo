@@ -27,15 +27,13 @@ function Navigation({ userBalance }) {
           <Link to="/" className={isActive('/')}>
             首页
           </Link>
+          <Link to="/gallery" className={isActive('/gallery')}>
+            作品广场
+          </Link>
           {isAuthenticated() && (
-            <>
-              <Link to="/my-works" className={isActive('/my-works')}>
-                我的作品
-              </Link>
-              <Link to="/gallery" className={isActive('/gallery')}>
-                作品广场
-              </Link>
-            </>
+            <Link to="/my-works" className={isActive('/my-works')}>
+              我的作品
+            </Link>
           )}
         </div>
         

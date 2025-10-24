@@ -57,14 +57,7 @@ function AppContent() {
             </ProtectedRoute>
           } 
         />
-        <Route 
-          path="/gallery" 
-          element={
-            <ProtectedRoute>
-              <Gallery />
-            </ProtectedRoute>
-          } 
-        />
+        <Route path="/gallery" element={<Gallery />} />
         <Route 
           path="/episode/:episodeId" 
           element={
