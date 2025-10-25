@@ -31,19 +31,84 @@
   font-weight: 500;
 }
 
-.sort-controls select {
+.custom-dropdown {
+  position: relative;
+}
+
+.dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 0.5rem 1rem;
   border: 2px solid #e0e0e0;
   border-radius: 6px;
   background: white;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: border-color 0.3s ease;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  justify-content: space-between;
 }
 
-.sort-controls select:focus {
-  outline: none;
+.dropdown-trigger:hover {
   border-color: #667eea;
+}
+
+.dropdown-icon {
+  width: 16px;
+  height: 16px;
+  color: #666;
+  transition: transform 0.3s ease;
+}
+
+.dropdown-trigger:hover .dropdown-icon {
+  color: #667eea;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  z-index: 100;
+  animation: dropdownSlide 0.2s ease;
+}
+
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  color: #333;
+}
+
+.dropdown-item:hover {
+  background: #f5f7fa;
+}
+
+.dropdown-item.active {
+  background: #667eea;
+  color: white;
+  font-weight: 500;
+}
+
+.dropdown-item:not(:last-child) {
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .empty-state {
@@ -101,9 +166,11 @@
   justify-content: center;
 }
 
-.work-cover-placeholder span {
-  font-size: 4rem;
-  opacity: 0.5;
+.work-cover-placeholder svg {
+  width: 4rem;
+  height: 4rem;
+  color: white;
+  opacity: 0.8;
 }
 
 .work-content {
@@ -141,6 +208,18 @@
   font-size: 0.9rem;
 }
 
+.work-meta span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.meta-icon {
+  width: 16px;
+  height: 16px;
+  color: #667eea;
+}
+
 .work-footer {
   display: flex;
   justify-content: space-between;
@@ -171,7 +250,13 @@
 }
 
 .like-icon {
-  font-size: 1.2rem;
+  width: 20px;
+  height: 20px;
+  color: #ff4757;
+}
+
+.btn-like.liked .like-icon {
+  color: #ff4757;
 }
 
 .like-count {
