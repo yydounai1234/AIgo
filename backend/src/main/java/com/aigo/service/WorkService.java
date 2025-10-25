@@ -40,10 +40,20 @@ public class WorkService {
     }
     
     @Transactional(readOnly = true)
-    public WorkResponse getWork(String workId) {
+    public WorkResponse getWork(String workId, String currentUserId) {
         Work work = workRepository.findById(workId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "作品不存在"));
-        return WorkResponse.fromEntity(work);
+        WorkResponse response = WorkResponse.fromEntity(work);
+        response.setEpisodes(
+            episodeRepository.findByWorkIdAndIsPublishedTrueOrderByEpisodeNumberAsc(workId)
+                .stream()
+                .map(com.aigo.dto.episode.EpisodeListItem::fromEntity)
+                .collect(Collectors.toList())
+        );
+        boolean isLiked = currentUserId != null && 
+                likeRepository.existsByUserIdAndWorkId(currentUserId, workId);
+        response.setIsLiked(isLiked);
+        return response;
     }
     
     @Transactional

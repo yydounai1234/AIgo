@@ -41,8 +41,10 @@ public class WorkController {
     }
     
     @GetMapping("/works/{id}")
-    public ApiResponse<WorkResponse> getWork(@PathVariable String id) {
-        WorkResponse response = workService.getWork(id);
+    public ApiResponse<WorkResponse> getWork(@PathVariable String id,
+                                              HttpServletRequest httpRequest) {
+        String userId = getUserIdFromRequest(httpRequest);
+        WorkResponse response = workService.getWork(id, userId);
         return ApiResponse.success(response);
     }
     
