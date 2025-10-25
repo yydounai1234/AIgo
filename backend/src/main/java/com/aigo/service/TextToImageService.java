@@ -85,15 +85,41 @@ public class TextToImageService {
         
         List<CompletableFuture<ImageResult>> futures = scenes.stream()
             .map(scene -> CompletableFuture.supplyAsync(() -> {
-                try {
-                    String imageUrl = generateImageForScene(scene, characterAppearances);
-                    return new ImageResult(scene.getSceneNumber(), imageUrl, null);
-                } catch (Exception e) {
-                    logger.error("[TextToImageService] Failed for scene {}, using placeholder", 
-                        scene.getSceneNumber(), e);
-                    String placeholder = createDemoImageUrl(scene);
-                    return new ImageResult(scene.getSceneNumber(), placeholder, e.getMessage());
+                int maxRetries = 3;
+                int retryDelay = 3000;
+                Exception lastException = null;
+                
+                for (int attempt = 1; attempt <= maxRetries; attempt++) {
+                    try {
+                        String imageUrl = generateImageForScene(scene, characterAppearances);
+                        if (attempt > 1) {
+                            logger.info("[TextToImageService] Scene {} succeeded on attempt {}", 
+                                scene.getSceneNumber(), attempt);
+                        }
+                        return new ImageResult(scene.getSceneNumber(), imageUrl, null);
+                    } catch (Exception e) {
+                        lastException = e;
+                        if (attempt < maxRetries) {
+                            logger.warn("[TextToImageService] Scene {} failed on attempt {}/{}, retrying in {}ms", 
+                                scene.getSceneNumber(), attempt, maxRetries, retryDelay);
+                            try {
+                                Thread.sleep(retryDelay);
+                            } catch (InterruptedException ie) {
+                                Thread.currentThread().interrupt();
+                                logger.error("[TextToImageService] Retry interrupted for scene {}", 
+                                    scene.getSceneNumber());
+                                break;
+                            }
+                        } else {
+                            logger.error("[TextToImageService] Scene {} failed after {} attempts, using placeholder", 
+                                scene.getSceneNumber(), maxRetries, e);
+                        }
+                    }
                 }
+                
+                String placeholder = createDemoImageUrl(scene);
+                return new ImageResult(scene.getSceneNumber(), placeholder, 
+                    lastException != null ? lastException.getMessage() : "Unknown error");
             }, executorService))
             .collect(Collectors.toList());
         
