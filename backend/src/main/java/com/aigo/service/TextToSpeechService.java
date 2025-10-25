@@ -23,6 +23,10 @@ public class TextToSpeechService {
     private final String apiKey;
     private final String baseUrl;
     private final QiniuStorageService qiniuStorageService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final Map<String, String> characterVoiceCache = new HashMap<>();
+    private List<VoiceProfile> availableVoices = null;
     
     public TextToSpeechService(
             @Value("${qiniu.tts.api.key}") String apiKey,
@@ -32,12 +36,6 @@ public class TextToSpeechService {
         this.baseUrl = baseUrl;
         this.qiniuStorageService = qiniuStorageService;
     }
-    
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private final HttpClient httpClient = HttpClient.newHttpClient();
-    
-    private final Map<String, String> characterVoiceCache = new HashMap<>();
-    private List<VoiceProfile> availableVoices = null;
     
     public List<String> generateAudioForScenes(List<Scene> scenes, List<Character> characters) {
         if (scenes == null || scenes.isEmpty()) {
