@@ -185,9 +185,11 @@
 }
 
 .feature-icon {
-  font-size: 3rem;
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto 1rem;
   display: block;
-  margin-bottom: 1rem;
+  color: #667eea;
 }
 
 .feature-card h4 {

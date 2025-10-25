@@ -118,9 +118,17 @@ function MyWorks() {
                 )}
 
                 <div className="work-stats">
-                  <span>📚 {work.episodes?.length || 0} 集</span>
                   <span>
-                    ✓ {work.episodes?.filter(e => e.isPublished).length || 0} 已发布
+                    <svg className="stat-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    {work.episodes?.length || 0} 集
+                  </span>
+                  <span>
+                    <svg className="stat-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    {work.episodes?.filter(e => e.isPublished).length || 0} 已发布
                   </span>
                 </div>
 
@@ -140,7 +148,15 @@ function MyWorks() {
                                 {episode.isPublished ? '已发布' : '草稿'}
                               </span>
                               <span className={`badge-sm ${episode.isFree ? 'badge-info' : 'badge-primary'}`}>
-                                {episode.isFree ? '免费' : `${episode.coinPrice}💰`}
+                                {episode.isFree ? '免费' : (
+                                  <>
+                                    <svg className="coin-icon-sm" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
+                                      <path d="M12 6v12M9 9h4.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5H9m0 3h4.5c.83 0 1.5-.67 1.5-1.5S14.33 12 13.5 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                                    </svg>
+                                    {episode.coinPrice}
+                                  </>
+                                )}
                               </span>
                             </div>
                             <button
