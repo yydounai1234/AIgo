@@ -298,9 +298,29 @@ curl -X POST http://localhost:8080/api/novel/parse \
 QINIU_TEXT2IMG_API_KEY=your-qiniu-text2img-api-key
 QINIU_TEXT2IMG_API_BASE_URL=https://openai.qiniu.com/v1
 QINIU_TEXT2IMG_MODEL_NAME=gemini-2.5-flash-image
+
+# 七牛云对象存储配置 (用于保存生成的图片)
+QINIU_STORAGE_ACCESS_KEY=your-qiniu-access-key
+QINIU_STORAGE_SECRET_KEY=your-qiniu-secret-key
+QINIU_STORAGE_BUCKET_NAME=aigo-images
+QINIU_STORAGE_DOMAIN=your-domain.qiniucdn.com
 ```
 
 参考 `.env.example` 查看完整配置示例。
+
+### 图片存储说明
+
+生成的图片会自动上传到七牛云对象存储,并返回公网可访问的 URL:
+- **存储位置**: 七牛云对象存储 (Kodo)
+- **文件命名**: `scene_{场景号}_{时间戳}_{UUID}.png`
+- **返回格式**: 完整的公网 URL (如 `https://your-domain.qiniucdn.com/scene_1_1234567890_abc.png`)
+- **访问方式**: 公网可直接访问,无需额外认证
+
+**配置说明**:
+- `QINIU_STORAGE_ACCESS_KEY`: 七牛云 AccessKey
+- `QINIU_STORAGE_SECRET_KEY`: 七牛云 SecretKey  
+- `QINIU_STORAGE_BUCKET_NAME`: 存储空间名称
+- `QINIU_STORAGE_DOMAIN`: 绑定的 CDN 加速域名
 
 ### API 响应示例
 
@@ -315,7 +335,7 @@ QINIU_TEXT2IMG_MODEL_NAME=gemini-2.5-flash-image
       "visualDescription": "李明站在天台上,面带微笑仰望天空",
       "atmosphere": "充满希望",
       "action": "伸展双臂,深呼吸",
-      "imageUrl": "data:image/png;base64,iVBORw0KG..."
+      "imageUrl": "https://your-domain.qiniucdn.com/scene_1_1234567890_abc.png"
     }
   ],
   "plotSummary": "...",
@@ -326,9 +346,9 @@ QINIU_TEXT2IMG_MODEL_NAME=gemini-2.5-flash-image
 
 ### 注意事项
 - Demo 模式 (API key 为 `demo-key`) 会返回占位图片
-- 生产环境需配置真实的七牛云 API 密钥
+- 生产环境需配置真实的七牛云 API 密钥和对象存储凭证
 - 图片生成为串行处理,场景较多时可能需要较长时间
-- 图片以 base64 格式返回,前端可直接显示
+- 图片存储到七牛云后返回公网 URL,支持 CDN 加速访问
 
 ## 下一步
 

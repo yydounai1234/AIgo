@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -33,12 +34,15 @@ public class TextToImageService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Map<String, String> characterDescriptions = new HashMap<>();
+    private final QiniuStorageService qiniuStorageService;
     
-    public TextToImageService() {
+    @Autowired
+    public TextToImageService(QiniuStorageService qiniuStorageService) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(10000);
         factory.setReadTimeout(30000);
         this.restTemplate = new RestTemplate(factory);
+        this.qiniuStorageService = qiniuStorageService;
     }
     
     public String generateImageForScene(Scene scene, Map<String, String> characterAppearances) {
@@ -54,9 +58,12 @@ public class TextToImageService {
             String prompt = buildImagePrompt(scene, characterDesc);
             
             logger.info("[TextToImageService] Generating image for scene {}", scene.getSceneNumber());
-            String imageData = callTextToImageApi(prompt);
+            String base64ImageData = callTextToImageApi(prompt);
             
-            return imageData;
+            String filePrefix = "scene_" + scene.getSceneNumber();
+            String publicUrl = qiniuStorageService.uploadBase64Image(base64ImageData, filePrefix);
+            
+            return publicUrl;
             
         } catch (Exception e) {
             logger.error("[TextToImageService] Failed to generate image for scene {}", scene.getSceneNumber(), e);
