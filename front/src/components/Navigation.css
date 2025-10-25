@@ -199,7 +199,7 @@
     padding: 0;
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease, padding 0.3s ease;
+    transition: max-height 0.3s ease, padding 0.3s ease, top 0.3s ease;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     margin-top: 0;
   }
@@ -210,13 +210,11 @@
   }
 
   .nav-links.mobile-open ~ .nav-user {
-    position: relative;
-    top: 0;
+    top: calc(100% + 12rem);
   }
   
   .nav-links.mobile-open ~ .nav-user.mobile-open {
     margin-top: 0;
-    transform: translateY(0);
   }
 
   .nav-user .user-info,
