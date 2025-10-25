@@ -13,6 +13,8 @@ public interface EpisodeRepository extends JpaRepository<Episode, String> {
     
     List<Episode> findByWorkIdOrderByEpisodeNumberAsc(String workId);
     
+    List<Episode> findByWorkIdAndIsPublishedTrueOrderByEpisodeNumberAsc(String workId);
+    
     Optional<Episode> findByWorkIdAndEpisodeNumber(String workId, Integer episodeNumber);
     
     @Query("SELECT MAX(e.episodeNumber) FROM Episode e WHERE e.workId = :workId")

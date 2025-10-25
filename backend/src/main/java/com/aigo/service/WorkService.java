@@ -43,7 +43,14 @@ public class WorkService {
     public WorkResponse getWork(String workId) {
         Work work = workRepository.findById(workId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "作品不存在"));
-        return WorkResponse.fromEntity(work);
+        WorkResponse response = WorkResponse.fromEntity(work);
+        response.setEpisodes(
+            episodeRepository.findByWorkIdAndIsPublishedTrueOrderByEpisodeNumberAsc(workId)
+                .stream()
+                .map(com.aigo.dto.episode.EpisodeListItem::fromEntity)
+                .collect(Collectors.toList())
+        );
+        return response;
     }
     
     @Transactional

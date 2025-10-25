@@ -9,6 +9,7 @@ import Register from './pages/Register'
 import WorkEditor from './pages/WorkEditor'
 import MyWorks from './pages/MyWorks'
 import Gallery from './pages/Gallery'
+import WorkDetail from './pages/WorkDetail'
 import EpisodeViewer from './pages/EpisodeViewer'
 import api from './services/api'
 import './App.css'
@@ -58,6 +59,7 @@ function AppContent() {
           } 
         />
         <Route path="/gallery" element={<Gallery />} />
+        <Route path="/work/:workId" element={<WorkDetail />} />
         <Route 
           path="/episode/:episodeId" 
           element={
