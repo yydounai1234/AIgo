@@ -205,9 +205,9 @@ public class NovelParseService {
         
         List<Scene> scenes = new ArrayList<>();
         scenes.add(new Scene(1, "旁白", "新的一天开始了。", 
-            "清晨的城市街道,阳光洒在街道上", "宁静、温暖", "镜头从天空慢慢拉近街道", null));
+            "清晨的城市街道,阳光洒在街道上", "宁静、温暖", "镜头从天空慢慢拉近街道", null, null));
         scenes.add(new Scene(2, "主角", "今天会是美好的一天!", 
-            "主角站在街道上,面带微笑仰望天空", "充满希望", "主角伸展双臂,深呼吸", null));
+            "主角站在街道上,面带微笑仰望天空", "充满希望", "主角伸展双臂,深呼吸", null, null));
         segment.setScenes(scenes);
         
         segment.setPlotSummary("这是一个关于" + text.substring(0, Math.min(20, text.length())) + "...的故事");
