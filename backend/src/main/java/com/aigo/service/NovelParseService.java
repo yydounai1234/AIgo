@@ -14,9 +14,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class NovelParseService {
@@ -142,7 +145,7 @@ public class NovelParseService {
         StringBuilder prompt = new StringBuilder();
         prompt.append("你是一个专业的动漫脚本分析师。请深度理解以下小说文本,并将其转换为动漫桥段。\n\n");
         prompt.append("请提取以下信息:\n");
-        prompt.append("1. 角色信息 (姓名、描述、外貌、性格)\n");
+        prompt.append("1. 角色信息 (姓名、描述、外貌、性格、性别)\n");
         prompt.append("2. 场景分镜 - 重要: 每个角色的每句对话都应该是一个独立的场景,用于生成独立的漫画图片\n");
         prompt.append("   - 场景编号: 连续递增的数字\n");
         prompt.append("   - 角色: 说话的角色名称\n");
@@ -163,7 +166,7 @@ public class NovelParseService {
         prompt.append("\n小说文本:\n").append(text).append("\n\n");
         prompt.append("请以 JSON 格式返回结果,结构如下:\n");
         prompt.append("{\n");
-        prompt.append("  \"characters\": [{\"name\": \"角色名\", \"description\": \"描述\", \"appearance\": \"外貌\", \"personality\": \"性格\"}],\n");
+        prompt.append("  \"characters\": [{\"name\": \"角色名\", \"description\": \"描述\", \"appearance\": \"外貌\", \"personality\": \"性格\", \"gender\": \"male/female/unknown\"}],\n");
         prompt.append("  \"scenes\": [\n");
         prompt.append("    {\"sceneNumber\": 1, \"character\": \"角色名\", \"dialogue\": \"该角色说的话\", \"visualDescription\": \"画面描述\", \"atmosphere\": \"氛围\", \"action\": \"动作描述\"},\n");
         prompt.append("    {\"sceneNumber\": 2, \"character\": \"另一个角色名\", \"dialogue\": \"该角色说的话\", \"visualDescription\": \"画面描述\", \"atmosphere\": \"氛围\", \"action\": \"动作描述\"}\n");
@@ -184,7 +187,9 @@ public class NovelParseService {
             
             if (jsonStart >= 0 && jsonEnd > jsonStart) {
                 String jsonContent = response.substring(jsonStart, jsonEnd);
-                return objectMapper.readValue(jsonContent, AnimeSegment.class);
+                AnimeSegment segment = objectMapper.readValue(jsonContent, AnimeSegment.class);
+                enrichCharactersWithGender(segment.getCharacters());
+                return segment;
             } else {
                 logger.warn("No JSON found in response, creating structured response from text");
                 return createFallbackResponse(response);
@@ -199,8 +204,8 @@ public class NovelParseService {
         AnimeSegment segment = new AnimeSegment();
         
         List<Character> characters = new ArrayList<>();
-        characters.add(new Character("主角", "故事的主人公", "年轻、充满活力", "勇敢、善良"));
-        characters.add(new Character("旁白", "叙述者", "无形", "客观"));
+        characters.add(new Character("主角", "故事的主人公", "年轻、充满活力", "勇敢、善良", "male"));
+        characters.add(new Character("旁白", "叙述者", "无形", "客观", "neutral"));
         segment.setCharacters(characters);
         
         List<Scene> scenes = new ArrayList<>();
@@ -225,5 +230,86 @@ public class NovelParseService {
         segment.setGenre("未分类");
         segment.setMood("未知");
         return segment;
+    }
+    
+    private void enrichCharactersWithGender(List<Character> characters) {
+        if (characters == null || characters.isEmpty()) {
+            return;
+        }
+        
+        for (Character character : characters) {
+            if (character.getGender() == null || character.getGender().trim().isEmpty() || 
+                "unknown".equalsIgnoreCase(character.getGender())) {
+                String detectedGender = detectGender(character.getName(), character);
+                character.setGender(detectedGender);
+                logger.info("[NovelParseService] Detected gender '{}' for character '{}'", 
+                    detectedGender, character.getName());
+            }
+        }
+    }
+    
+    private String detectGender(String characterName, Character character) {
+        if (character == null) {
+            return detectGenderFromName(characterName);
+        }
+        
+        String combinedText = (character.getDescription() + " " + 
+                              character.getAppearance() + " " + 
+                              character.getPersonality()).toLowerCase();
+        
+        Set<String> maleKeywords = new HashSet<>(Arrays.asList(
+            "男", "他", "先生", "男性", "男孩", "男人", "少年", "哥哥", "兄弟", "父亲", "爸爸", "叔叔", "爷爷", "公"
+        ));
+        Set<String> femaleKeywords = new HashSet<>(Arrays.asList(
+            "女", "她", "女士", "女性", "女孩", "女人", "少女", "姐姐", "妹妹", "母亲", "妈妈", "阿姨", "奶奶", "婆婆"
+        ));
+        
+        int maleScore = 0;
+        int femaleScore = 0;
+        
+        for (String keyword : maleKeywords) {
+            if (combinedText.contains(keyword)) {
+                maleScore++;
+            }
+        }
+        
+        for (String keyword : femaleKeywords) {
+            if (combinedText.contains(keyword)) {
+                femaleScore++;
+            }
+        }
+        
+        if (maleScore > femaleScore) {
+            return "male";
+        } else if (femaleScore > maleScore) {
+            return "female";
+        }
+        
+        return detectGenderFromName(characterName);
+    }
+    
+    private String detectGenderFromName(String name) {
+        String nameLower = name.toLowerCase();
+        
+        Set<String> maleNameIndicators = new HashSet<>(Arrays.asList(
+            "明", "强", "刚", "军", "伟", "涛", "龙", "杰", "鹏", "磊"
+        ));
+        Set<String> femaleNameIndicators = new HashSet<>(Arrays.asList(
+            "娜", "婷", "丽", "芳", "静", "雅", "兰", "燕", "莉", "萍"
+        ));
+        
+        for (String indicator : femaleNameIndicators) {
+            if (nameLower.contains(indicator)) {
+                return "female";
+            }
+        }
+        
+        for (String indicator : maleNameIndicators) {
+            if (nameLower.contains(indicator)) {
+                return "male";
+            }
+        }
+        
+        return "neutral";
     }
 }

@@ -16,4 +16,6 @@ public class Character {
     private String appearance;
     
     private String personality;
+    
+    private String gender;
 }
