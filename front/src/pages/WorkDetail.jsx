@@ -14,8 +14,12 @@ function WorkDetail() {
   const [error, setError] = useState('')
 
   useEffect(() => {
+    if (!isAuthenticated()) {
+      navigate('/login')
+      return
+    }
     loadWorkDetail()
-  }, [workId])
+  }, [workId, isAuthenticated, navigate])
 
   const loadWorkDetail = async () => {
     setLoading(true)
