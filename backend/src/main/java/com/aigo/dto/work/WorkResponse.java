@@ -24,6 +24,7 @@ public class WorkResponse {
     private String coverImage;
     private Integer likesCount;
     private Integer viewsCount;
+    private Boolean isLiked;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<EpisodeListItem> episodes;
