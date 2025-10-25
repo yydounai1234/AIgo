@@ -112,5 +112,6 @@ public class Episode {
         private Integer id;
         private String text;
         private String imageUrl;
+        private String audioUrl;
     }
 }

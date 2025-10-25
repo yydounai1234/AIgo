@@ -47,7 +47,8 @@ public class EpisodeAsyncService {
                     .map(scene -> new Episode.SceneData(
                             scene.getSceneNumber(),
                             scene.getDialogue(),
-                            scene.getImageUrl()))
+                            scene.getImageUrl(),
+                            scene.getAudioUrl()))
                     .toList());
             episode.setPlotSummary(segment.getPlotSummary());
             episode.setGenre(segment.getGenre());

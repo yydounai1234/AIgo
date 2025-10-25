@@ -18,6 +18,7 @@ function EpisodeViewer() {
   const [currentScene, setCurrentScene] = useState(0)
   const [modal, setModal] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null })
   const pollingIntervalRef = useRef(null)
+  const audioRef = useRef(null)
 
   useEffect(() => {
     loadEpisode()
@@ -37,6 +38,29 @@ function EpisodeViewer() {
     
     return () => stopPolling()
   }, [episode?.status])
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+    }
+    
+    if (episode?.scenes && episode.scenes[currentScene]?.audioUrl) {
+      const audioUrl = episode.scenes[currentScene].audioUrl
+      if (audioRef.current) {
+        audioRef.current.src = audioUrl
+        audioRef.current.play().catch(err => {
+          console.warn('Audio autoplay failed:', err)
+        })
+      }
+    }
+    
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+      }
+    }
+  }, [currentScene, episode?.scenes])
 
   const startPolling = () => {
     if (pollingIntervalRef.current) return
@@ -290,6 +314,7 @@ function EpisodeViewer() {
 
   return (
     <div className="episode-viewer-page">
+      <audio ref={audioRef} />
       <div className="viewer-container">
         <div className="viewer-header">
           <button onClick={() => navigate(-1)} className="btn-back">
