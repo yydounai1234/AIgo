@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
 import './WorkDetail.css'
@@ -7,6 +7,7 @@ import './WorkDetail.css'
 function WorkDetail() {
   const { workId } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const { isAuthenticated } = useAuth()
   const [work, setWork] = useState(null)
   const [episodes, setEpisodes] = useState([])
@@ -44,7 +45,7 @@ function WorkDetail() {
 
   const handleLike = async () => {
     if (!isAuthenticated()) {
-      navigate('/login')
+      navigate('/login', { state: { from: location } })
       return
     }
 
@@ -74,6 +75,10 @@ function WorkDetail() {
   }
 
   const handleViewEpisode = (episodeId) => {
+    if (!isAuthenticated()) {
+      navigate('/login', { state: { from: location } })
+      return
+    }
     navigate(`/episode/${episodeId}`)
   }
 

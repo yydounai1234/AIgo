@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
 import './Gallery.css'
 
 function Gallery() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { isAuthenticated } = useAuth()
   const [works, setWorks] = useState([])
   const [sortBy, setSortBy] = useState('latest')
   const [loading, setLoading] = useState(true)
@@ -35,6 +38,11 @@ function Gallery() {
   }
 
   const handleLike = async (workId) => {
+    if (!isAuthenticated()) {
+      navigate('/login', { state: { from: location } })
+      return
+    }
+    
     const work = works.find(w => w.id === workId)
     if (!work) return
     

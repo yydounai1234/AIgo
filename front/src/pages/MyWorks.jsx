@@ -92,13 +92,22 @@ function MyWorks() {
 
         {works.length === 0 ? (
           <div className="empty-state">
-            <p>你还没有创建任何作品</p>
-            <button
-              onClick={() => navigate('/')}
-              className="btn btn-primary"
-            >
-              立即创建
-            </button>
+            <div className="empty-state-image">
+              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style={{ stopColor: '#667eea', stopOpacity: 0.2 }} />
+                    <stop offset="100%" style={{ stopColor: '#764ba2', stopOpacity: 0.2 }} />
+                  </linearGradient>
+                </defs>
+                <circle cx="100" cy="100" r="80" fill="url(#gradient1)" />
+                <path d="M70 90 L70 70 L90 70 M130 70 L130 90 M70 130 Q100 110 130 130" 
+                      stroke="#667eea" strokeWidth="4" fill="none" strokeLinecap="round" />
+                <circle cx="80" cy="80" r="5" fill="#667eea" />
+                <circle cx="120" cy="80" r="5" fill="#667eea" />
+                <path d="M60 140 L140 140 L130 160 L70 160 Z" fill="#764ba2" opacity="0.3" />
+              </svg>
+            </div>
           </div>
         ) : (
           <div className="works-grid">
