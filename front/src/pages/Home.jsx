@@ -2,10 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { Autoplay, Pagination, Navigation } from 'swiper/modules'
+import { Autoplay, Pagination } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/pagination'
-import 'swiper/css/navigation'
 import './Home.css'
 
 function Home() {
@@ -54,12 +53,12 @@ function Home() {
     {
       title: '探索无限可能',
       subtitle: '让 AI 为你的故事注入生命',
-      color: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+      color: 'linear-gradient(135deg, #9d50bb 0%, #6e48aa 100%)'
     },
     {
       title: '打造专属作品',
       subtitle: '分享你的创意，收获粉丝与回报',
-      color: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+      color: 'linear-gradient(135deg, #8e54e9 0%, #4776e6 100%)'
     }
   ]
 
@@ -67,7 +66,7 @@ function Home() {
     <div className="home-page">
       <div className="home-hero">
         <Swiper
-          modules={[Autoplay, Pagination, Navigation]}
+          modules={[Autoplay, Pagination]}
           spaceBetween={0}
           slidesPerView={1}
           autoplay={{
@@ -77,7 +76,6 @@ function Home() {
           pagination={{
             clickable: true,
           }}
-          navigation={true}
           loop={true}
           className="hero-swiper"
         >
