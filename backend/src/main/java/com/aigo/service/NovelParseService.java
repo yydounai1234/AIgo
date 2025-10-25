@@ -35,6 +35,9 @@ public class NovelParseService {
     @Autowired
     private TextToImageService textToImageService;
     
+    @Autowired
+    private TextToSpeechService textToSpeechService;
+    
     private final ObjectMapper objectMapper = new ObjectMapper();
     
     public AnimeSegment parseNovelText(String text, String style, String targetAudience) {
@@ -45,6 +48,7 @@ public class NovelParseService {
             logger.info("[NovelParseService] Using demo mode");
             AnimeSegment segment = createDemoResponse(text);
             generateImagesForSegment(segment);
+            generateAudioForSegment(segment);
             return segment;
         }
         
@@ -68,6 +72,7 @@ public class NovelParseService {
                 segment.getScenes() != null ? segment.getScenes().size() : 0);
             
             generateImagesForSegment(segment);
+            generateAudioForSegment(segment);
             
             return segment;
             
@@ -107,6 +112,29 @@ public class NovelParseService {
             logger.info("[NovelParseService] Image generation completed");
         } catch (Exception e) {
             logger.error("[NovelParseService] Failed to generate images", e);
+        }
+    }
+    
+    private void generateAudioForSegment(AnimeSegment segment) {
+        if (segment.getScenes() == null || segment.getScenes().isEmpty()) {
+            return;
+        }
+        
+        logger.info("[NovelParseService] Generating audio for {} scenes", segment.getScenes().size());
+        
+        try {
+            List<String> audioUrls = textToSpeechService.generateAudioForScenes(
+                segment.getScenes(), 
+                segment.getCharacters()
+            );
+            
+            for (int i = 0; i < segment.getScenes().size() && i < audioUrls.size(); i++) {
+                segment.getScenes().get(i).setAudioUrl(audioUrls.get(i));
+            }
+            
+            logger.info("[NovelParseService] Audio generation completed");
+        } catch (Exception e) {
+            logger.error("[NovelParseService] Failed to generate audio", e);
         }
     }
     

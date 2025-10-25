@@ -350,6 +350,102 @@ QINIU_STORAGE_DOMAIN=your-domain.qiniucdn.com
 - 图片生成为串行处理,场景较多时可能需要较长时间
 - 图片存储到七牛云后返回公网 URL,支持 CDN 加速访问
 
+## 文字转语音功能 (七牛云 TTS)
+
+### 功能说明
+系统已集成七牛云文字转语音 (TTS) 服务,可以自动为每个对话生成语音。语音生成与小说解析流程无缝集成,无需额外 API 调用。
+
+### 工作流程
+1. 调用 `/api/novel/parse` 解析小说文本
+2. 系统自动提取角色信息和对话内容
+3. 为每个场景的 `dialogue` 生成对应的语音
+4. 语音 URL 保存在场景的 `audioUrl` 字段中
+
+### 角色声音一致性保证
+为确保同一角色在不同场景中声音一致,系统采用以下策略:
+- **智能性别识别**: 通过分析角色的描述 (description)、外貌 (appearance) 和性格 (personality) 自动识别性别
+- **关键词检测**: 系统会检测"男"、"女"、"他"、"她"等性别关键词
+- **姓名分析**: 当角色信息不足时,通过姓名特征推断性别
+- **角色-音色映射**: 每个角色首次分配音色后,系统会缓存该映射关系,确保后续场景使用相同音色
+
+### 性别识别规则
+系统使用以下规则识别角色性别:
+
+**男性关键词**: 男、他、先生、男性、男孩、男人、少年、哥哥、兄弟、父亲、爸爸  
+**女性关键词**: 女、她、女士、女性、女孩、女人、少女、姐姐、妹妹、母亲、妈妈
+
+**姓名特征**:
+- 女性: 娜、婷、丽、芳、静、雅、兰、燕、莉、萍
+- 男性: 明、强、刚、军、伟、涛、龙、杰、鹏、磊
+
+### 默认音色配置
+- **女性角色**: `qiniu_zh_female_wwxkjx` (甜美女声)
+- **男性角色**: `qiniu_zh_male_default` (标准男声)
+- **未识别角色**: 默认使用女性音色
+
+### 配置 TTS API
+
+在 `.env` 文件中添加:
+```bash
+# 七牛云 TTS API 配置
+QINIU_TTS_API_KEY=your-qiniu-tts-api-key
+QINIU_TTS_API_BASE_URL=https://openai.qiniu.com/v1
+
+# 七牛云对象存储配置 (用于保存生成的语音)
+QINIU_STORAGE_ACCESS_KEY=your-qiniu-access-key
+QINIU_STORAGE_SECRET_KEY=your-qiniu-secret-key
+QINIU_STORAGE_BUCKET_NAME=aigo-images
+QINIU_STORAGE_DOMAIN=your-domain.qiniucdn.com
+```
+
+参考 `.env.example` 查看完整配置示例。
+
+### 音频存储说明
+
+生成的音频会自动上传到七牛云对象存储,并返回公网可访问的 URL:
+- **存储位置**: 七牛云对象存储 (Kodo)
+- **文件命名**: `scene_{场景号}_{时间戳}_{UUID}.mp3`
+- **音频格式**: MP3
+- **返回格式**: 完整的公网 URL (如 `https://your-domain.qiniucdn.com/scene_1_1234567890_abc.mp3`)
+- **访问方式**: 公网可直接访问,无需额外认证
+
+### API 响应示例
+
+```json
+{
+  "characters": [
+    {
+      "name": "李明",
+      "description": "年轻男孩",
+      "appearance": "短发,阳光",
+      "personality": "开朗"
+    }
+  ],
+  "scenes": [
+    {
+      "sceneNumber": 1,
+      "character": "李明",
+      "dialogue": "今天会是美好的一天!",
+      "visualDescription": "李明站在天台上,面带微笑仰望天空",
+      "atmosphere": "充满希望",
+      "action": "伸展双臂,深呼吸",
+      "imageUrl": "https://your-domain.qiniucdn.com/scene_1_1234567890_abc.png",
+      "audioUrl": "https://your-domain.qiniucdn.com/scene_1_1234567890_def.mp3"
+    }
+  ],
+  "plotSummary": "...",
+  "genre": "...",
+  "mood": "..."
+}
+```
+
+### 注意事项
+- Demo 模式 (API key 为 `demo-key`) 会返回占位音频 URL
+- 生产环境需配置真实的七牛云 TTS API 密钥和对象存储凭证
+- 音频生成为串行处理,对话较多时可能需要较长时间
+- 音频存储到七牛云后返回公网 URL,支持 CDN 加速访问
+- 空对话或无文本的场景不会生成音频
+
 ## 下一步
 
 - [ ] 实现用户认证系统

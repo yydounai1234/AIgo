@@ -90,6 +90,54 @@ public class QiniuStorageService {
         return String.format("%s_%s_%s.png", prefix, timestamp, uuid);
     }
     
+    public String uploadBase64Audio(String base64Data, String filePrefix) {
+        if ("demo-key".equals(accessKey)) {
+            logger.info("[QiniuStorageService] Using demo mode, returning placeholder audio URL");
+            return "https://example.com/audio/" + filePrefix + ".mp3";
+        }
+        
+        initializeIfNeeded();
+        
+        try {
+            byte[] audioBytes = decodeBase64Audio(base64Data);
+            
+            String fileName = generateAudioFileName(filePrefix);
+            
+            String uploadToken = auth.uploadToken(bucketName);
+            
+            Response response = uploadManager.put(audioBytes, fileName, uploadToken);
+            
+            if (response.isOK()) {
+                String publicUrl = buildPublicUrl(fileName);
+                logger.info("[QiniuStorageService] Successfully uploaded audio: {}", publicUrl);
+                return publicUrl;
+            } else {
+                throw new RuntimeException("Upload failed with status: " + response.statusCode);
+            }
+            
+        } catch (QiniuException e) {
+            logger.error("[QiniuStorageService] Failed to upload audio to Qiniu", e);
+            throw new RuntimeException("上传音频到七牛云失败: " + e.getMessage(), e);
+        } catch (Exception e) {
+            logger.error("[QiniuStorageService] Unexpected error during audio upload", e);
+            throw new RuntimeException("上传音频失败: " + e.getMessage(), e);
+        }
+    }
+    
+    private byte[] decodeBase64Audio(String base64Data) {
+        String base64Content = base64Data;
+        if (base64Data.contains(",")) {
+            base64Content = base64Data.split(",")[1];
+        }
+        return Base64.getDecoder().decode(base64Content);
+    }
+    
+    private String generateAudioFileName(String prefix) {
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        return String.format("%s_%s_%s.mp3", prefix, timestamp, uuid);
+    }
+    
     private String buildPublicUrl(String fileName) {
         String domainUrl = domain;
         if (!domainUrl.startsWith("http://") && !domainUrl.startsWith("https://")) {
