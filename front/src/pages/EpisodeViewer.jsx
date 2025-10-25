@@ -19,6 +19,7 @@ function EpisodeViewer() {
   const [modal, setModal] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null })
   const pollingIntervalRef = useRef(null)
   const audioRef = useRef(null)
+  const imagePreloadRefs = useRef({})
 
   useEffect(() => {
     loadEpisode()
@@ -49,11 +50,17 @@ function EpisodeViewer() {
       const audioUrl = episode.scenes[currentScene].audioUrl
       if (audioRef.current) {
         audioRef.current.src = audioUrl
-        audioRef.current.play().catch(err => {
-          console.warn('Audio autoplay failed:', err)
-        })
+        audioRef.current.load()
+        const playPromise = audioRef.current.play()
+        if (playPromise !== undefined) {
+          playPromise.catch(err => {
+            console.warn('Audio autoplay failed:', err)
+          })
+        }
       }
     }
+    
+    preloadAdjacentImages()
     
     return () => {
       if (audioRef.current) {
@@ -61,6 +68,27 @@ function EpisodeViewer() {
       }
     }
   }, [currentScene, episode?.scenes])
+
+  const preloadAdjacentImages = () => {
+    if (!episode?.scenes) return
+    
+    const imagesToPreload = []
+    if (currentScene > 0) {
+      imagesToPreload.push(currentScene - 1)
+    }
+    if (currentScene < episode.scenes.length - 1) {
+      imagesToPreload.push(currentScene + 1)
+    }
+    
+    imagesToPreload.forEach(index => {
+      const scene = episode.scenes[index]
+      if (scene?.imageUrl && !imagePreloadRefs.current[index]) {
+        const img = new Image()
+        img.src = scene.imageUrl
+        imagePreloadRefs.current[index] = img
+      }
+    })
+  }
 
   const startPolling = () => {
     if (pollingIntervalRef.current) return
@@ -319,7 +347,7 @@ function EpisodeViewer() {
 
   return (
     <div className="episode-viewer-page">
-      <audio ref={audioRef} />
+      <audio ref={audioRef} preload="auto" />
       <div className="viewer-container">
         <div className="viewer-header">
           <button onClick={() => navigate(-1)} className="btn-back">
