@@ -106,7 +106,6 @@ function MyWorks() {
                 <circle cx="80" cy="80" r="5" fill="#667eea" />
                 <circle cx="120" cy="80" r="5" fill="#667eea" />
                 <path d="M60 140 L140 140 L130 160 L70 160 Z" fill="#764ba2" opacity="0.3" />
-                <text x="100" y="195" textAnchor="middle" fontSize="12" fill="#999">还没有作品</text>
               </svg>
             </div>
           </div>
