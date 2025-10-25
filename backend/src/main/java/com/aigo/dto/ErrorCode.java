@@ -17,6 +17,7 @@ public enum ErrorCode {
     NOT_FOUND("NOT_FOUND", "资源不存在", HttpStatus.NOT_FOUND),
     
     // 业务逻辑错误
+    BAD_REQUEST("BAD_REQUEST", "请求参数错误", HttpStatus.BAD_REQUEST),
     VALIDATION_ERROR("VALIDATION_ERROR", "请求参数验证失败", HttpStatus.BAD_REQUEST),
     INSUFFICIENT_COINS("INSUFFICIENT_COINS", "金币余额不足", HttpStatus.BAD_REQUEST),
     ALREADY_PURCHASED("ALREADY_PURCHASED", "已购买过该内容", HttpStatus.BAD_REQUEST),
