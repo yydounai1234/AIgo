@@ -16,6 +16,11 @@
   margin-bottom: 2rem;
 }
 
+.btn-fixed-width {
+  width: 200px;
+  max-width: 100%;
+}
+
 .page-header h1 {
   color: #333;
 }
@@ -88,6 +93,26 @@
   border-bottom: 1px solid #e0e0e0;
   color: #666;
   font-size: 0.9rem;
+}
+
+.work-stats span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.stat-icon {
+  width: 16px;
+  height: 16px;
+  color: #667eea;
+}
+
+.coin-icon-sm {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 2px;
 }
 
 .episodes-preview {
@@ -217,6 +242,10 @@
   }
   
   .page-header .btn {
+    width: 100%;
+  }
+
+  .btn-fixed-width {
     width: 100%;
   }
   

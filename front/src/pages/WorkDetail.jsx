@@ -121,7 +121,9 @@ function WorkDetail() {
               <img src={work.coverImage} alt={work.title} />
             ) : (
               <div className="work-cover-placeholder-large">
-                <span>📚</span>
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </div>
             )}
           </div>
@@ -135,17 +137,24 @@ function WorkDetail() {
 
             <div className="work-stats">
               <div className="stat-item">
-                <span className="stat-icon">📖</span>
+                <svg className="stat-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
                 <span className="stat-label">集数</span>
                 <span className="stat-value">{episodes.length || 0}</span>
               </div>
               <div className="stat-item">
-                <span className="stat-icon">👁️</span>
+                <svg className="stat-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
                 <span className="stat-label">浏览</span>
                 <span className="stat-value">{work.viewsCount || 0}</span>
               </div>
               <div className="stat-item">
-                <span className="stat-icon">❤️</span>
+                <svg className="stat-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
                 <span className="stat-label">点赞</span>
                 <span className="stat-value">{work.likesCount || 0}</span>
               </div>
@@ -155,7 +164,9 @@ function WorkDetail() {
               onClick={handleLike}
               className={`btn-like-large ${work.isLiked ? 'liked' : ''}`}
             >
-              <span className="like-icon">{work.isLiked ? '❤️' : '🤍'}</span>
+              <svg className="like-icon" viewBox="0 0 24 24" fill={work.isLiked ? "currentColor" : "none"} xmlns="http://www.w3.org/2000/svg">
+                <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
               <span>{work.isLiked ? '已点赞' : '点赞'}</span>
             </button>
           </div>
@@ -178,13 +189,18 @@ function WorkDetail() {
                   
                   <div className="episode-content">
                     <h3 className="episode-title">{episode.title}</h3>
+                    <p className="episode-description">{episode.novelText || '暂无简介'}</p>
                     
                     <div className="episode-meta">
                       {episode.isFree ? (
                         <span className="badge badge-free">免费</span>
                       ) : (
                         <span className="badge badge-paid">
-                          🪙 {episode.coinPrice} 金币
+                          <svg className="coin-icon-sm" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
+                            <path d="M12 6v12M9 9h4.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5H9m0 3h4.5c.83 0 1.5-.67 1.5-1.5S14.33 12 13.5 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                          </svg>
+                          {episode.coinPrice} 金币
                         </span>
                       )}
                     </div>
@@ -192,7 +208,7 @@ function WorkDetail() {
 
                   <button
                     onClick={() => handleViewEpisode(episode.id)}
-                    className="btn btn-primary btn-sm"
+                    className="btn btn-primary btn-sm btn-watch"
                   >
                     观看
                   </button>

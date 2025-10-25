@@ -72,11 +72,31 @@
 }
 
 .error-message {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   background: #ffe0e0;
   color: #d32f2f;
-  padding: 0.75rem;
+  padding: 0.75rem 1.5rem;
   border-radius: 6px;
-  margin-bottom: 1rem;
+  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+  z-index: 2000;
+  min-width: 300px;
+  max-width: 90%;
+  text-align: center;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 .btn {
@@ -102,6 +122,35 @@
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.btn-fixed-width {
+  width: 200px;
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .home-hero h1 {
+    font-size: 2rem;
+  }
+
+  .home-hero p {
+    font-size: 1rem;
+  }
+
+  .home-content {
+    padding: 2rem 1rem;
+  }
+
+  .btn-fixed-width {
+    width: 100%;
+  }
 }
 
 .home-features {
@@ -136,9 +185,11 @@
 }
 
 .feature-icon {
-  font-size: 3rem;
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto 1rem;
   display: block;
-  margin-bottom: 1rem;
+  color: #667eea;
 }
 
 .feature-card h4 {

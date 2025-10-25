@@ -20,6 +20,15 @@
   font-weight: bold;
   color: white;
   text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  color: white;
 }
 
 .nav-links {
@@ -55,6 +64,21 @@
 .user-info {
   color: white;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-icon {
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+.coin-icon {
+  width: 18px;
+  height: 18px;
+  color: white;
 }
 
 .coin-balance {
@@ -63,6 +87,23 @@
   background: rgba(255, 255, 255, 0.2);
   padding: 0.5rem 1rem;
   border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: white;
+}
+
+.mobile-menu-toggle svg {
+  width: 24px;
+  height: 24px;
 }
 
 .btn-logout {
@@ -105,4 +146,99 @@
 
 .btn-register:hover {
   background: rgba(255, 255, 255, 0.4);
+}
+
+@media (max-width: 768px) {
+  .nav-container {
+    padding: 1rem;
+    position: relative;
+  }
+
+  .mobile-menu-toggle {
+    display: block;
+  }
+
+  .nav-links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .nav-links.mobile-open {
+    max-height: 500px;
+    padding: 1rem 0;
+  }
+
+  .nav-links a {
+    padding: 1rem 2rem;
+    border-radius: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .nav-links a:last-child {
+    border-bottom: none;
+  }
+
+  .nav-user {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease, top 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 0;
+  }
+
+  .nav-user.mobile-open {
+    max-height: 500px;
+    padding: 1rem 0;
+  }
+
+  .nav-links.mobile-open ~ .nav-user {
+    top: calc(100% + 12rem);
+  }
+  
+  .nav-links.mobile-open ~ .nav-user.mobile-open {
+    margin-top: 0;
+  }
+
+  .nav-user .user-info,
+  .nav-user .coin-balance,
+  .nav-user .btn-logout,
+  .nav-user .btn-login,
+  .nav-user .btn-register {
+    width: calc(100% - 4rem);
+    margin: 0 2rem;
+    justify-content: center;
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .nav-user .coin-balance {
+    background: transparent;
+    margin-bottom: 0.5rem;
+  }
+
+  .nav-user > * {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .nav-user > *:last-child {
+    border-bottom: none;
+  }
 }

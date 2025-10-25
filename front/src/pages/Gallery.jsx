@@ -9,6 +9,7 @@ function Gallery() {
   const [sortBy, setSortBy] = useState('latest')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [dropdownOpen, setDropdownOpen] = useState(false)
 
   useEffect(() => {
     loadGallery()
@@ -77,10 +78,33 @@ function Gallery() {
           <h1>作品广场</h1>
           <div className="sort-controls">
             <label>排序：</label>
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-              <option value="latest">最新发布</option>
-              <option value="likes">最多点赞</option>
-            </select>
+            <div className="custom-dropdown">
+              <button 
+                className="dropdown-trigger"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+              >
+                <span>{sortBy === 'latest' ? '最新发布' : '最多点赞'}</span>
+                <svg className="dropdown-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              {dropdownOpen && (
+                <div className="dropdown-menu">
+                  <div 
+                    className={`dropdown-item ${sortBy === 'latest' ? 'active' : ''}`}
+                    onClick={() => { setSortBy('latest'); setDropdownOpen(false); }}
+                  >
+                    最新发布
+                  </div>
+                  <div 
+                    className={`dropdown-item ${sortBy === 'likes' ? 'active' : ''}`}
+                    onClick={() => { setSortBy('likes'); setDropdownOpen(false); }}
+                  >
+                    最多点赞
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -99,7 +123,9 @@ function Gallery() {
                     <img src={work.coverImage} alt={work.title} />
                   ) : (
                     <div className="work-cover-placeholder">
-                      <span>📚</span>
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
                     </div>
                   )}
                 </div>
@@ -112,10 +138,17 @@ function Gallery() {
 
                   <div className="work-meta">
                     <span className="work-episodes">
-                      📖 {work.episodeCount || 0} 集
+                      <svg className="meta-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      {work.episodeCount || 0} 集
                     </span>
                     <span className="work-views">
-                      👁️ {work.viewsCount || 0} 浏览
+                      <svg className="meta-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      {work.viewsCount || 0} 浏览
                     </span>
                   </div>
 
@@ -124,7 +157,9 @@ function Gallery() {
                       onClick={() => handleLike(work.id)}
                       className={`btn-like ${work.isLiked ? 'liked' : ''}`}
                     >
-                      <span className="like-icon">{work.isLiked ? '❤️' : '🤍'}</span>
+                      <svg className="like-icon" viewBox="0 0 24 24" fill={work.isLiked ? "currentColor" : "none"} xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
                       <span className="like-count">{work.likesCount || 0}</span>
                     </button>
 
