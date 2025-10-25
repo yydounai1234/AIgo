@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import org.slf4j.Logger;
+import java.time.Duration;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,6 +59,8 @@ public class NovelParseService {
                 .baseUrl(baseUrl)
                 .modelName(modelName)
                 .temperature(0.7)
+                .timeout(Duration.ofSeconds(60))
+                .maxRetries(3)
                 .build();
             
             String prompt = buildPrompt(text, style, targetAudience);
