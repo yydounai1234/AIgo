@@ -35,16 +35,14 @@ public class Like {
     private String userId;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", insertable = false, updatable = false, 
-                foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
     
     @Column(name = "work_id", nullable = false, length = 36)
     private String workId;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "work_id", insertable = false, updatable = false,
-                foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "work_id", insertable = false, updatable = false)
     private Work work;
     
     @Column(name = "created_at", nullable = false, updatable = false)

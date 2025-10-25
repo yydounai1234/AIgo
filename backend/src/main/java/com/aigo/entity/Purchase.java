@@ -35,16 +35,14 @@ public class Purchase {
     private String userId;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", insertable = false, updatable = false,
-                foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
     
     @Column(name = "episode_id", nullable = false, length = 36)
     private String episodeId;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "episode_id", insertable = false, updatable = false,
-                foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "episode_id", insertable = false, updatable = false)
     private Episode episode;
     
     @Column(name = "coin_cost", nullable = false)
