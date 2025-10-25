@@ -31,8 +31,6 @@ public class NovelParseController {
             request.getTargetAudience());
         
         try {
-            logger.debug("[NovelParseController] Calling novelParseService.parseNovelText()");
-            
             AnimeSegment segment = novelParseService.parseNovelText(
                 request.getText(),
                 request.getStyle(),
@@ -43,19 +41,14 @@ public class NovelParseController {
                 segment.getCharacters() != null ? segment.getCharacters().size() : 0,
                 segment.getScenes() != null ? segment.getScenes().size() : 0);
             
-            logger.debug("[NovelParseController] Returning ResponseEntity with segment");
             return ResponseEntity.ok(segment);
             
         } catch (Exception e) {
             logger.error("[NovelParseController] Failed to parse novel", e);
-            logger.error("[NovelParseController] Exception type: {}, message: {}", 
-                e.getClass().getName(), e.getMessage());
             
             Map<String, String> error = new HashMap<>();
             error.put("error", "解析失败");
             error.put("message", e.getMessage());
-            
-            logger.debug("[NovelParseController] Returning error response");
             return ResponseEntity.internalServerError().body(error);
         }
     }

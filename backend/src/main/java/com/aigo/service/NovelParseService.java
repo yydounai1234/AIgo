@@ -40,21 +40,15 @@ public class NovelParseService {
     public AnimeSegment parseNovelText(String text, String style, String targetAudience) {
         logger.info("[NovelParseService] Starting parseNovelText - text length: {}, style: {}, targetAudience: {}",
             text != null ? text.length() : 0, style, targetAudience);
-        logger.debug("[NovelParseService] API Key: {}, Base URL: {}, Model: {}",
-            apiKey != null ? apiKey.substring(0, Math.min(10, apiKey.length())) + "..." : "null",
-            baseUrl, modelName);
         
         if ("demo-key".equals(apiKey)) {
-            logger.info("[NovelParseService] Using demo mode (demo-key detected)");
+            logger.info("[NovelParseService] Using demo mode");
             AnimeSegment segment = createDemoResponse(text);
-            logger.info("[NovelParseService] Demo response created successfully");
             generateImagesForSegment(segment);
-            logger.info("[NovelParseService] Demo images generated");
             return segment;
         }
         
         try {
-            logger.debug("[NovelParseService] Building OpenAI chat model");
             ChatLanguageModel model = OpenAiChatModel.builder()
                 .apiKey(apiKey)
                 .baseUrl(baseUrl)
@@ -62,43 +56,29 @@ public class NovelParseService {
                 .temperature(0.7)
                 .build();
             
-            logger.debug("[NovelParseService] Building prompt");
             String prompt = buildPrompt(text, style, targetAudience);
-            logger.debug("[NovelParseService] Prompt built, length: {}", prompt.length());
             
-            logger.info("[NovelParseService] Calling LLM model.generate()");
+            logger.info("[NovelParseService] Calling LLM model");
             String response = model.generate(prompt);
-            logger.info("[NovelParseService] LLM response received, length: {}", 
-                response != null ? response.length() : 0);
-            logger.debug("[NovelParseService] LLM response preview: {}",
-                response != null && response.length() > 200 ? response.substring(0, 200) + "..." : response);
+            logger.info("[NovelParseService] LLM response received");
             
-            logger.debug("[NovelParseService] Parsing LLM response");
             AnimeSegment segment = parseResponse(response);
-            logger.info("[NovelParseService] Response parsed - characters: {}, scenes: {}",
+            logger.info("[NovelParseService] Parsed - characters: {}, scenes: {}",
                 segment.getCharacters() != null ? segment.getCharacters().size() : 0,
                 segment.getScenes() != null ? segment.getScenes().size() : 0);
             
-            logger.info("[NovelParseService] Generating images for segment");
             generateImagesForSegment(segment);
-            logger.info("[NovelParseService] Image generation completed");
             
-            logger.info("[NovelParseService] parseNovelText completed successfully");
             return segment;
             
         } catch (Exception e) {
-            logger.error("[NovelParseService] Failed to parse novel text with DeepSeek", e);
-            logger.error("[NovelParseService] Exception type: {}, message: {}",
-                e.getClass().getName(), e.getMessage());
+            logger.error("[NovelParseService] Failed to parse novel text", e);
             throw new RuntimeException("LLM 处理失败: " + e.getMessage(), e);
         }
     }
     
     private void generateImagesForSegment(AnimeSegment segment) {
-        logger.debug("[NovelParseService] generateImagesForSegment called");
-        
         if (segment.getScenes() == null || segment.getScenes().isEmpty()) {
-            logger.info("[NovelParseService] No scenes to generate images for");
             return;
         }
         
@@ -112,29 +92,21 @@ public class NovelParseService {
                     character.getDescription());
                 characterAppearances.put(character.getName(), fullDesc);
             }
-            logger.debug("[NovelParseService] Character appearances mapped: {}", characterAppearances.keySet());
         }
         
         try {
-            logger.debug("[NovelParseService] Calling textToImageService.generateImagesForScenes()");
             List<String> imageUrls = textToImageService.generateImagesForScenes(
                 segment.getScenes(), 
                 characterAppearances
             );
             
-            logger.info("[NovelParseService] Received {} image URLs from text-to-image service", 
-                imageUrls != null ? imageUrls.size() : 0);
-            
             for (int i = 0; i < segment.getScenes().size() && i < imageUrls.size(); i++) {
                 segment.getScenes().get(i).setImageUrl(imageUrls.get(i));
-                logger.debug("[NovelParseService] Set imageUrl for scene {}", i + 1);
             }
             
-            logger.info("[NovelParseService] Image generation completed successfully");
+            logger.info("[NovelParseService] Image generation completed");
         } catch (Exception e) {
-            logger.error("[NovelParseService] Failed to generate images for scenes", e);
-            logger.error("[NovelParseService] Image generation exception type: {}, message: {}",
-                e.getClass().getName(), e.getMessage());
+            logger.error("[NovelParseService] Failed to generate images", e);
         }
     }
     
@@ -196,16 +168,12 @@ public class NovelParseService {
     }
     
     private AnimeSegment createDemoResponse(String text) {
-        logger.debug("[NovelParseService] createDemoResponse called with text length: {}", 
-            text != null ? text.length() : 0);
-        
         AnimeSegment segment = new AnimeSegment();
         
         List<Character> characters = new ArrayList<>();
         characters.add(new Character("主角", "故事的主人公", "年轻、充满活力", "勇敢、善良"));
         characters.add(new Character("旁白", "叙述者", "无形", "客观"));
         segment.setCharacters(characters);
-        logger.debug("[NovelParseService] Demo characters created: {}", characters.size());
         
         List<Scene> scenes = new ArrayList<>();
         scenes.add(new Scene(1, "旁白", "新的一天开始了。", 
@@ -213,13 +181,11 @@ public class NovelParseService {
         scenes.add(new Scene(2, "主角", "今天会是美好的一天!", 
             "主角站在街道上,面带微笑仰望天空", "充满希望", "主角伸展双臂,深呼吸", null));
         segment.setScenes(scenes);
-        logger.debug("[NovelParseService] Demo scenes created: {}", scenes.size());
         
         segment.setPlotSummary("这是一个关于" + text.substring(0, Math.min(20, text.length())) + "...的故事");
         segment.setGenre("青春、冒险");
         segment.setMood("积极向上");
         
-        logger.debug("[NovelParseService] Demo response created successfully");
         return segment;
     }
     
