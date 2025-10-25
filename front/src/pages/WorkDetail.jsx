@@ -20,7 +20,7 @@ function WorkDetail() {
       return
     }
     loadWorkDetail()
-  }, [workId, isAuthenticated, navigate])
+  }, [workId, isAuthenticated, navigate, location])
 
   const loadWorkDetail = async () => {
     setLoading(true)
