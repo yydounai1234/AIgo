@@ -22,6 +22,4 @@ public class Scene {
     private String action;
     
     private String imageUrl;
-    
-    private String audioUrl;
 }

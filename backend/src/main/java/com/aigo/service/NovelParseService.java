@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import org.slf4j.Logger;
-import java.time.Duration;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,9 +35,6 @@ public class NovelParseService {
     @Autowired
     private TextToImageService textToImageService;
     
-    @Autowired
-    private TextToSpeechService textToSpeechService;
-    
     private final ObjectMapper objectMapper = new ObjectMapper();
     
     public AnimeSegment parseNovelText(String text, String style, String targetAudience) {
@@ -49,7 +45,6 @@ public class NovelParseService {
             logger.info("[NovelParseService] Using demo mode");
             AnimeSegment segment = createDemoResponse(text);
             generateImagesForSegment(segment);
-            generateAudioForSegment(segment);
             return segment;
         }
         
@@ -59,8 +54,6 @@ public class NovelParseService {
                 .baseUrl(baseUrl)
                 .modelName(modelName)
                 .temperature(0.7)
-                .timeout(Duration.ofSeconds(60))
-                .maxRetries(3)
                 .build();
             
             String prompt = buildPrompt(text, style, targetAudience);
@@ -75,7 +68,6 @@ public class NovelParseService {
                 segment.getScenes() != null ? segment.getScenes().size() : 0);
             
             generateImagesForSegment(segment);
-            generateAudioForSegment(segment);
             
             return segment;
             
@@ -115,29 +107,6 @@ public class NovelParseService {
             logger.info("[NovelParseService] Image generation completed");
         } catch (Exception e) {
             logger.error("[NovelParseService] Failed to generate images", e);
-        }
-    }
-    
-    private void generateAudioForSegment(AnimeSegment segment) {
-        if (segment.getScenes() == null || segment.getScenes().isEmpty()) {
-            return;
-        }
-        
-        logger.info("[NovelParseService] Generating audio for {} scenes", segment.getScenes().size());
-        
-        try {
-            List<String> audioUrls = textToSpeechService.generateAudioForScenes(
-                segment.getScenes(), 
-                segment.getCharacters()
-            );
-            
-            for (int i = 0; i < segment.getScenes().size() && i < audioUrls.size(); i++) {
-                segment.getScenes().get(i).setAudioUrl(audioUrls.get(i));
-            }
-            
-            logger.info("[NovelParseService] Audio generation completed");
-        } catch (Exception e) {
-            logger.error("[NovelParseService] Failed to generate audio", e);
         }
     }
     
@@ -208,9 +177,9 @@ public class NovelParseService {
         
         List<Scene> scenes = new ArrayList<>();
         scenes.add(new Scene(1, "旁白", "新的一天开始了。", 
-            "清晨的城市街道,阳光洒在街道上", "宁静、温暖", "镜头从天空慢慢拉近街道", null, null));
+            "清晨的城市街道,阳光洒在街道上", "宁静、温暖", "镜头从天空慢慢拉近街道", null));
         scenes.add(new Scene(2, "主角", "今天会是美好的一天!", 
-            "主角站在街道上,面带微笑仰望天空", "充满希望", "主角伸展双臂,深呼吸", null, null));
+            "主角站在街道上,面带微笑仰望天空", "充满希望", "主角伸展双臂,深呼吸", null));
         segment.setScenes(scenes);
         
         segment.setPlotSummary("这是一个关于" + text.substring(0, Math.min(20, text.length())) + "...的故事");
