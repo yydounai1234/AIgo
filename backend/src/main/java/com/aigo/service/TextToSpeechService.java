@@ -27,9 +27,6 @@ public class TextToSpeechService {
     @Value("${qiniu.tts.api.base.url}")
     private String baseUrl;
     
-    @Value("${qiniu.tts.model.name}")
-    private String modelName;
-    
     @Autowired
     private QiniuStorageService qiniuStorageService;
     
@@ -86,12 +83,17 @@ public class TextToSpeechService {
         
         String endpoint = baseUrl + "/voice/tts";
         
+        Map<String, Object> audioParams = new HashMap<>();
+        audioParams.put("voice_type", voiceType);
+        audioParams.put("encoding", "mp3");
+        audioParams.put("speed_ratio", 1.0);
+        
+        Map<String, Object> requestParams = new HashMap<>();
+        requestParams.put("text", text);
+        
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", modelName);
-        requestBody.put("voice_type", voiceType);
-        requestBody.put("encoding", "mp3");
-        requestBody.put("speed_ratio", 1.0);
-        requestBody.put("text", text);
+        requestBody.put("audio", audioParams);
+        requestBody.put("request", requestParams);
         
         String jsonBody = objectMapper.writeValueAsString(requestBody);
         
