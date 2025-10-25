@@ -20,13 +20,14 @@ public class TextToSpeechService {
     
     private static final Logger logger = LoggerFactory.getLogger(TextToSpeechService.class);
     
-    private final String apiKey;
-    private final String baseUrl;
-    private final QiniuStorageService qiniuStorageService;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final Map<String, String> characterVoiceCache = new HashMap<>();
     private List<VoiceProfile> availableVoices = null;
+    
+    private final String apiKey;
+    private final String baseUrl;
+    private final QiniuStorageService qiniuStorageService;
     
     public TextToSpeechService(
             @Value("${qiniu.tts.api.key}") String apiKey,
