@@ -10,11 +10,16 @@ import com.aigo.entity.Purchase;
 import com.aigo.entity.User;
 import com.aigo.entity.Work;
 import com.aigo.exception.BusinessException;
+import com.aigo.model.AnimeSegment;
+import com.aigo.model.NovelParseRequest;
 import com.aigo.repository.EpisodeRepository;
 import com.aigo.repository.PurchaseRepository;
 import com.aigo.repository.UserRepository;
 import com.aigo.repository.WorkRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,10 +30,13 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class EpisodeService {
     
+    private static final Logger logger = LoggerFactory.getLogger(EpisodeService.class);
+    
     private final EpisodeRepository episodeRepository;
     private final WorkRepository workRepository;
     private final PurchaseRepository purchaseRepository;
     private final UserRepository userRepository;
+    private final NovelParseService novelParseService;
     
     @Transactional
     public EpisodeResponse createEpisode(String userId, String workId, CreateEpisodeRequest request) {
@@ -49,9 +57,13 @@ public class EpisodeService {
                 .scenes(request.getScenes())
                 .isFree(request.getIsFree())
                 .coinPrice(request.getIsFree() ? 0 : request.getCoinPrice())
+                .status("PENDING")
                 .build();
         
         episode = episodeRepository.save(episode);
+        
+        processEpisodeAsync(episode.getId(), request.getNovelText());
+        
         return EpisodeResponse.fromEntity(episode);
     }
     
@@ -188,5 +200,73 @@ public class EpisodeService {
                 .newBalance(user.getCoinBalance())
                 .purchasedAt(purchase.getPurchasedAt())
                 .build();
+    }
+    
+    @Async
+    public void processEpisodeAsync(String episodeId, String novelText) {
+        logger.info("[EpisodeService] Starting async processing for episode {}", episodeId);
+        
+        try {
+            Episode episode = episodeRepository.findById(episodeId).orElse(null);
+            if (episode == null) {
+                logger.error("[EpisodeService] Episode not found: {}", episodeId);
+                return;
+            }
+            
+            episode.setStatus("PROCESSING");
+            episodeRepository.save(episode);
+            
+            AnimeSegment segment = novelParseService.parseNovelText(novelText, null, null);
+            
+            episode.setCharacters(segment.getCharacters());
+            episode.setScenes(segment.getScenes().stream()
+                    .map(scene -> new Episode.SceneData(
+                            scene.getSceneNumber(),
+                            scene.getDialogue(),
+                            scene.getImageUrl()))
+                    .toList());
+            episode.setPlotSummary(segment.getPlotSummary());
+            episode.setGenre(segment.getGenre());
+            episode.setMood(segment.getMood());
+            episode.setStatus("SUCCESS");
+            
+            episodeRepository.save(episode);
+            logger.info("[EpisodeService] Episode {} processed successfully", episodeId);
+            
+        } catch (Exception e) {
+            logger.error("[EpisodeService] Failed to process episode " + episodeId, e);
+            
+            Episode episode = episodeRepository.findById(episodeId).orElse(null);
+            if (episode != null) {
+                episode.setStatus("FAILED");
+                episode.setErrorMessage(e.getMessage());
+                episodeRepository.save(episode);
+            }
+        }
+    }
+    
+    @Transactional
+    public EpisodeResponse retryEpisode(String userId, String episodeId) {
+        Episode episode = episodeRepository.findById(episodeId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "集数不存在"));
+        
+        Work work = workRepository.findById(episode.getWorkId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "作品不存在"));
+        
+        if (!work.getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "无权限重试此集数");
+        }
+        
+        if (!"FAILED".equals(episode.getStatus())) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "只能重试失败的集数");
+        }
+        
+        episode.setStatus("PENDING");
+        episode.setErrorMessage(null);
+        episode = episodeRepository.save(episode);
+        
+        processEpisodeAsync(episode.getId(), episode.getNovelText());
+        
+        return EpisodeResponse.fromEntity(episode);
     }
 }

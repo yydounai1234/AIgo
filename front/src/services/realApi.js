@@ -136,5 +136,11 @@ export const realApi = {
     return await request(`/api/works/${workId}/like`, {
       method: 'DELETE'
     })
+  },
+
+  async retryEpisode(episodeId) {
+    return await request(`/api/episodes/${episodeId}/retry`, {
+      method: 'POST'
+    })
   }
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import Modal from '../components/Modal'
@@ -14,12 +14,44 @@ function EpisodeViewer() {
   const [error, setError] = useState('')
   const [needsPurchase, setNeedsPurchase] = useState(false)
   const [purchasing, setPurchasing] = useState(false)
+  const [retrying, setRetrying] = useState(false)
   const [currentScene, setCurrentScene] = useState(0)
   const [modal, setModal] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null })
+  const pollingIntervalRef = useRef(null)
 
   useEffect(() => {
     loadEpisode()
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current)
+      }
+    }
   }, [episodeId])
+
+  useEffect(() => {
+    if (episode?.status === 'PENDING' || episode?.status === 'PROCESSING') {
+      startPolling()
+    } else {
+      stopPolling()
+    }
+    
+    return () => stopPolling()
+  }, [episode?.status])
+
+  const startPolling = () => {
+    if (pollingIntervalRef.current) return
+    
+    pollingIntervalRef.current = setInterval(() => {
+      loadEpisodeQuietly()
+    }, 3000)
+  }
+
+  const stopPolling = () => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current)
+      pollingIntervalRef.current = null
+    }
+  }
 
   const loadEpisode = async () => {
     setLoading(true)
@@ -48,6 +80,55 @@ function EpisodeViewer() {
       setError('加载集数时发生错误')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadEpisodeQuietly = async () => {
+    try {
+      const result = await api.getEpisode(episodeId)
+      
+      if (result.success) {
+        setEpisode(result.data)
+      }
+    } catch (err) {
+      console.error('Polling error:', err)
+    }
+  }
+
+  const handleRetry = async () => {
+    setRetrying(true)
+    
+    try {
+      const result = await api.retryEpisode(episodeId)
+      
+      if (result.success) {
+        setEpisode(result.data)
+        setModal({ 
+          isOpen: true, 
+          type: 'alert', 
+          title: '重新生成中', 
+          message: '已开始重新生成集数内容，请稍候...', 
+          onConfirm: null 
+        })
+      } else {
+        setModal({ 
+          isOpen: true, 
+          type: 'alert', 
+          title: '重试失败', 
+          message: result.error?.message || '重试失败', 
+          onConfirm: null 
+        })
+      }
+    } catch (err) {
+      setModal({ 
+        isOpen: true, 
+        type: 'alert', 
+        title: '错误', 
+        message: '重试时发生错误', 
+        onConfirm: null 
+      })
+    } finally {
+      setRetrying(false)
     }
   }
 
@@ -147,6 +228,59 @@ function EpisodeViewer() {
         <button onClick={() => navigate(-1)} className="btn btn-secondary">
           返回
         </button>
+      </div>
+    )
+  }
+
+  if (episode.status === 'PENDING' || episode.status === 'PROCESSING') {
+    return (
+      <div className="episode-viewer-page">
+        <div className="generation-status">
+          <div className="status-card">
+            <div className="spinner"></div>
+            <h2>🎬 生成中...</h2>
+            <h3>{episode.title}</h3>
+            <p className="status-message">
+              {episode.status === 'PENDING' 
+                ? '等待处理，请稍候...' 
+                : '正在使用 AI 生成动漫内容，这可能需要几分钟时间...'}
+            </p>
+            <p className="status-tip">
+              页面将自动刷新，请不要关闭窗口
+            </p>
+            <button onClick={() => navigate(-1)} className="btn btn-secondary">
+              返回
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (episode.status === 'FAILED') {
+    return (
+      <div className="episode-viewer-page">
+        <div className="generation-status">
+          <div className="status-card error">
+            <h2>❌ 生成失败</h2>
+            <h3>{episode.title}</h3>
+            <p className="error-message">
+              {episode.errorMessage || '生成过程中发生错误'}
+            </p>
+            <div className="status-actions">
+              <button
+                onClick={handleRetry}
+                className="btn btn-primary"
+                disabled={retrying}
+              >
+                {retrying ? '重新生成中...' : '🔄 重新生成'}
+              </button>
+              <button onClick={() => navigate(-1)} className="btn btn-secondary">
+                返回
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
