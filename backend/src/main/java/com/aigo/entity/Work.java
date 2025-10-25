@@ -33,8 +33,7 @@ public class Work {
     private String userId;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", insertable = false, updatable = false,
-                foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
     
     @Column(nullable = false, length = 100)
