@@ -25,7 +25,10 @@ function WorkDetail() {
       const result = await api.getWork(workId)
       
       if (result.success) {
-        setWork(result.data)
+        setWork({
+          ...result.data,
+          isLiked: result.data.isLiked === true
+        })
         if (result.data.episodes) {
           setEpisodes(result.data.episodes)
         }
