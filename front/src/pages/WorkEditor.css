@@ -241,6 +241,8 @@
   display: flex;
   gap: 0.5rem;
   flex-shrink: 0;
+  min-width: 240px;
+  justify-content: flex-end;
 }
 
 .loading-page,
