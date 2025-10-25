@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -22,22 +21,22 @@ public class TextToImageService {
     
     private static final Logger logger = LoggerFactory.getLogger(TextToImageService.class);
     
-    @Value("${qiniu.text2img.api.key}")
-    private String apiKey;
-    
-    @Value("${qiniu.text2img.api.base.url:https://openai.qiniu.com/v1}")
-    private String baseUrl;
-    
-    @Value("${qiniu.text2img.model.name:gemini-2.5-flash-image}")
-    private String modelName;
-    
+    private final String apiKey;
+    private final String baseUrl;
+    private final String modelName;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Map<String, String> characterDescriptions = new HashMap<>();
     private final QiniuStorageService qiniuStorageService;
     
-    @Autowired
-    public TextToImageService(QiniuStorageService qiniuStorageService) {
+    public TextToImageService(
+            @Value("${qiniu.text2img.api.key}") String apiKey,
+            @Value("${qiniu.text2img.api.base.url:https://openai.qiniu.com/v1}") String baseUrl,
+            @Value("${qiniu.text2img.model.name:gemini-2.5-flash-image}") String modelName,
+            QiniuStorageService qiniuStorageService) {
+        this.apiKey = apiKey;
+        this.baseUrl = baseUrl;
+        this.modelName = modelName;
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(10000);
         factory.setReadTimeout(30000);

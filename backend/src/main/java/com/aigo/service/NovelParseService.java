@@ -10,7 +10,6 @@ import dev.langchain4j.model.openai.OpenAiChatModel;
 import org.slf4j.Logger;
 import java.time.Duration;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -24,20 +23,24 @@ public class NovelParseService {
     
     private static final Logger logger = LoggerFactory.getLogger(NovelParseService.class);
     
-    @Value("${deepseek.api.key}")
-    private String apiKey;
+    private final String apiKey;
+    private final String baseUrl;
+    private final String modelName;
+    private final TextToImageService textToImageService;
+    private final TextToSpeechService textToSpeechService;
     
-    @Value("${deepseek.api.base.url}")
-    private String baseUrl;
-    
-    @Value("${deepseek.model.name}")
-    private String modelName;
-    
-    @Autowired
-    private TextToImageService textToImageService;
-    
-    @Autowired
-    private TextToSpeechService textToSpeechService;
+    public NovelParseService(
+            @Value("${deepseek.api.key}") String apiKey,
+            @Value("${deepseek.api.base.url}") String baseUrl,
+            @Value("${deepseek.model.name}") String modelName,
+            TextToImageService textToImageService,
+            TextToSpeechService textToSpeechService) {
+        this.apiKey = apiKey;
+        this.baseUrl = baseUrl;
+        this.modelName = modelName;
+        this.textToImageService = textToImageService;
+        this.textToSpeechService = textToSpeechService;
+    }
     
     private final ObjectMapper objectMapper = new ObjectMapper();
     

@@ -6,7 +6,6 @@ import com.aigo.service.NovelParseService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,8 +19,11 @@ public class NovelParseController {
     
     private static final Logger logger = LoggerFactory.getLogger(NovelParseController.class);
     
-    @Autowired
-    private NovelParseService novelParseService;
+    private final NovelParseService novelParseService;
+    
+    public NovelParseController(NovelParseService novelParseService) {
+        this.novelParseService = novelParseService;
+    }
     
     @PostMapping("/parse")
     public ResponseEntity<?> parseNovel(@Valid @RequestBody NovelParseRequest request) {

@@ -19,17 +19,21 @@ public class QiniuStorageService {
     
     private static final Logger logger = LoggerFactory.getLogger(QiniuStorageService.class);
     
-    @Value("${qiniu.storage.access.key}")
-    private String accessKey;
+    private final String accessKey;
+    private final String secretKey;
+    private final String bucketName;
+    private final String domain;
     
-    @Value("${qiniu.storage.secret.key}")
-    private String secretKey;
-    
-    @Value("${qiniu.storage.bucket.name}")
-    private String bucketName;
-    
-    @Value("${qiniu.storage.domain}")
-    private String domain;
+    public QiniuStorageService(
+            @Value("${qiniu.storage.access.key}") String accessKey,
+            @Value("${qiniu.storage.secret.key}") String secretKey,
+            @Value("${qiniu.storage.bucket.name}") String bucketName,
+            @Value("${qiniu.storage.domain}") String domain) {
+        this.accessKey = accessKey;
+        this.secretKey = secretKey;
+        this.bucketName = bucketName;
+        this.domain = domain;
+    }
     
     private UploadManager uploadManager;
     private Auth auth;
