@@ -205,13 +205,7 @@ public class TextToSpeechService {
     }
     
     private String selectVoiceByGender(String gender) {
-        if ("female".equals(gender)) {
-            return "qiniu_zh_female_wwxkjx";
-        } else if ("male".equals(gender)) {
-            return "qiniu_zh_male_default";
-        } else {
-            return "qiniu_zh_female_wwxkjx";
-        }
+        return "qiniu_zh_female_wwxkjx";
     }
     
     private void fetchVoiceList() {

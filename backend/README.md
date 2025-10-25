@@ -379,9 +379,7 @@ QINIU_STORAGE_DOMAIN=your-domain.qiniucdn.com
 - 男性: 明、强、刚、军、伟、涛、龙、杰、鹏、磊
 
 ### 默认音色配置
-- **女性角色**: `qiniu_zh_female_wwxkjx` (甜美女声)
-- **男性角色**: `qiniu_zh_male_default` (标准男声)
-- **未识别角色**: 默认使用女性音色
+- **所有角色**: `qiniu_zh_female_wwxkjx` (统一使用甜美女声)
 
 ### 配置 TTS API
 
