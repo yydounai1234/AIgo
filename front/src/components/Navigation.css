@@ -20,6 +20,15 @@
   font-weight: bold;
   color: white;
   text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  color: white;
 }
 
 .nav-links {
@@ -201,7 +210,8 @@
   }
 
   .nav-links.mobile-open ~ .nav-user.mobile-open {
-    margin-top: 12rem;
+    margin-top: 0;
+    transform: translateY(0);
   }
 
   .nav-user .user-info,
@@ -214,6 +224,11 @@
     justify-content: center;
     text-align: center;
     padding: 1rem;
+  }
+
+  .nav-user .coin-balance {
+    background: transparent;
+    margin-bottom: 0.5rem;
   }
 
   .nav-user > * {
