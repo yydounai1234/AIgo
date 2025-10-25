@@ -16,6 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 @Service
 public class TextToImageService {
@@ -35,6 +39,7 @@ public class TextToImageService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Map<String, String> characterDescriptions = new HashMap<>();
     private final QiniuStorageService qiniuStorageService;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(5);
     
     @Autowired
     public TextToImageService(QiniuStorageService qiniuStorageService) {
@@ -72,50 +77,69 @@ public class TextToImageService {
     }
     
     public List<String> generateImagesForScenes(List<Scene> scenes, Map<String, String> characterAppearances) {
-        logger.info("[TextToImageService] Generating images for {} scenes", scenes.size());
+        logger.info("[TextToImageService] Generating images for {} scenes in parallel", scenes.size());
         
-        List<String> imageUrls = new ArrayList<>();
-        
-        for (Scene scene : scenes) {
-            try {
-                String imageUrl = generateImageForScene(scene, characterAppearances);
-                imageUrls.add(imageUrl);
-                
-                Thread.sleep(500);
-                
-            } catch (Exception e) {
-                logger.error("[TextToImageService] Failed for scene {}, using placeholder", 
-                    scene.getSceneNumber(), e);
-                String placeholder = createDemoImageUrl(scene);
-                imageUrls.add(placeholder);
-            }
+        if (scenes.isEmpty()) {
+            return new ArrayList<>();
         }
         
-        logger.info("[TextToImageService] Completed, generated {} images", imageUrls.size());
+        List<CompletableFuture<ImageResult>> futures = scenes.stream()
+            .map(scene -> CompletableFuture.supplyAsync(() -> {
+                try {
+                    String imageUrl = generateImageForScene(scene, characterAppearances);
+                    return new ImageResult(scene.getSceneNumber(), imageUrl, null);
+                } catch (Exception e) {
+                    logger.error("[TextToImageService] Failed for scene {}, using placeholder", 
+                        scene.getSceneNumber(), e);
+                    String placeholder = createDemoImageUrl(scene);
+                    return new ImageResult(scene.getSceneNumber(), placeholder, e.getMessage());
+                }
+            }, executorService))
+            .collect(Collectors.toList());
+        
+        List<ImageResult> results = futures.stream()
+            .map(CompletableFuture::join)
+            .sorted(Comparator.comparingInt(ImageResult::getSceneNumber))
+            .collect(Collectors.toList());
+        
+        List<String> imageUrls = results.stream()
+            .map(ImageResult::getImageUrl)
+            .collect(Collectors.toList());
+        
+        long failedCount = results.stream().filter(r -> r.getError() != null).count();
+        logger.info("[TextToImageService] Completed, generated {} images ({} failed)", 
+            imageUrls.size(), failedCount);
+        
         return imageUrls;
     }
     
     private String buildImagePrompt(Scene scene, String characterDescription) {
         StringBuilder prompt = new StringBuilder();
         
-        prompt.append("漫画风格插画。");
+        prompt.append("Anime/manga style illustration. ");
         
-        prompt.append("角色: ").append(characterDescription).append("。");
+        prompt.append("Character: ").append(characterDescription)
+            .append(". IMPORTANT: Keep this character's appearance consistent with previous scenes - ");
+        
+        String characterKey = scene.getCharacter();
+        if (characterDescriptions.containsKey(characterKey)) {
+            prompt.append("use this exact description: ").append(characterDescriptions.get(characterKey)).append(". ");
+        }
         
         if (scene.getVisualDescription() != null && !scene.getVisualDescription().isEmpty()) {
-            prompt.append("画面: ").append(scene.getVisualDescription()).append("。");
+            prompt.append("Scene: ").append(scene.getVisualDescription()).append(". ");
         }
         
         if (scene.getAction() != null && !scene.getAction().isEmpty()) {
-            prompt.append("动作: ").append(scene.getAction()).append("。");
+            prompt.append("Action: ").append(scene.getAction()).append(". ");
         }
         
         if (scene.getAtmosphere() != null && !scene.getAtmosphere().isEmpty()) {
-            prompt.append("氛围: ").append(scene.getAtmosphere()).append("。");
+            prompt.append("Atmosphere: ").append(scene.getAtmosphere()).append(". ");
         }
         
-        prompt.append("保持角色外观一致性。高质量，细节丰富。");
-        
+        prompt.append("High quality, detailed, consistent character design across all scenes. ");
+        prompt.append("Same face, same hairstyle, same clothing for character ").append(characterKey).append(".");
         
         return prompt.toString();
     }
@@ -161,5 +185,21 @@ public class TextToImageService {
     
     private String createDemoImageUrl(Scene scene) {
         return "http://via.placeholder.com/1024x1024.png?text=Scene+" + scene.getSceneNumber() + ":" + scene.getCharacter();
+    }
+    
+    private static class ImageResult {
+        private final int sceneNumber;
+        private final String imageUrl;
+        private final String error;
+        
+        public ImageResult(int sceneNumber, String imageUrl, String error) {
+            this.sceneNumber = sceneNumber;
+            this.imageUrl = imageUrl;
+            this.error = error;
+        }
+        
+        public int getSceneNumber() { return sceneNumber; }
+        public String getImageUrl() { return imageUrl; }
+        public String getError() { return error; }
     }
 }
