@@ -54,7 +54,6 @@ public class EpisodeService {
                 .episodeNumber(maxEpisodeNumber + 1)
                 .title(request.getTitle())
                 .novelText(request.getNovelText())
-                .scenes(request.getScenes())
                 .isFree(request.getIsFree())
                 .coinPrice(request.getIsFree() ? 0 : request.getCoinPrice())
                 .status("PENDING")
@@ -204,7 +203,11 @@ public class EpisodeService {
     
     @Async
     public void processEpisodeAsync(String episodeId, String novelText) {
-        logger.info("[EpisodeService] Starting async processing for episode {}", episodeId);
+        logger.info("[EpisodeService] ========== Starting async processing ==========");
+        logger.info("[EpisodeService] Episode ID: {}", episodeId);
+        logger.info("[EpisodeService] Novel text length: {}", novelText != null ? novelText.length() : 0);
+        logger.info("[EpisodeService] Novel text content: {}", novelText);
+        logger.info("[EpisodeService] ================================================");
         
         try {
             Episode episode = episodeRepository.findById(episodeId).orElse(null);
