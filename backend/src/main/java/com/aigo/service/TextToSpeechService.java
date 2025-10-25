@@ -130,11 +130,12 @@ public class TextToSpeechService {
         }
         
         String gender = detectGender(characterName, character);
-        String voiceType = selectVoiceByGender(gender);
+        String ageGroup = detectAgeGroup(characterName, character);
+        String voiceType = selectVoiceByCharacteristics(gender, ageGroup);
         
         characterVoiceCache.put(characterName, voiceType);
-        logger.info("[TextToSpeechService] Mapped character '{}' to voice '{}' (gender: {})", 
-            characterName, voiceType, gender);
+        logger.info("[TextToSpeechService] Mapped character '{}' to voice '{}' (gender: {}, age: {})", 
+            characterName, voiceType, gender, ageGroup);
         
         return voiceType;
     }
@@ -149,10 +150,10 @@ public class TextToSpeechService {
                               character.getPersonality()).toLowerCase();
         
         Set<String> maleKeywords = new HashSet<>(Arrays.asList(
-            "男", "他", "先生", "男性", "男孩", "男人", "少年", "哥哥", "兄弟", "父亲", "爸爸"
+            "男", "他", "先生", "男性", "男孩", "男人", "少年", "哥哥", "兄弟", "父亲", "爸爸", "叔叔", "爷爷", "公"
         ));
         Set<String> femaleKeywords = new HashSet<>(Arrays.asList(
-            "女", "她", "女士", "女性", "女孩", "女人", "少女", "姐姐", "妹妹", "母亲", "妈妈"
+            "女", "她", "女士", "女性", "女孩", "女人", "少女", "姐姐", "妹妹", "母亲", "妈妈", "阿姨", "奶奶", "婆婆"
         ));
         
         int maleScore = 0;
@@ -177,6 +178,43 @@ public class TextToSpeechService {
         }
         
         return detectGenderFromName(characterName);
+    }
+    
+    private String detectAgeGroup(String characterName, Character character) {
+        if (character == null) {
+            return "young_adult";
+        }
+        
+        String combinedText = (character.getDescription() + " " + 
+                              character.getAppearance() + " " + 
+                              character.getPersonality()).toLowerCase();
+        
+        if (combinedText.contains("老") || combinedText.contains("年迈") || 
+            combinedText.contains("苍老") || combinedText.contains("白发") ||
+            combinedText.contains("爷爷") || combinedText.contains("奶奶") ||
+            combinedText.contains("长者") || combinedText.contains("老人")) {
+            return "elderly";
+        }
+        
+        if (combinedText.contains("中年") || combinedText.contains("叔叔") || 
+            combinedText.contains("阿姨") || combinedText.contains("成熟") ||
+            combinedText.contains("父亲") || combinedText.contains("母亲")) {
+            return "middle_aged";
+        }
+        
+        if (combinedText.contains("少年") || combinedText.contains("少女") || 
+            combinedText.contains("小孩") || combinedText.contains("孩子") ||
+            combinedText.contains("儿童") || combinedText.contains("童") ||
+            combinedText.contains("幼")) {
+            return "teenager";
+        }
+        
+        if (combinedText.contains("青年") || combinedText.contains("年轻") ||
+            combinedText.contains("小伙") || combinedText.contains("姑娘")) {
+            return "young_adult";
+        }
+        
+        return "young_adult";
     }
     
     private String detectGenderFromName(String name) {
@@ -206,6 +244,51 @@ public class TextToSpeechService {
     
     private String selectVoiceByGender(String gender) {
         return "qiniu_zh_female_wwxkjx";
+    }
+    
+    private String selectVoiceByCharacteristics(String gender, String ageGroup) {
+        String key = gender + "_" + ageGroup;
+        
+        switch (key) {
+            case "male_elderly":
+                return "qiniu_zh_male_ybxknjs";
+            
+            case "male_middle_aged":
+                return "qiniu_zh_male_wncwxz";
+            
+            case "male_young_adult":
+                return "qiniu_zh_male_tyygjs";
+            
+            case "male_teenager":
+                return "qiniu_zh_male_hlsnkk";
+            
+            case "female_elderly":
+                return "qiniu_zh_female_sqjyay";
+            
+            case "female_middle_aged":
+                return "qiniu_zh_female_kljxdd";
+            
+            case "female_young_adult":
+                return "qiniu_zh_female_wwxkjx";
+            
+            case "female_teenager":
+                return "qiniu_zh_female_xyqxxj";
+            
+            case "neutral_elderly":
+                return "qiniu_zh_male_ybxknjs";
+            
+            case "neutral_middle_aged":
+                return "qiniu_zh_male_tyygjs";
+            
+            case "neutral_young_adult":
+                return "qiniu_zh_female_wwxkjx";
+            
+            case "neutral_teenager":
+                return "qiniu_zh_male_hlsnkk";
+            
+            default:
+                return "qiniu_zh_female_wwxkjx";
+        }
     }
     
     private void fetchVoiceList() {
