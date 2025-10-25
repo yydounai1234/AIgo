@@ -390,6 +390,7 @@ QINIU_STORAGE_DOMAIN=your-domain.qiniucdn.com
 # 七牛云 TTS API 配置
 QINIU_TTS_API_KEY=your-qiniu-tts-api-key
 QINIU_TTS_API_BASE_URL=https://openai.qiniu.com/v1
+QINIU_TTS_MODEL_NAME=tts-1
 
 # 七牛云对象存储配置 (用于保存生成的语音)
 QINIU_STORAGE_ACCESS_KEY=your-qiniu-access-key

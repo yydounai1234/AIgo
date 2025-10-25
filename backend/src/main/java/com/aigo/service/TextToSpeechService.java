@@ -27,6 +27,9 @@ public class TextToSpeechService {
     @Value("${qiniu.tts.api.base.url}")
     private String baseUrl;
     
+    @Value("${qiniu.tts.model.name}")
+    private String modelName;
+    
     @Autowired
     private QiniuStorageService qiniuStorageService;
     
@@ -84,6 +87,7 @@ public class TextToSpeechService {
         String endpoint = baseUrl + "/voice/tts";
         
         Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("model", modelName);
         requestBody.put("voice_type", voiceType);
         requestBody.put("encoding", "mp3");
         requestBody.put("speed_ratio", 1.0);
