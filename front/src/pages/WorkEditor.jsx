@@ -99,18 +99,34 @@ function WorkEditor() {
     setShowEpisodeForm(true)
   }
 
-  const handleEditEpisode = (episode) => {
+  const handleEditEpisode = async (episode) => {
     if (episode.isPublished) {
       setModal({ isOpen: true, type: 'alert', title: '提示', message: '已发布的集数不可编辑', onConfirm: null })
       return
     }
     
-    setEditingEpisode(episode)
-    setEpisodeTitle(episode.title)
-    setNovelText(episode.novelText)
-    setIsFree(episode.isFree)
-    setCoinPrice(episode.coinPrice || 0)
-    setShowEpisodeForm(true)
+    setActionLoading(true)
+    setError('')
+    
+    try {
+      const result = await api.getEpisode(episode.id)
+      
+      if (result.success) {
+        const episodeData = result.data
+        setEditingEpisode(episodeData)
+        setEpisodeTitle(episodeData.title)
+        setNovelText(episodeData.novelText || '')
+        setIsFree(episodeData.isFree)
+        setCoinPrice(episodeData.coinPrice || 0)
+        setShowEpisodeForm(true)
+      } else {
+        setError(result.error?.message || '加载集数详情失败')
+      }
+    } catch (err) {
+      setError('加载集数详情时发生错误')
+    } finally {
+      setActionLoading(false)
+    }
   }
 
   const handleSaveEpisode = async () => {
