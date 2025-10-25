@@ -16,7 +16,7 @@ function WorkDetail() {
 
   useEffect(() => {
     if (!isAuthenticated()) {
-      navigate('/login')
+      navigate('/login', { state: { from: location } })
       return
     }
     loadWorkDetail()
