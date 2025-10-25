@@ -79,13 +79,15 @@ function Home() {
 
             {error && <div className="error-message">{error}</div>}
 
-            <button 
-              type="submit" 
-              className="btn btn-primary"
-              disabled={loading}
-            >
-              {loading ? '创建中...' : '开始创作'}
-            </button>
+            <div className="button-container">
+              <button 
+                type="submit" 
+                className="btn btn-primary btn-fixed-width"
+                disabled={loading}
+              >
+                {loading ? '创建中...' : '开始创作'}
+              </button>
+            </div>
           </form>
         </div>
 

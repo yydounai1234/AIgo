@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import Modal from '../components/Modal'
 import './EpisodeViewer.css'
 
 function EpisodeViewer() {
@@ -14,6 +15,7 @@ function EpisodeViewer() {
   const [needsPurchase, setNeedsPurchase] = useState(false)
   const [purchasing, setPurchasing] = useState(false)
   const [currentScene, setCurrentScene] = useState(0)
+  const [modal, setModal] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null })
 
   useEffect(() => {
     loadEpisode()
@@ -58,13 +60,31 @@ function EpisodeViewer() {
       const result = await api.purchaseEpisode(episodeId)
       
       if (result.success) {
-        alert(`购买成功！消耗 ${result.data.coinCost} 金币，剩余 ${result.data.newBalance} 金币`)
+        setModal({ 
+          isOpen: true, 
+          type: 'alert', 
+          title: '购买成功', 
+          message: `消耗 ${result.data.coinCost} 金币，剩余 ${result.data.newBalance} 金币`, 
+          onConfirm: null 
+        })
         await loadEpisode()
       } else {
-        alert(result.error?.message || '购买失败')
+        setModal({ 
+          isOpen: true, 
+          type: 'alert', 
+          title: '购买失败', 
+          message: result.error?.message || '购买失败', 
+          onConfirm: null 
+        })
       }
     } catch (err) {
-      alert('购买时发生错误')
+      setModal({ 
+        isOpen: true, 
+        type: 'alert', 
+        title: '错误', 
+        message: '购买时发生错误', 
+        onConfirm: null 
+      })
     } finally {
       setPurchasing(false)
     }
@@ -229,6 +249,15 @@ function EpisodeViewer() {
           </>
         )}
       </div>
+
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={() => setModal({ ...modal, isOpen: false })}
+        onConfirm={modal.onConfirm}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+      />
     </div>
   )
 }

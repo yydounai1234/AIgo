@@ -178,6 +178,7 @@ function WorkDetail() {
                   
                   <div className="episode-content">
                     <h3 className="episode-title">{episode.title}</h3>
+                    <p className="episode-description">{episode.novelText || '暂无简介'}</p>
                     
                     <div className="episode-meta">
                       {episode.isFree ? (
@@ -192,7 +193,7 @@ function WorkDetail() {
 
                   <button
                     onClick={() => handleViewEpisode(episode.id)}
-                    className="btn btn-primary btn-sm"
+                    className="btn btn-primary btn-sm btn-watch"
                   >
                     观看
                   </button>

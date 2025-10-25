@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import Modal from '../components/Modal'
 import './MyWorks.css'
 
 function MyWorks() {
@@ -8,6 +9,8 @@ function MyWorks() {
   const [works, setWorks] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [modal, setModal] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null })
+  const [deletingWorkId, setDeletingWorkId] = useState(null)
 
   useEffect(() => {
     loadMyWorks()
@@ -36,22 +39,31 @@ function MyWorks() {
     navigate(`/work/${workId}/edit`)
   }
 
-  const handleDeleteWork = async (workId) => {
-    if (!confirm('确定要删除这个作品吗？此操作不可撤销。')) {
-      return
-    }
+  const handleDeleteWork = (workId) => {
+    setDeletingWorkId(workId)
+    setModal({
+      isOpen: true,
+      type: 'confirm',
+      title: '确认删除',
+      message: '确定要删除这个作品吗？此操作不可撤销。',
+      onConfirm: () => confirmDeleteWork(workId)
+    })
+  }
+
+  const confirmDeleteWork = async (workId) => {
+    setModal({ ...modal, isOpen: false })
     
     try {
       const result = await api.deleteWork(workId)
       
       if (result.success) {
         setWorks(works.filter(w => w.id !== workId))
-        alert('作品已删除')
+        setModal({ isOpen: true, type: 'alert', title: '成功', message: '作品已删除', onConfirm: null })
       } else {
-        alert(result.error?.message || '删除失败')
+        setModal({ isOpen: true, type: 'alert', title: '错误', message: result.error?.message || '删除失败', onConfirm: null })
       }
     } catch (err) {
-      alert('删除作品时发生错误')
+      setModal({ isOpen: true, type: 'alert', title: '错误', message: '删除作品时发生错误', onConfirm: null })
     }
   }
 
@@ -70,7 +82,7 @@ function MyWorks() {
           <h1>我的作品</h1>
           <button
             onClick={() => navigate('/')}
-            className="btn btn-primary"
+            className="btn btn-primary btn-fixed-width"
           >
             + 创建新作品
           </button>
@@ -165,6 +177,15 @@ function MyWorks() {
           </div>
         )}
       </div>
+
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={() => setModal({ ...modal, isOpen: false })}
+        onConfirm={modal.onConfirm}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+      />
     </div>
   )
 }

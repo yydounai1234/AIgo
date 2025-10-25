@@ -55,6 +55,15 @@
 .user-info {
   color: white;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-icon {
+  width: 20px;
+  height: 20px;
+  color: white;
 }
 
 .coin-balance {
@@ -105,4 +114,20 @@
 
 .btn-register:hover {
   background: rgba(255, 255, 255, 0.4);
+}
+
+@media (max-width: 768px) {
+  .nav-container {
+    padding: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .nav-links {
+    gap: 1rem;
+  }
+
+  .nav-user {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
 }

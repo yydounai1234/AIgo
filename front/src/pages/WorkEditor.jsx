@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import Modal from '../components/Modal'
 import './WorkEditor.css'
 
 function WorkEditor() {
@@ -24,6 +25,8 @@ function WorkEditor() {
   const [coinPrice, setCoinPrice] = useState(0)
   
   const [actionLoading, setActionLoading] = useState(false)
+  
+  const [modal, setModal] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null })
 
   useEffect(() => {
     loadWork()
@@ -76,7 +79,7 @@ function WorkEditor() {
       
       if (result.success) {
         setWork(result.data)
-        alert('作品信息已更新')
+        setModal({ isOpen: true, type: 'alert', title: '成功', message: '作品信息已更新', onConfirm: null })
       } else {
         setError(result.error?.message || '更新失败')
       }
@@ -98,7 +101,7 @@ function WorkEditor() {
 
   const handleEditEpisode = (episode) => {
     if (episode.isPublished) {
-      alert('已发布的集数不可编辑')
+      setModal({ isOpen: true, type: 'alert', title: '提示', message: '已发布的集数不可编辑', onConfirm: null })
       return
     }
     
@@ -143,7 +146,7 @@ function WorkEditor() {
         if (result.success) {
           await loadWork()
           setShowEpisodeForm(false)
-          alert('集数已更新')
+          setModal({ isOpen: true, type: 'alert', title: '成功', message: '集数已更新', onConfirm: null })
         } else {
           setError(result.error?.message || '更新失败')
         }
@@ -159,7 +162,7 @@ function WorkEditor() {
         if (result.success) {
           await loadWork()
           setShowEpisodeForm(false)
-          alert('集数已创建')
+          setModal({ isOpen: true, type: 'alert', title: '成功', message: '集数已创建', onConfirm: null })
         } else {
           setError(result.error?.message || '创建失败')
         }
@@ -172,10 +175,17 @@ function WorkEditor() {
   }
 
   const handlePublishEpisode = async (episodeId) => {
-    if (!confirm('发布后将不可再编辑，确定要发布吗？')) {
-      return
-    }
-    
+    setModal({
+      isOpen: true,
+      type: 'confirm',
+      title: '确认发布',
+      message: '发布后将不可再编辑，确定要发布吗？',
+      onConfirm: () => confirmPublishEpisode(episodeId)
+    })
+  }
+
+  const confirmPublishEpisode = async (episodeId) => {
+    setModal({ ...modal, isOpen: false })
     setActionLoading(true)
     setError('')
     
@@ -184,7 +194,7 @@ function WorkEditor() {
       
       if (result.success) {
         await loadWork()
-        alert('集数已发布')
+        setModal({ isOpen: true, type: 'alert', title: '成功', message: '集数已发布', onConfirm: null })
       } else {
         setError(result.error?.message || '发布失败')
       }
@@ -250,13 +260,15 @@ function WorkEditor() {
             </label>
           </div>
           
-          <button
-            onClick={handleUpdateWork}
-            className="btn btn-primary"
-            disabled={actionLoading}
-          >
-            {actionLoading ? '保存中...' : '保存作品信息'}
-          </button>
+          <div className="button-container">
+            <button
+              onClick={handleUpdateWork}
+              className="btn btn-primary btn-fixed-width"
+              disabled={actionLoading}
+            >
+              {actionLoading ? '保存中...' : '修改作品信息'}
+            </button>
+          </div>
         </div>
         
         <div className="episodes-section">
@@ -327,14 +339,14 @@ function WorkEditor() {
               <div className="form-actions">
                 <button
                   onClick={handleSaveEpisode}
-                  className="btn btn-primary"
+                  className="btn btn-primary btn-fixed-width"
                   disabled={actionLoading}
                 >
-                  {actionLoading ? '保存中...' : '保存集数'}
+                  {actionLoading ? '保存中...' : '保存'}
                 </button>
                 <button
                   onClick={() => setShowEpisodeForm(false)}
-                  className="btn btn-secondary"
+                  className="btn btn-secondary btn-fixed-width"
                   disabled={actionLoading}
                 >
                   取消
@@ -395,6 +407,15 @@ function WorkEditor() {
           </div>
         </div>
       </div>
+
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={() => setModal({ ...modal, isOpen: false })}
+        onConfirm={modal.onConfirm}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+      />
     </div>
   )
 }

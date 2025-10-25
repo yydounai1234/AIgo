@@ -104,6 +104,35 @@
   cursor: not-allowed;
 }
 
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.btn-fixed-width {
+  width: 200px;
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .home-hero h1 {
+    font-size: 2rem;
+  }
+
+  .home-hero p {
+    font-size: 1rem;
+  }
+
+  .home-content {
+    padding: 2rem 1rem;
+  }
+
+  .btn-fixed-width {
+    width: 100%;
+  }
+}
+
 .home-features {
   margin-top: 3rem;
 }

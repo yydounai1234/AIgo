@@ -146,6 +146,17 @@
   cursor: not-allowed;
 }
 
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.btn-fixed-width {
+  width: 200px;
+  max-width: 100%;
+}
+
 .episode-form-card {
   background: #f8f9fa;
   border: 2px solid #e0e0e0;
@@ -163,6 +174,7 @@
   display: flex;
   gap: 1rem;
   margin-top: 1.5rem;
+  justify-content: center;
 }
 
 .episodes-list {
@@ -293,6 +305,10 @@
   }
   
   .form-actions .btn {
+    width: 100%;
+  }
+
+  .btn-fixed-width {
     width: 100%;
   }
 }
