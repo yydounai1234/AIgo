@@ -160,6 +160,6 @@ public class TextToImageService {
     }
     
     private String createDemoImageUrl(Scene scene) {
-        return "https://via.placeholder.com/1024x1024.png?text=Scene+" + scene.getSceneNumber() + ":" + scene.getCharacter();
+        return "http://via.placeholder.com/1024x1024.png?text=Scene+" + scene.getSceneNumber() + ":" + scene.getCharacter();
     }
 }

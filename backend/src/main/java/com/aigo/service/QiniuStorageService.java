@@ -45,7 +45,7 @@ public class QiniuStorageService {
     public String uploadBase64Image(String base64Data, String filePrefix) {
         if ("demo-key".equals(accessKey)) {
             logger.info("[QiniuStorageService] Using demo mode, returning placeholder URL");
-            return "https://via.placeholder.com/1024x1024.png?text=" + filePrefix;
+            return "http://via.placeholder.com/1024x1024.png?text=" + filePrefix;
         }
         
         initializeIfNeeded();
@@ -93,7 +93,7 @@ public class QiniuStorageService {
     private String buildPublicUrl(String fileName) {
         String domainUrl = domain;
         if (!domainUrl.startsWith("http://") && !domainUrl.startsWith("https://")) {
-            domainUrl = "https://" + domainUrl;
+            domainUrl = "http://" + domainUrl;
         }
         if (!domainUrl.endsWith("/")) {
             domainUrl += "/";
