@@ -6,6 +6,7 @@ import com.aigo.exception.BusinessException;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import lombok.Data;
+import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,6 +41,8 @@ public class LangChainTestController {
             try {
                 ChatLanguageModel model = OpenAiChatModel.builder()
                     .apiKey(openaiApiKey)
+                    .timeout(Duration.ofSeconds(60))
+                    .maxRetries(3)
                     .build();
                 
                 String aiResponse = model.generate(request.getMessage());
