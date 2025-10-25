@@ -35,7 +35,7 @@
 
 .empty-state-image {
   max-width: 300px;
-  margin: 0 auto;
+  margin: 0 auto 2rem;
 }
 
 .empty-state-image svg {
