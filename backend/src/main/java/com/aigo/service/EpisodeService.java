@@ -56,6 +56,8 @@ public class EpisodeService {
                 .novelText(request.getNovelText())
                 .isFree(request.getIsFree())
                 .coinPrice(request.getIsFree() ? 0 : request.getCoinPrice())
+                .style(request.getStyle())
+                .targetAudience(request.getTargetAudience())
                 .status("PENDING")
                 .build();
         
@@ -219,7 +221,11 @@ public class EpisodeService {
             episode.setStatus("PROCESSING");
             episodeRepository.save(episode);
             
-            AnimeSegment segment = novelParseService.parseNovelText(novelText, null, null);
+            AnimeSegment segment = novelParseService.parseNovelText(
+                novelText, 
+                episode.getStyle(), 
+                episode.getTargetAudience()
+            );
             
             episode.setCharacters(segment.getCharacters());
             episode.setScenes(segment.getScenes().stream()

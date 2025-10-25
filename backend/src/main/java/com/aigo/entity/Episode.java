@@ -87,6 +87,12 @@ public class Episode {
     @Column(name = "error_message", columnDefinition = "TEXT")
     private String errorMessage;
     
+    @Column(name = "style", length = 100)
+    private String style;
+    
+    @Column(name = "target_audience", length = 100)
+    private String targetAudience;
+    
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     

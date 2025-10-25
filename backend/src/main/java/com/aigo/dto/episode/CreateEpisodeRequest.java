@@ -22,4 +22,8 @@ public class CreateEpisodeRequest {
     private Boolean isFree;
     
     private Integer coinPrice = 0;
+    
+    private String style;
+    
+    private String targetAudience;
 }

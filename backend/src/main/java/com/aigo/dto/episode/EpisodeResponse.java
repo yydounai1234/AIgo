@@ -30,6 +30,8 @@ public class EpisodeResponse {
     private String genre;
     private String mood;
     private String errorMessage;
+    private String style;
+    private String targetAudience;
     private LocalDateTime createdAt;
     
     public static EpisodeResponse fromEntity(Episode episode) {
@@ -49,6 +51,8 @@ public class EpisodeResponse {
                 .genre(episode.getGenre())
                 .mood(episode.getMood())
                 .errorMessage(episode.getErrorMessage())
+                .style(episode.getStyle())
+                .targetAudience(episode.getTargetAudience())
                 .createdAt(episode.getCreatedAt())
                 .build();
     }
