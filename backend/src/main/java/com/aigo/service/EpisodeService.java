@@ -15,6 +15,8 @@ import com.aigo.repository.PurchaseRepository;
 import com.aigo.repository.UserRepository;
 import com.aigo.repository.WorkRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,10 +27,13 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class EpisodeService {
     
+    private static final Logger logger = LoggerFactory.getLogger(EpisodeService.class);
+    
     private final EpisodeRepository episodeRepository;
     private final WorkRepository workRepository;
     private final PurchaseRepository purchaseRepository;
     private final UserRepository userRepository;
+    private final EpisodeAsyncService episodeAsyncService;
     
     @Transactional
     public EpisodeResponse createEpisode(String userId, String workId, CreateEpisodeRequest request) {
@@ -46,12 +51,17 @@ public class EpisodeService {
                 .episodeNumber(maxEpisodeNumber + 1)
                 .title(request.getTitle())
                 .novelText(request.getNovelText())
-                .scenes(request.getScenes())
                 .isFree(request.getIsFree())
                 .coinPrice(request.getIsFree() ? 0 : request.getCoinPrice())
+                .style(request.getStyle())
+                .targetAudience(request.getTargetAudience())
+                .status("PENDING")
                 .build();
         
         episode = episodeRepository.save(episode);
+        
+        episodeAsyncService.processEpisodeAsync(episode.getId(), request.getNovelText());
+        
         return EpisodeResponse.fromEntity(episode);
     }
     
@@ -188,5 +198,30 @@ public class EpisodeService {
                 .newBalance(user.getCoinBalance())
                 .purchasedAt(purchase.getPurchasedAt())
                 .build();
+    }
+    
+    @Transactional
+    public EpisodeResponse retryEpisode(String userId, String episodeId) {
+        Episode episode = episodeRepository.findById(episodeId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "集数不存在"));
+        
+        Work work = workRepository.findById(episode.getWorkId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "作品不存在"));
+        
+        if (!work.getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "无权限重试此集数");
+        }
+        
+        if (!"FAILED".equals(episode.getStatus())) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "只能重试失败的集数");
+        }
+        
+        episode.setStatus("PENDING");
+        episode.setErrorMessage(null);
+        episode = episodeRepository.save(episode);
+        
+        episodeAsyncService.processEpisodeAsync(episode.getId(), episode.getNovelText());
+        
+        return EpisodeResponse.fromEntity(episode);
     }
 }

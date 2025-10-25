@@ -12,6 +12,7 @@ import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import com.aigo.model.Character;
 
 @Entity
 @Table(name = "episodes", 
@@ -38,7 +39,8 @@ public class Episode {
     private String workId;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "work_id", insertable = false, updatable = false)
+    @JoinColumn(name = "work_id", insertable = false, updatable = false,
+                foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Work work;
     
     @Column(name = "episode_number", nullable = false)
@@ -65,6 +67,32 @@ public class Episode {
     @Column(name = "is_published", nullable = false)
     @Builder.Default
     private Boolean isPublished = false;
+    
+    @Column(name = "status", length = 20)
+    @Builder.Default
+    private String status = "PENDING";
+    
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "characters", columnDefinition = "JSON")
+    private List<Character> characters;
+    
+    @Column(name = "plot_summary", columnDefinition = "TEXT")
+    private String plotSummary;
+    
+    @Column(name = "genre", length = 100)
+    private String genre;
+    
+    @Column(name = "mood", length = 100)
+    private String mood;
+    
+    @Column(name = "error_message", columnDefinition = "TEXT")
+    private String errorMessage;
+    
+    @Column(name = "style", length = 100)
+    private String style;
+    
+    @Column(name = "target_audience", length = 100)
+    private String targetAudience;
     
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

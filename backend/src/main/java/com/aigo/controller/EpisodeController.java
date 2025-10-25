@@ -73,4 +73,12 @@ public class EpisodeController {
         PurchaseResponse response = episodeService.purchaseEpisode(userId, id);
         return ApiResponse.success(response);
     }
+    
+    @PostMapping("/episodes/{id}/retry")
+    public ApiResponse<EpisodeResponse> retryEpisode(@PathVariable String id,
+                                                       HttpServletRequest httpRequest) {
+        String userId = getUserIdFromRequest(httpRequest);
+        EpisodeResponse response = episodeService.retryEpisode(userId, id);
+        return ApiResponse.success(response);
+    }
 }

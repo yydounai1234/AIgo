@@ -18,10 +18,12 @@ public class CreateEpisodeRequest {
     @NotBlank(message = "小说文本不能为空")
     private String novelText;
     
-    private List<Episode.SceneData> scenes;
-    
     @NotNull(message = "必须指定是否免费")
     private Boolean isFree;
     
     private Integer coinPrice = 0;
+    
+    private String style;
+    
+    private String targetAudience;
 }
