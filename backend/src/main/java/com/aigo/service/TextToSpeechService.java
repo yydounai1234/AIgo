@@ -145,6 +145,13 @@ public class TextToSpeechService {
             return detectGenderFromName(characterName);
         }
         
+        if (character.getGender() != null && !character.getGender().trim().isEmpty() && 
+            !"unknown".equalsIgnoreCase(character.getGender())) {
+            logger.debug("[TextToSpeechService] Using existing gender '{}' for character '{}'", 
+                character.getGender(), characterName);
+            return character.getGender();
+        }
+        
         String combinedText = (character.getDescription() + " " + 
                               character.getAppearance() + " " + 
                               character.getPersonality()).toLowerCase();
