@@ -39,7 +39,8 @@ public class Episode {
     private String workId;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "work_id", insertable = false, updatable = false)
+    @JoinColumn(name = "work_id", insertable = false, updatable = false,
+                foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Work work;
     
     @Column(name = "episode_number", nullable = false)
