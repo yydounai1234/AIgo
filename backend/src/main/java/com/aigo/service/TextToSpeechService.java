@@ -97,6 +97,8 @@ public class TextToSpeechService {
         
         String jsonBody = objectMapper.writeValueAsString(requestBody);
         
+        logger.debug("[TextToSpeechService] Request body: {}", jsonBody);
+        
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(endpoint))
             .header("Content-Type", "application/json")
@@ -107,7 +109,10 @@ public class TextToSpeechService {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         
         if (response.statusCode() != 200) {
-            throw new RuntimeException("TTS API failed with status: " + response.statusCode());
+            logger.error("[TextToSpeechService] TTS API failed with status: {}", response.statusCode());
+            logger.error("[TextToSpeechService] Request body was: {}", jsonBody);
+            logger.error("[TextToSpeechService] Response body: {}", response.body());
+            throw new RuntimeException("TTS API failed with status: " + response.statusCode() + ", response: " + response.body());
         }
         
         JsonNode responseJson = objectMapper.readTree(response.body());
