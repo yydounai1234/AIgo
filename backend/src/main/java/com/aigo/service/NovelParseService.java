@@ -9,11 +9,14 @@ import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class NovelParseService {
@@ -29,11 +32,20 @@ public class NovelParseService {
     @Value("${deepseek.model.name}")
     private String modelName;
     
+    @Autowired
+    private TextToImageService textToImageService;
+    
     private final ObjectMapper objectMapper = new ObjectMapper();
     
     public AnimeSegment parseNovelText(String text, String style, String targetAudience) {
+        logger.info("[NovelParseService] Starting parseNovelText - text length: {}, style: {}, targetAudience: {}",
+            text != null ? text.length() : 0, style, targetAudience);
+        
         if ("demo-key".equals(apiKey)) {
-            return createDemoResponse(text);
+            logger.info("[NovelParseService] Using demo mode");
+            AnimeSegment segment = createDemoResponse(text);
+            generateImagesForSegment(segment);
+            return segment;
         }
         
         try {
@@ -45,13 +57,56 @@ public class NovelParseService {
                 .build();
             
             String prompt = buildPrompt(text, style, targetAudience);
-            String response = model.generate(prompt);
             
-            return parseResponse(response);
+            logger.info("[NovelParseService] Calling LLM model");
+            String response = model.generate(prompt);
+            logger.info("[NovelParseService] LLM response received");
+            
+            AnimeSegment segment = parseResponse(response);
+            logger.info("[NovelParseService] Parsed - characters: {}, scenes: {}",
+                segment.getCharacters() != null ? segment.getCharacters().size() : 0,
+                segment.getScenes() != null ? segment.getScenes().size() : 0);
+            
+            generateImagesForSegment(segment);
+            
+            return segment;
             
         } catch (Exception e) {
-            logger.error("Failed to parse novel text with DeepSeek", e);
+            logger.error("[NovelParseService] Failed to parse novel text", e);
             throw new RuntimeException("LLM 处理失败: " + e.getMessage(), e);
+        }
+    }
+    
+    private void generateImagesForSegment(AnimeSegment segment) {
+        if (segment.getScenes() == null || segment.getScenes().isEmpty()) {
+            return;
+        }
+        
+        logger.info("[NovelParseService] Generating images for {} scenes", segment.getScenes().size());
+        
+        Map<String, String> characterAppearances = new HashMap<>();
+        if (segment.getCharacters() != null) {
+            for (Character character : segment.getCharacters()) {
+                String fullDesc = String.format("%s,%s", 
+                    character.getAppearance(), 
+                    character.getDescription());
+                characterAppearances.put(character.getName(), fullDesc);
+            }
+        }
+        
+        try {
+            List<String> imageUrls = textToImageService.generateImagesForScenes(
+                segment.getScenes(), 
+                characterAppearances
+            );
+            
+            for (int i = 0; i < segment.getScenes().size() && i < imageUrls.size(); i++) {
+                segment.getScenes().get(i).setImageUrl(imageUrls.get(i));
+            }
+            
+            logger.info("[NovelParseService] Image generation completed");
+        } catch (Exception e) {
+            logger.error("[NovelParseService] Failed to generate images", e);
         }
     }
     
@@ -122,9 +177,9 @@ public class NovelParseService {
         
         List<Scene> scenes = new ArrayList<>();
         scenes.add(new Scene(1, "旁白", "新的一天开始了。", 
-            "清晨的城市街道,阳光洒在街道上", "宁静、温暖", "镜头从天空慢慢拉近街道"));
+            "清晨的城市街道,阳光洒在街道上", "宁静、温暖", "镜头从天空慢慢拉近街道", null));
         scenes.add(new Scene(2, "主角", "今天会是美好的一天!", 
-            "主角站在街道上,面带微笑仰望天空", "充满希望", "主角伸展双臂,深呼吸"));
+            "主角站在街道上,面带微笑仰望天空", "充满希望", "主角伸展双臂,深呼吸", null));
         segment.setScenes(scenes);
         
         segment.setPlotSummary("这是一个关于" + text.substring(0, Math.min(20, text.length())) + "...的故事");

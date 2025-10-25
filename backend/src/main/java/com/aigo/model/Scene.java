@@ -20,4 +20,6 @@ public class Scene {
     private String atmosphere;
     
     private String action;
+    
+    private String imageUrl;
 }
