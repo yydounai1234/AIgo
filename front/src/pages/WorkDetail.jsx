@@ -15,12 +15,8 @@ function WorkDetail() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (!isAuthenticated()) {
-      navigate('/login', { state: { from: location } })
-      return
-    }
     loadWorkDetail()
-  }, [workId, isAuthenticated, navigate, location])
+  }, [workId])
 
   const loadWorkDetail = async () => {
     setLoading(true)
@@ -79,6 +75,10 @@ function WorkDetail() {
   }
 
   const handleViewEpisode = (episodeId) => {
+    if (!isAuthenticated()) {
+      navigate('/login', { state: { from: location } })
+      return
+    }
     navigate(`/episode/${episodeId}`)
   }
 
