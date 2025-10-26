@@ -49,6 +49,14 @@ CREATE TABLE IF NOT EXISTS episodes (
     is_free BOOLEAN DEFAULT TRUE NOT NULL COMMENT '是否免费',
     coin_price INTEGER DEFAULT 0 NOT NULL COMMENT '金币价格',
     is_published BOOLEAN DEFAULT FALSE NOT NULL COMMENT '是否已发布',
+    status VARCHAR(20) DEFAULT 'PENDING' COMMENT '集数状态 (PENDING/PROCESSING/COMPLETED/FAILED)',
+    characters JSON COMMENT '角色信息 (JSON数组)',
+    plot_summary TEXT COMMENT '剧情摘要',
+    genre VARCHAR(100) COMMENT '类型/题材',
+    mood VARCHAR(100) COMMENT '氛围/情绪',
+    error_message TEXT COMMENT '错误信息（生成失败时）',
+    style VARCHAR(100) COMMENT '风格',
+    target_audience VARCHAR(100) COMMENT '目标受众',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
     FOREIGN KEY (work_id) REFERENCES works(id) ON DELETE CASCADE,
     UNIQUE KEY unique_work_episode (work_id, episode_number),
@@ -84,6 +92,54 @@ CREATE TABLE IF NOT EXISTS likes (
     INDEX idx_work_id (work_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='点赞表';
 
+-- 角色表
+CREATE TABLE IF NOT EXISTS characters (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '角色唯一标识',
+    name VARCHAR(100) NOT NULL COMMENT '角色名称',
+    description TEXT COMMENT '角色描述',
+    appearance TEXT COMMENT '外观描述',
+    personality TEXT COMMENT '性格描述',
+    work_id VARCHAR(36) COMMENT '关联作品ID',
+    is_protagonist BOOLEAN DEFAULT FALSE COMMENT '是否主角',
+    image_url VARCHAR(500) COMMENT '角色图片URL',
+    gender VARCHAR(50) COMMENT '性别',
+    body_type TEXT COMMENT '体型描述',
+    facial_features TEXT COMMENT '面部特征',
+    hair_type VARCHAR(100) COMMENT '发型',
+    hair_color VARCHAR(100) COMMENT '发色',
+    face_shape VARCHAR(100) COMMENT '脸型',
+    eye_type VARCHAR(100) COMMENT '眼睛类型',
+    eye_color VARCHAR(100) COMMENT '眼睛颜色',
+    nose_type VARCHAR(100) COMMENT '鼻子类型',
+    mouth_type VARCHAR(100) COMMENT '嘴巴类型',
+    skin_tone VARCHAR(100) COMMENT '肤色',
+    height VARCHAR(100) COMMENT '身高',
+    build VARCHAR(100) COMMENT '体格',
+    clothing_style TEXT COMMENT '服装风格',
+    distinguishing_features TEXT COMMENT '显著特征',
+    is_placeholder_name BOOLEAN DEFAULT FALSE COMMENT '是否为占位符名称',
+    nicknames JSON COMMENT '昵称列表 (JSON数组)',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL COMMENT '更新时间',
+    INDEX idx_work_id (work_id),
+    INDEX idx_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色表';
+
+-- 场景表
+CREATE TABLE IF NOT EXISTS scenes (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '场景唯一标识',
+    scene_number INTEGER NOT NULL COMMENT '场景编号',
+    character VARCHAR(100) COMMENT '角色名称',
+    dialogue TEXT COMMENT '对话内容',
+    visual_description TEXT COMMENT '视觉描述',
+    atmosphere TEXT COMMENT '氛围',
+    action TEXT COMMENT '动作',
+    content TEXT COMMENT '场景内容',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL COMMENT '更新时间',
+    INDEX idx_scene_number (scene_number)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='场景表';
+
 -- 索引说明：
 -- 1. users表：
 --    - idx_username: 用于登录时根据用户名查询
@@ -110,6 +166,13 @@ CREATE TABLE IF NOT EXISTS likes (
 --    - idx_user_id: 用于查询用户点赞的作品
 --    - idx_work_id: 用于查询作品被哪些用户点赞
 --    - unique_user_work: 防止重复点赞
+--
+-- 6. characters表：
+--    - idx_work_id: 用于查询作品的所有角色
+--    - idx_name: 用于根据角色名称查询
+--
+-- 7. scenes表：
+--    - idx_scene_number: 用于按场景编号查询
 
 -- 业务规则说明：
 -- 1. 作品广场：只显示 is_public = true 的作品，可以看到所有公开作品
@@ -124,3 +187,15 @@ CREATE TABLE IF NOT EXISTS likes (
 --    - 新用户注册获得100金币
 --    - 购买付费集数扣除相应金币
 --    - 金币不足无法购买
+-- 6. 角色管理：
+--    - 角色可以关联到作品（work_id）
+--    - 支持详细的外观、性格、体征等属性
+--    - 支持多个昵称（JSON 数组）
+-- 7. 集数状态管理：
+--    - PENDING: 等待处理
+--    - PROCESSING: 处理中
+--    - COMPLETED: 已完成
+--    - FAILED: 失败（需查看 error_message）
+-- 8. 场景数据：
+--    - episodes 表中的 scenes 字段存储场景的 JSON 数据
+--    - scenes 表提供独立的场景数据存储（可选）
