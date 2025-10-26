@@ -36,6 +36,18 @@ public class CharacterService {
                                                        String description, String appearance, 
                                                        String personality, String gender, 
                                                        Boolean isProtagonist) {
+        return createOrUpdateWorkCharacter(workId, characterName, description, appearance, 
+            personality, gender, isProtagonist, null, null, null, null, null);
+    }
+    
+    @Transactional
+    public CharacterEntity createOrUpdateWorkCharacter(String workId, String characterName, 
+                                                       String description, String appearance, 
+                                                       String personality, String gender, 
+                                                       Boolean isProtagonist,
+                                                       String bodyType, String facialFeatures,
+                                                       String clothingStyle, String distinguishingFeatures,
+                                                       Boolean isPlaceholderName) {
         Optional<CharacterEntity> existing = characterRepository.findByWorkIdAndName(workId, characterName);
         
         CharacterEntity character;
@@ -56,6 +68,21 @@ public class CharacterService {
             if (isProtagonist != null) {
                 character.setIsProtagonist(isProtagonist);
             }
+            if (bodyType != null && !bodyType.isEmpty()) {
+                character.setBodyType(bodyType);
+            }
+            if (facialFeatures != null && !facialFeatures.isEmpty()) {
+                character.setFacialFeatures(facialFeatures);
+            }
+            if (clothingStyle != null && !clothingStyle.isEmpty()) {
+                character.setClothingStyle(clothingStyle);
+            }
+            if (distinguishingFeatures != null && !distinguishingFeatures.isEmpty()) {
+                character.setDistinguishingFeatures(distinguishingFeatures);
+            }
+            if (isPlaceholderName != null && !isPlaceholderName && character.getIsPlaceholderName()) {
+                character.setIsPlaceholderName(false);
+            }
         } else {
             character = new CharacterEntity();
             character.setWorkId(workId);
@@ -65,6 +92,11 @@ public class CharacterService {
             character.setPersonality(personality);
             character.setGender(gender);
             character.setIsProtagonist(isProtagonist != null ? isProtagonist : false);
+            character.setBodyType(bodyType);
+            character.setFacialFeatures(facialFeatures);
+            character.setClothingStyle(clothingStyle);
+            character.setDistinguishingFeatures(distinguishingFeatures);
+            character.setIsPlaceholderName(isPlaceholderName != null ? isPlaceholderName : false);
         }
         
         return characterRepository.save(character);

@@ -95,6 +95,7 @@ public class NovelParseService {
                 segment.getCharacters() != null ? segment.getCharacters().size() : 0,
                 segment.getScenes() != null ? segment.getScenes().size() : 0);
             
+            assignPlaceholderNames(segment, workId);
             resolvePronounsInScenes(segment, workCharacters);
             enrichSegmentWithWorkCharacters(segment, workId);
             generateImagesForSegment(segment);
@@ -118,10 +119,31 @@ public class NovelParseService {
         Map<String, String> characterAppearances = new HashMap<>();
         if (segment.getCharacters() != null) {
             for (Character character : segment.getCharacters()) {
-                String fullDesc = String.format("%s,%s", 
-                    character.getAppearance(), 
-                    character.getDescription());
-                characterAppearances.put(character.getName(), fullDesc);
+                StringBuilder descBuilder = new StringBuilder();
+                if (character.getAppearance() != null && !character.getAppearance().isEmpty()) {
+                    descBuilder.append(character.getAppearance());
+                }
+                if (character.getBodyType() != null && !character.getBodyType().isEmpty()) {
+                    if (descBuilder.length() > 0) descBuilder.append(", ");
+                    descBuilder.append("体型: ").append(character.getBodyType());
+                }
+                if (character.getFacialFeatures() != null && !character.getFacialFeatures().isEmpty()) {
+                    if (descBuilder.length() > 0) descBuilder.append(", ");
+                    descBuilder.append("面部: ").append(character.getFacialFeatures());
+                }
+                if (character.getClothingStyle() != null && !character.getClothingStyle().isEmpty()) {
+                    if (descBuilder.length() > 0) descBuilder.append(", ");
+                    descBuilder.append("服装: ").append(character.getClothingStyle());
+                }
+                if (character.getDistinguishingFeatures() != null && !character.getDistinguishingFeatures().isEmpty()) {
+                    if (descBuilder.length() > 0) descBuilder.append(", ");
+                    descBuilder.append("特征: ").append(character.getDistinguishingFeatures());
+                }
+                if (character.getDescription() != null && !character.getDescription().isEmpty()) {
+                    if (descBuilder.length() > 0) descBuilder.append(", ");
+                    descBuilder.append(character.getDescription());
+                }
+                characterAppearances.put(character.getName(), descBuilder.toString());
             }
         }
         
@@ -184,7 +206,16 @@ public class NovelParseService {
         }
         
         prompt.append("请提取以下信息:\n");
-        prompt.append("1. 角色信息 (姓名、描述、外貌、性格、性别)\n");
+        prompt.append("1. 角色信息 (姓名、描述、外貌、性格、性别、详细外观特征)\n");
+        prompt.append("   - 姓名: 如果文本中明确提到角色姓名，使用该姓名；如果未提及姓名，使用占位符（男性用'未知男性'，女性用'未知女性'）\n");
+        prompt.append("   - 描述: 角色的基本描述和背景\n");
+        prompt.append("   - 外貌: 整体外貌特征\n");
+        prompt.append("   - **体型**: 身高（高/中等/矮）、体型（瘦弱/苗条/匀称/健壮/丰满/肥胖等）\n");
+        prompt.append("   - **面部特征**: 详细的五官描述（眼睛颜色和形状、鼻子、嘴唇、脸型等）\n");
+        prompt.append("   - **服装风格**: 常穿的服装类型和风格\n");
+        prompt.append("   - **显著特征**: 疤痕、纹身、配饰或其他独特标记\n");
+        prompt.append("   - 性格: 性格特点\n");
+        prompt.append("   - 性别: male/female/unknown\n");
         prompt.append("   **重要**: 如果文本中使用了代词（我、你、她、他、它），请根据上下文识别代词指代的具体角色名称\n");
         prompt.append("2. 场景分镜 - 重要: 每个角色的每句对话都应该是一个独立的场景,用于生成独立的漫画图片\n");
         prompt.append("   - 场景编号: 连续递增的数字\n");
@@ -207,7 +238,17 @@ public class NovelParseService {
         prompt.append("\n小说文本:\n").append(text).append("\n\n");
         prompt.append("请以 JSON 格式返回结果,结构如下:\n");
         prompt.append("{\n");
-        prompt.append("  \"characters\": [{\"name\": \"角色名\", \"description\": \"描述\", \"appearance\": \"外貌\", \"personality\": \"性格\", \"gender\": \"male/female/unknown\"}],\n");
+        prompt.append("  \"characters\": [{\n");
+        prompt.append("    \"name\": \"角色名或'未知男性'/'未知女性'\",\n");
+        prompt.append("    \"description\": \"描述\",\n");
+        prompt.append("    \"appearance\": \"整体外貌\",\n");
+        prompt.append("    \"bodyType\": \"体型描述（身高+体型）\",\n");
+        prompt.append("    \"facialFeatures\": \"详细面部特征\",\n");
+        prompt.append("    \"clothingStyle\": \"服装风格\",\n");
+        prompt.append("    \"distinguishingFeatures\": \"显著特征\",\n");
+        prompt.append("    \"personality\": \"性格\",\n");
+        prompt.append("    \"gender\": \"male/female/unknown\"\n");
+        prompt.append("  }],\n");
         prompt.append("  \"scenes\": [\n");
         prompt.append("    {\"sceneNumber\": 1, \"character\": \"具体角色名（非代词）\", \"dialogue\": \"该角色说的话\", \"visualDescription\": \"画面描述\", \"atmosphere\": \"氛围\", \"action\": \"动作描述\"},\n");
         prompt.append("    {\"sceneNumber\": 2, \"character\": \"具体角色名（非代词）\", \"dialogue\": \"该角色说的话\", \"visualDescription\": \"画面描述\", \"atmosphere\": \"氛围\", \"action\": \"动作描述\"}\n");
@@ -357,6 +398,67 @@ public class NovelParseService {
         return "neutral";
     }
     
+    private void assignPlaceholderNames(AnimeSegment segment, String workId) {
+        if (segment.getCharacters() == null || segment.getCharacters().isEmpty()) {
+            return;
+        }
+        
+        Map<String, Integer> genderCounters = new HashMap<>();
+        genderCounters.put("male", 0);
+        genderCounters.put("female", 0);
+        genderCounters.put("unknown", 0);
+        
+        if (workId != null) {
+            try {
+                List<com.aigo.entity.CharacterEntity> existingChars = characterService.getCharactersByWorkId(workId);
+                for (com.aigo.entity.CharacterEntity existingChar : existingChars) {
+                    if (existingChar.getIsPlaceholderName() != null && existingChar.getIsPlaceholderName()) {
+                        String name = existingChar.getName();
+                        if (name.startsWith("男") && name.length() > 1) {
+                            char suffix = name.charAt(1);
+                            int index = suffix - 'a' + 1;
+                            genderCounters.put("male", Math.max(genderCounters.get("male"), index));
+                        } else if (name.startsWith("女") && name.length() > 1) {
+                            char suffix = name.charAt(1);
+                            int index = suffix - 'a' + 1;
+                            genderCounters.put("female", Math.max(genderCounters.get("female"), index));
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("[NovelParseService] Failed to load existing placeholder characters", e);
+            }
+        }
+        
+        for (Character character : segment.getCharacters()) {
+            String name = character.getName();
+            if (name == null || name.isEmpty() || "未知男性".equals(name) || "未知女性".equals(name)) {
+                String gender = character.getGender();
+                if (gender == null || gender.isEmpty()) {
+                    gender = "unknown";
+                }
+                
+                int counter = genderCounters.get(gender);
+                char suffix = (char) ('a' + counter);
+                String placeholderName;
+                
+                if ("male".equalsIgnoreCase(gender)) {
+                    placeholderName = "男" + suffix;
+                } else if ("female".equalsIgnoreCase(gender)) {
+                    placeholderName = "女" + suffix;
+                } else {
+                    placeholderName = "未知" + suffix;
+                }
+                
+                character.setName(placeholderName);
+                genderCounters.put(gender, counter + 1);
+                
+                logger.info("[NovelParseService] Assigned placeholder name '{}' to {} character", 
+                    placeholderName, gender);
+            }
+        }
+    }
+    
     private void resolvePronounsInScenes(AnimeSegment segment, List<com.aigo.entity.CharacterEntity> workCharacters) {
         if (segment.getScenes() == null || segment.getScenes().isEmpty()) {
             return;
@@ -440,6 +542,18 @@ public class NovelParseService {
                     }
                     if (existingChar.getGender() != null && !existingChar.getGender().isEmpty()) {
                         character.setGender(existingChar.getGender());
+                    }
+                    if (existingChar.getBodyType() != null && !existingChar.getBodyType().isEmpty()) {
+                        character.setBodyType(existingChar.getBodyType());
+                    }
+                    if (existingChar.getFacialFeatures() != null && !existingChar.getFacialFeatures().isEmpty()) {
+                        character.setFacialFeatures(existingChar.getFacialFeatures());
+                    }
+                    if (existingChar.getClothingStyle() != null && !existingChar.getClothingStyle().isEmpty()) {
+                        character.setClothingStyle(existingChar.getClothingStyle());
+                    }
+                    if (existingChar.getDistinguishingFeatures() != null && !existingChar.getDistinguishingFeatures().isEmpty()) {
+                        character.setDistinguishingFeatures(existingChar.getDistinguishingFeatures());
                     }
                     logger.info("[NovelParseService] Enriched character '{}' with existing work data", character.getName());
                 }

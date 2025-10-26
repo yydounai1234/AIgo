@@ -49,6 +49,8 @@ public class EpisodeAsyncService {
                     boolean isProtagonist = "我".equals(character.getName()) || 
                                            "主角".equals(character.getName()) ||
                                            "主人公".equals(character.getName());
+                    boolean isPlaceholder = character.getName().matches("^[男女未知][a-z]$");
+                    
                     characterService.createOrUpdateWorkCharacter(
                         episode.getWorkId(),
                         character.getName(),
@@ -56,7 +58,12 @@ public class EpisodeAsyncService {
                         character.getAppearance(),
                         character.getPersonality(),
                         character.getGender(),
-                        isProtagonist
+                        isProtagonist,
+                        character.getBodyType(),
+                        character.getFacialFeatures(),
+                        character.getClothingStyle(),
+                        character.getDistinguishingFeatures(),
+                        isPlaceholder
                     );
                 }
             }

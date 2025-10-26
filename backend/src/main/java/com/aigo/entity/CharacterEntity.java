@@ -44,6 +44,21 @@ public class CharacterEntity {
     @Column(length = 50)
     private String gender;
     
+    @Column(name = "body_type", columnDefinition = "TEXT")
+    private String bodyType;
+    
+    @Column(name = "facial_features", columnDefinition = "TEXT")
+    private String facialFeatures;
+    
+    @Column(name = "clothing_style", columnDefinition = "TEXT")
+    private String clothingStyle;
+    
+    @Column(name = "distinguishing_features", columnDefinition = "TEXT")
+    private String distinguishingFeatures;
+    
+    @Column(name = "is_placeholder_name")
+    private Boolean isPlaceholderName = false;
+    
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
