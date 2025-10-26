@@ -26,7 +26,6 @@ function EpisodeViewer() {
   const imagePreloadRefs = useRef({})
   const viewerContainerRef = useRef(null)
   const hideControlsTimeoutRef = useRef(null)
-  const shouldAutoPlayNextRef = useRef(false)
 
   useEffect(() => {
     loadEpisode()
@@ -65,34 +64,12 @@ function EpisodeViewer() {
     const handleAudioEnded = () => {
       setIsPlaying(false)
       if (autoPlay && episode?.scenes && currentScene < episode.scenes.length - 1) {
-        shouldAutoPlayNextRef.current = true
         setCurrentScene(prev => prev + 1)
       }
     }
     
     const handlePlay = () => setIsPlaying(true)
     const handlePause = () => setIsPlaying(false)
-    
-    const handleLoadedData = () => {
-      console.log('Audio loaded for scene', currentScene, 'shouldAutoPlay:', shouldAutoPlayNextRef.current, 'autoPlay:', autoPlay)
-      
-      if (shouldAutoPlayNextRef.current && autoPlay) {
-        console.log('Attempting to auto-play scene', currentScene)
-        const playPromise = audioRef.current?.play()
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              console.log('Auto-play successful for scene', currentScene)
-              setIsPlaying(true)
-              shouldAutoPlayNextRef.current = false
-            })
-            .catch(err => {
-              console.warn('Auto-play failed:', err)
-              shouldAutoPlayNextRef.current = false
-            })
-        }
-      }
-    }
     
     const currentSceneData = episode?.scenes?.[currentScene]
     
@@ -105,7 +82,6 @@ function EpisodeViewer() {
         audioRef.current.addEventListener('ended', handleAudioEnded)
         audioRef.current.addEventListener('play', handlePlay)
         audioRef.current.addEventListener('pause', handlePause)
-        audioRef.current.addEventListener('loadeddata', handleLoadedData)
       }
     }
     
@@ -117,7 +93,6 @@ function EpisodeViewer() {
         audioRef.current.removeEventListener('ended', handleAudioEnded)
         audioRef.current.removeEventListener('play', handlePlay)
         audioRef.current.removeEventListener('pause', handlePause)
-        audioRef.current.removeEventListener('loadeddata', handleLoadedData)
       }
     }
   }, [currentScene, episode?.scenes, autoPlay])
