@@ -8,6 +8,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import WorkEditor from './pages/WorkEditor'
 import MyWorks from './pages/MyWorks'
+import MyFavorites from './pages/MyFavorites'
 import Gallery from './pages/Gallery'
 import WorkDetail from './pages/WorkDetail'
 import EpisodeViewer from './pages/EpisodeViewer'
@@ -55,6 +56,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <MyWorks />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/my-favorites" 
+          element={
+            <ProtectedRoute>
+              <MyFavorites />
             </ProtectedRoute>
           } 
         />

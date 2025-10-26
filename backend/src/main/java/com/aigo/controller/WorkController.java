@@ -96,4 +96,11 @@ public class WorkController {
         workService.unlikeWork(userId, id);
         return ApiResponse.success(Map.of("message", "取消点赞成功"));
     }
+    
+    @GetMapping("/my-favorites")
+    public ApiResponse<List<GalleryItemResponse>> getMyFavorites(HttpServletRequest httpRequest) {
+        String userId = getUserIdFromRequest(httpRequest);
+        List<GalleryItemResponse> response = workService.getMyFavorites(userId);
+        return ApiResponse.success(response);
+    }
 }

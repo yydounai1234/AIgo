@@ -158,4 +158,16 @@ public class WorkService {
         work.setLikesCount(Math.max(0, work.getLikesCount() - 1));
         workRepository.save(work);
     }
+    
+    @Transactional(readOnly = true)
+    public List<GalleryItemResponse> getMyFavorites(String userId) {
+        List<Work> likedWorks = workRepository.findLikedWorksByUserId(userId);
+        
+        return likedWorks.stream()
+                .map(work -> {
+                    int episodeCount = episodeRepository.countByWorkIdAndIsPublishedTrue(work.getId()).intValue();
+                    return GalleryItemResponse.fromEntity(work, true, episodeCount);
+                })
+                .collect(Collectors.toList());
+    }
 }
