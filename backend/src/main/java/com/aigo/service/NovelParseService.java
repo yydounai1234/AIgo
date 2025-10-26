@@ -289,8 +289,10 @@ public class NovelParseService {
         AnimeSegment segment = new AnimeSegment();
         
         List<Character> characters = new ArrayList<>();
-        characters.add(new Character("主角", "故事的主人公", "年轻、充满活力", "勇敢、善良", "male"));
-        characters.add(new Character("旁白", "叙述者", "无形", "客观", "neutral"));
+        characters.add(new Character("主角", "故事的主人公", "年轻、充满活力", "勇敢、善良", "male", 
+            "中等身高、匀称", "清秀的五官", "休闲装", "无"));
+        characters.add(new Character("旁白", "叙述者", "无形", "客观", "neutral", 
+            null, null, null, null));
         segment.setCharacters(characters);
         
         List<Scene> scenes = new ArrayList<>();
