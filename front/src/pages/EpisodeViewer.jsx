@@ -126,6 +126,24 @@ function EpisodeViewer() {
             setWork(workResult.data)
           }
         }
+        
+        if (result.data.scenes && result.data.scenes.length > 0) {
+          const firstScene = result.data.scenes[0]
+          if (firstScene.audioUrl && firstScene.text !== '无') {
+            setTimeout(() => {
+              if (audioRef.current) {
+                audioRef.current.src = firstScene.audioUrl
+                audioRef.current.load()
+                const playPromise = audioRef.current.play()
+                if (playPromise !== undefined) {
+                  playPromise.catch(err => {
+                    console.warn('Audio autoplay failed:', err)
+                  })
+                }
+              }
+            }, 100)
+          }
+        }
       } else {
         setError(result.error?.message || '加载失败')
       }
