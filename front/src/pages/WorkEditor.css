@@ -115,40 +115,6 @@
   margin-right: 0.25rem;
 }
 
-.character-actions {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e0e0e0;
-}
-
-.btn-edit-character {
-  background: #667eea;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background 0.3s ease;
-}
-
-.btn-edit-character:hover {
-  background: #764ba2;
-}
-
-.character-form-card {
-  background: #fff3cd;
-  border: 2px solid #ffc107;
-  border-radius: 12px;
-  padding: 2rem;
-  margin-top: 1.5rem;
-}
-
-.character-form-card h3 {
-  margin: 0 0 1.5rem 0;
-  color: #333;
-}
-
 .form-actions {
   display: flex;
   gap: 1rem;
