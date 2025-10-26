@@ -78,11 +78,13 @@ spring.jpa.hibernate.ddl-auto=update
 
 ### 2. 配置 AI 服务（可选）
 
-如果需要使用 AI 功能，需要配置 API 密钥。推荐使用环境变量方式：
+如果需要使用 AI 功能，需要配置 API 密钥。
+
+**说明**：后端使用 `application.properties` 作为配置文件，该文件通过环境变量占位符（如 `${DEEPSEEK_API_KEY:demo-key}`）读取配置。您可以通过以下两种方式设置这些环境变量：
 
 #### 方式一：使用 .env 文件（推荐）
 
-在 `backend/` 目录下创建 `.env` 文件：
+在 `backend/` 目录下创建 `.env` 文件来管理环境变量：
 
 ```bash
 cd backend
