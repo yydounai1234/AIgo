@@ -43,27 +43,13 @@ mvn spring-boot:run
 
 ### 测试接口
 
-#### 1. Hello 接口
-
-```bash
-curl http://localhost:8080/api/hello
-```
-
-响应示例：
-```json
-{
-  "message": "Hello from AIgo Backend!",
-  "description": "Spring Boot + LangChain4j integration is ready"
-}
-```
-
-#### 2. LangChain 测试接口
+#### 1. LangChain 测试接口
 
 ```bash
 curl http://localhost:8080/api/langchain/test
 ```
 
-#### 3. AI 聊天接口
+#### 2. AI 聊天接口
 
 ```bash
 curl -X POST http://localhost:8080/api/langchain/chat \
