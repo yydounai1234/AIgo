@@ -72,6 +72,10 @@ function Gallery() {
   }
 
   const handleViewWork = (workId) => {
+    if (!isAuthenticated()) {
+      navigate('/login', { state: { from: location } })
+      return
+    }
     navigate(`/work/${workId}`)
   }
 
