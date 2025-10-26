@@ -77,10 +77,29 @@ public class EpisodeService {
             throw new BusinessException(ErrorCode.FORBIDDEN, "集数未发布");
         }
         
-        work.setViewsCount(work.getViewsCount() + 1);
-        workRepository.save(work);
+        if (episode.getIsFree() || work.getUserId().equals(userId) || 
+            (userId != null && purchaseRepository.existsByUserIdAndEpisodeId(userId, episodeId))) {
+            work.setViewsCount(work.getViewsCount() + 1);
+            workRepository.save(work);
+            
+            return EpisodeResponse.fromEntity(episode);
+        }
         
-        return EpisodeResponse.fromEntity(episode);
+        Map<String, Object> needsPurchase = new HashMap<>();
+        needsPurchase.put("success", false);
+        needsPurchase.put("needsPurchase", true);
+        
+        Map<String, Object> data = new HashMap<>();
+        data.put("id", episode.getId());
+        data.put("episodeId", episode.getId());
+        data.put("episodeNumber", episode.getEpisodeNumber());
+        data.put("title", episode.getTitle());
+        data.put("coinPrice", episode.getCoinPrice());
+        data.put("workId", episode.getWorkId());
+        data.put("isFree", episode.getIsFree());
+        needsPurchase.put("data", data);
+        
+        return needsPurchase;
     }
     
     @Transactional
