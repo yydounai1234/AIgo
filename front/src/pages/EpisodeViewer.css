@@ -255,10 +255,25 @@
   max-width: 500px;
 }
 
+.purchase-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.lock-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: #f59e0b;
+  flex-shrink: 0;
+}
+
 .purchase-card h2 {
   color: white;
   font-size: 2rem;
-  margin-bottom: 1rem;
+  margin: 0;
 }
 
 .purchase-card h3 {
