@@ -1,0 +1,173 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import api from '../services/api'
+import Modal from '../components/Modal'
+import './Recharge.css'
+
+function Recharge() {
+  const navigate = useNavigate()
+  const { user, updateUser } = useAuth()
+  const [amount, setAmount] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [modal, setModal] = useState({ isOpen: false, type: 'alert', title: '', message: '' })
+
+  const presetAmounts = [10, 50, 100, 200, 500, 1000]
+
+  const handleRecharge = async () => {
+    const rechargeAmount = parseInt(amount)
+    
+    if (!rechargeAmount || rechargeAmount <= 0) {
+      setModal({
+        isOpen: true,
+        type: 'alert',
+        title: '输入错误',
+        message: '请输入有效的充值金额'
+      })
+      return
+    }
+
+    if (rechargeAmount > 1000) {
+      setModal({
+        isOpen: true,
+        type: 'alert',
+        title: '充值限制',
+        message: '单次充值金额不能超过 1000 金币'
+      })
+      return
+    }
+
+    setLoading(true)
+    try {
+      const result = await api.rechargeCoins(rechargeAmount)
+      
+      if (result.success) {
+        updateUser({ ...user, coinBalance: result.data.newBalance })
+        setModal({
+          isOpen: true,
+          type: 'alert',
+          title: '充值成功',
+          message: `成功充值 ${rechargeAmount} 金币，当前余额：${result.data.newBalance} 金币`
+        })
+        setAmount('')
+      } else {
+        setModal({
+          isOpen: true,
+          type: 'alert',
+          title: '充值失败',
+          message: result.error?.message || '充值失败，请稍后重试'
+        })
+      }
+    } catch (err) {
+      setModal({
+        isOpen: true,
+        type: 'alert',
+        title: '错误',
+        message: '充值时发生错误，请稍后重试'
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handlePresetClick = (preset) => {
+    setAmount(preset.toString())
+  }
+
+  const handleModalClose = () => {
+    setModal({ ...modal, isOpen: false })
+    if (modal.title === '充值成功') {
+      navigate(-1)
+    }
+  }
+
+  return (
+    <div className="recharge-page">
+      <div className="recharge-container">
+        <div className="recharge-header">
+          <button onClick={() => navigate(-1)} className="btn-back">
+            ← 返回
+          </button>
+          <h2>金币充值</h2>
+        </div>
+
+        <div className="recharge-card">
+          <div className="balance-display">
+            <div className="balance-icon">💰</div>
+            <div className="balance-info">
+              <span className="balance-label">当前余额</span>
+              <span className="balance-amount">{user?.coinBalance || 0} 金币</span>
+            </div>
+          </div>
+
+          <div className="recharge-notice">
+            <p>💡 提示：目前为测试阶段，支付功能尚未打通，您可以免费充值金币用于体验功能</p>
+            <p>⚠️ 单次充值上限：1000 金币</p>
+          </div>
+
+          <div className="preset-amounts">
+            <h3>快速充值</h3>
+            <div className="preset-grid">
+              {presetAmounts.map(preset => (
+                <button
+                  key={preset}
+                  className={`preset-btn ${amount === preset.toString() ? 'active' : ''}`}
+                  onClick={() => handlePresetClick(preset)}
+                >
+                  <span className="preset-amount">{preset}</span>
+                  <span className="preset-label">金币</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="custom-amount">
+            <h3>自定义金额</h3>
+            <div className="amount-input-group">
+              <input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="请输入充值金额"
+                min="1"
+                max="1000"
+                className="amount-input"
+              />
+              <span className="input-suffix">金币</span>
+            </div>
+          </div>
+
+          <div className="recharge-action">
+            <button
+              onClick={handleRecharge}
+              disabled={loading || !amount}
+              className="btn btn-primary btn-large"
+            >
+              {loading ? '充值中...' : '立即充值'}
+            </button>
+          </div>
+
+          <div className="recharge-info">
+            <h4>充值说明</h4>
+            <ul>
+              <li>金币可用于购买付费集数内容</li>
+              <li>100 金币 = 1 元（测试阶段免费）</li>
+              <li>充值金币不支持退款</li>
+              <li>如有问题，请联系客服</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={handleModalClose}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+      />
+    </div>
+  )
+}
+
+export default Recharge

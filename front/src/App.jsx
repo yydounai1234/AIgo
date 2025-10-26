@@ -12,6 +12,7 @@ import MyFavorites from './pages/MyFavorites'
 import Gallery from './pages/Gallery'
 import WorkDetail from './pages/WorkDetail'
 import EpisodeViewer from './pages/EpisodeViewer'
+import Recharge from './pages/Recharge'
 import api from './services/api'
 import './App.css'
 
@@ -74,6 +75,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <EpisodeViewer />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/recharge" 
+          element={
+            <ProtectedRoute>
+              <Recharge />
             </ProtectedRoute>
           } 
         />

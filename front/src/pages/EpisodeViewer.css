@@ -264,7 +264,43 @@
 .purchase-card h3 {
   color: #999;
   font-size: 1.3rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
+}
+
+.balance-display-small {
+  background: #333;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.balance-label {
+  color: #999;
+  font-size: 1rem;
+}
+
+.balance-value {
+  color: #4ade80;
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.balance-value.insufficient {
+  color: #ef4444;
+}
+
+.insufficient-warning {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
 }
 
 .price-info {

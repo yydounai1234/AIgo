@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
 import Modal from '../components/Modal'
 import './EpisodeViewer.css'
@@ -7,6 +8,7 @@ import './EpisodeViewer.css'
 function EpisodeViewer() {
   const { episodeId } = useParams()
   const navigate = useNavigate()
+  const { user } = useAuth()
   
   const [episode, setEpisode] = useState(null)
   const [work, setWork] = useState(null)
@@ -230,6 +232,21 @@ function EpisodeViewer() {
   const handlePurchase = async () => {
     if (!episode) return
     
+    const userBalance = user?.coinBalance || 0
+    
+    if (userBalance < episode.coinPrice) {
+      setModal({
+        isOpen: true,
+        type: 'confirm',
+        title: '金币不足',
+        message: `您的金币余额为 ${userBalance}，需要 ${episode.coinPrice} 金币才能购买。是否前往充值？`,
+        onConfirm: () => {
+          navigate('/recharge')
+        }
+      })
+      return
+    }
+    
     setPurchasing(true)
     
     try {
@@ -245,13 +262,25 @@ function EpisodeViewer() {
         })
         await loadEpisode()
       } else {
-        setModal({ 
-          isOpen: true, 
-          type: 'alert', 
-          title: '购买失败', 
-          message: result.error?.message || '购买失败', 
-          onConfirm: null 
-        })
+        if (result.error?.code === 'INSUFFICIENT_COINS') {
+          setModal({
+            isOpen: true,
+            type: 'confirm',
+            title: '金币不足',
+            message: result.error.message + '。是否前往充值？',
+            onConfirm: () => {
+              navigate('/recharge')
+            }
+          })
+        } else {
+          setModal({ 
+            isOpen: true, 
+            type: 'alert', 
+            title: '购买失败', 
+            message: result.error?.message || '购买失败', 
+            onConfirm: null 
+          })
+        }
       }
     } catch (err) {
       setModal({ 
@@ -283,25 +312,39 @@ function EpisodeViewer() {
   }
 
   if (needsPurchase && episode) {
+    const userBalance = user?.coinBalance || 0
+    const isInsufficient = userBalance < episode.coinPrice
+    
     return (
       <div className="episode-viewer-page">
         <div className="purchase-prompt">
           <div className="purchase-card">
             <h2>🔒 付费内容</h2>
             <h3>{episode.title}</h3>
+            <div className="balance-display-small">
+              <span className="balance-label">您的余额：</span>
+              <span className={`balance-value ${isInsufficient ? 'insufficient' : ''}`}>
+                {userBalance} 金币
+              </span>
+            </div>
             <p className="price-info">
               需要支付 <strong>{episode.coinPrice}</strong> 金币才能观看此集内容
             </p>
             <p className="exchange-info">
               (100 金币 = 1 元)
             </p>
+            {isInsufficient && (
+              <div className="insufficient-warning">
+                ⚠️ 金币余额不足，请先充值
+              </div>
+            )}
             <div className="purchase-actions">
               <button
                 onClick={handlePurchase}
                 className="btn btn-primary btn-large"
                 disabled={purchasing}
               >
-                {purchasing ? '购买中...' : `购买 (${episode.coinPrice} 💰)`}
+                {purchasing ? '购买中...' : isInsufficient ? '充值购买' : `购买 (${episode.coinPrice} 💰)`}
               </button>
               <button
                 onClick={() => navigate(-1)}
