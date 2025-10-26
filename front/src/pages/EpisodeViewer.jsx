@@ -16,6 +16,7 @@ function EpisodeViewer() {
   const [purchasing, setPurchasing] = useState(false)
   const [retrying, setRetrying] = useState(false)
   const [currentScene, setCurrentScene] = useState(0)
+  const [autoPlay, setAutoPlay] = useState(false)
   const [modal, setModal] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null })
   const pollingIntervalRef = useRef(null)
   const audioRef = useRef(null)
@@ -81,6 +82,33 @@ function EpisodeViewer() {
       }
     }
   }, [currentScene, episode?.scenes])
+
+  useEffect(() => {
+    if (!autoPlay || !episode?.scenes || currentScene >= episode.scenes.length - 1) {
+      return
+    }
+
+    const currentSceneData = episode.scenes[currentScene]
+    if (!currentSceneData?.audioUrl || currentSceneData?.text === '无') {
+      return
+    }
+
+    const handleAudioEnded = () => {
+      if (autoPlay && currentScene < episode.scenes.length - 1) {
+        setCurrentScene(prev => prev + 1)
+      }
+    }
+
+    if (audioRef.current) {
+      audioRef.current.addEventListener('ended', handleAudioEnded)
+    }
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.removeEventListener('ended', handleAudioEnded)
+      }
+    }
+  }, [autoPlay, currentScene, episode?.scenes])
 
   const preloadAdjacentImages = () => {
     if (!episode?.scenes) return
@@ -463,6 +491,20 @@ function EpisodeViewer() {
               >
                 下一个场景 →
               </button>
+            </div>
+
+            <div className="playback-controls">
+              <label className="autoplay-toggle">
+                <input
+                  type="checkbox"
+                  checked={autoPlay}
+                  onChange={(e) => setAutoPlay(e.target.checked)}
+                />
+                <span>自动播放</span>
+              </label>
+              <p className="playback-tip">
+                {autoPlay ? '✓ 音频结束后自动播放下一场景' : '手动点击「下一个场景」按钮切换'}
+              </p>
             </div>
 
             <div className="scene-thumbnails">

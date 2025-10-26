@@ -6,7 +6,7 @@
 .home-hero {
   position: relative;
   overflow: hidden;
-  height: 500px;
+  height: 320px;
 }
 
 .hero-swiper {
@@ -204,7 +204,7 @@
 
 @media (max-width: 768px) {
   .home-hero {
-    height: 350px;
+    height: 250px;
   }
 
   .hero-content h1 {
