@@ -8,7 +8,7 @@ import './EpisodeViewer.css'
 function EpisodeViewer() {
   const { episodeId } = useParams()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, updateUser } = useAuth()
   
   const [episode, setEpisode] = useState(null)
   const [work, setWork] = useState(null)
@@ -253,6 +253,11 @@ function EpisodeViewer() {
       const result = await api.purchaseEpisode(episodeId)
       
       if (result.success) {
+        // 更新用户金币余额
+        updateUser({
+          ...user,
+          coinBalance: result.data.newBalance
+        })
         setModal({ 
           isOpen: true, 
           type: 'alert', 
