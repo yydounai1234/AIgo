@@ -348,7 +348,7 @@ function EpisodeViewer() {
               </button>
               <button
                 onClick={() => navigate(-1)}
-                className="btn btn-secondary"
+                className="btn btn-secondary btn-large"
               >
                 返回
               </button>
