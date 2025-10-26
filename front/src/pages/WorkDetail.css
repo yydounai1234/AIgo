@@ -263,6 +263,11 @@
   color: white;
 }
 
+.badge-purchased {
+  background: #3498db;
+  color: white;
+}
+
 .btn-watch {
   flex-shrink: 0;
   width: 120px;
