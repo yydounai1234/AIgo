@@ -64,6 +64,17 @@ public class NovelParseService {
         }
         
         try {
+            List<com.aigo.entity.CharacterEntity> workCharacters = null;
+            if (workId != null) {
+                try {
+                    workCharacters = characterService.getCharactersByWorkId(workId);
+                    logger.info("[NovelParseService] Loaded {} existing work characters for context", 
+                        workCharacters != null ? workCharacters.size() : 0);
+                } catch (Exception e) {
+                    logger.warn("[NovelParseService] Failed to load work characters", e);
+                }
+            }
+            
             ChatLanguageModel model = OpenAiChatModel.builder()
                 .apiKey(apiKey)
                 .baseUrl(baseUrl)
@@ -73,7 +84,7 @@ public class NovelParseService {
                 .maxRetries(3)
                 .build();
             
-            String prompt = buildPrompt(text, style, targetAudience);
+            String prompt = buildPromptWithWorkCharacters(text, style, targetAudience, workCharacters);
             
             logger.info("[NovelParseService] Calling LLM model");
             String response = model.generate(prompt);
@@ -84,6 +95,7 @@ public class NovelParseService {
                 segment.getCharacters() != null ? segment.getCharacters().size() : 0,
                 segment.getScenes() != null ? segment.getScenes().size() : 0);
             
+            resolvePronounsInScenes(segment, workCharacters);
             enrichSegmentWithWorkCharacters(segment, workId);
             generateImagesForSegment(segment);
             generateAudioForSegment(segment);
@@ -153,13 +165,31 @@ public class NovelParseService {
     }
     
     private String buildPrompt(String text, String style, String targetAudience) {
+        return buildPromptWithWorkCharacters(text, style, targetAudience, null);
+    }
+    
+    private String buildPromptWithWorkCharacters(String text, String style, String targetAudience, List<com.aigo.entity.CharacterEntity> workCharacters) {
         StringBuilder prompt = new StringBuilder();
         prompt.append("你是一个专业的动漫脚本分析师。请深度理解以下小说文本,并将其转换为动漫桥段。\n\n");
+        
+        if (workCharacters != null && !workCharacters.isEmpty()) {
+            prompt.append("已知的角色信息（来自之前的集数）:\n");
+            for (com.aigo.entity.CharacterEntity character : workCharacters) {
+                prompt.append(String.format("- %s: %s, 外貌: %s\n", 
+                    character.getName(), 
+                    character.getDescription() != null ? character.getDescription() : "未知",
+                    character.getAppearance() != null ? character.getAppearance() : "未知"));
+            }
+            prompt.append("\n");
+        }
+        
         prompt.append("请提取以下信息:\n");
         prompt.append("1. 角色信息 (姓名、描述、外貌、性格、性别)\n");
+        prompt.append("   **重要**: 如果文本中使用了代词（我、你、她、他、它），请根据上下文识别代词指代的具体角色名称\n");
         prompt.append("2. 场景分镜 - 重要: 每个角色的每句对话都应该是一个独立的场景,用于生成独立的漫画图片\n");
         prompt.append("   - 场景编号: 连续递增的数字\n");
-        prompt.append("   - 角色: 说话的角色名称\n");
+        prompt.append("   - 角色: **必须使用具体的角色名称，不要使用代词（我、你、她、他、它）**\n");
+        prompt.append("   - 如果文本中某句对话使用了代词，请根据上下文和已知角色信息，将代词替换为实际的角色名称\n");
         prompt.append("   - 对话: 该角色在这个场景中说的话\n");
         prompt.append("   - 画面描述: 这个场景的视觉画面,包括人物动作、表情、背景等\n");
         prompt.append("   - 氛围: 场景的情绪氛围\n");
@@ -179,14 +209,17 @@ public class NovelParseService {
         prompt.append("{\n");
         prompt.append("  \"characters\": [{\"name\": \"角色名\", \"description\": \"描述\", \"appearance\": \"外貌\", \"personality\": \"性格\", \"gender\": \"male/female/unknown\"}],\n");
         prompt.append("  \"scenes\": [\n");
-        prompt.append("    {\"sceneNumber\": 1, \"character\": \"角色名\", \"dialogue\": \"该角色说的话\", \"visualDescription\": \"画面描述\", \"atmosphere\": \"氛围\", \"action\": \"动作描述\"},\n");
-        prompt.append("    {\"sceneNumber\": 2, \"character\": \"另一个角色名\", \"dialogue\": \"该角色说的话\", \"visualDescription\": \"画面描述\", \"atmosphere\": \"氛围\", \"action\": \"动作描述\"}\n");
+        prompt.append("    {\"sceneNumber\": 1, \"character\": \"具体角色名（非代词）\", \"dialogue\": \"该角色说的话\", \"visualDescription\": \"画面描述\", \"atmosphere\": \"氛围\", \"action\": \"动作描述\"},\n");
+        prompt.append("    {\"sceneNumber\": 2, \"character\": \"具体角色名（非代词）\", \"dialogue\": \"该角色说的话\", \"visualDescription\": \"画面描述\", \"atmosphere\": \"氛围\", \"action\": \"动作描述\"}\n");
         prompt.append("  ],\n");
         prompt.append("  \"plotSummary\": \"剧情总结\",\n");
         prompt.append("  \"genre\": \"类型\",\n");
         prompt.append("  \"mood\": \"情绪基调\"\n");
         prompt.append("}\n\n");
-        prompt.append("注意: 每个角色的每句对话都必须是一个独立的场景对象,这样才能为每句对话生成对应的漫画图片。\n");
+        prompt.append("注意事项:\n");
+        prompt.append("1. 每个角色的每句对话都必须是一个独立的场景对象,这样才能为每句对话生成对应的漫画图片\n");
+        prompt.append("2. **关键**: 场景中的character字段必须使用具体的角色名称，绝对不能使用代词（我、你、她、他、它）\n");
+        prompt.append("3. 如果文本中角色用代词说话，请分析上下文确定是哪个角色，然后用该角色的真实名称\n");
         
         return prompt.toString();
     }
@@ -322,6 +355,63 @@ public class NovelParseService {
         }
         
         return "neutral";
+    }
+    
+    private void resolvePronounsInScenes(AnimeSegment segment, List<com.aigo.entity.CharacterEntity> workCharacters) {
+        if (segment.getScenes() == null || segment.getScenes().isEmpty()) {
+            return;
+        }
+        
+        Set<String> pronouns = new HashSet<>(Arrays.asList("我", "你", "她", "他", "它"));
+        Map<String, String> pronounToCharacter = new HashMap<>();
+        
+        if (workCharacters != null && !workCharacters.isEmpty()) {
+            for (com.aigo.entity.CharacterEntity workChar : workCharacters) {
+                if (workChar.getIsProtagonist() != null && workChar.getIsProtagonist()) {
+                    pronounToCharacter.put("我", workChar.getName());
+                    logger.info("[NovelParseService] Mapped pronoun '我' to protagonist '{}'", workChar.getName());
+                }
+                
+                if (workChar.getGender() != null) {
+                    if ("female".equalsIgnoreCase(workChar.getGender())) {
+                        pronounToCharacter.putIfAbsent("她", workChar.getName());
+                    } else if ("male".equalsIgnoreCase(workChar.getGender())) {
+                        pronounToCharacter.putIfAbsent("他", workChar.getName());
+                    }
+                }
+            }
+        }
+        
+        if (segment.getCharacters() != null) {
+            for (Character character : segment.getCharacters()) {
+                if ("我".equals(character.getName()) || "主角".equals(character.getName()) || "主人公".equals(character.getName())) {
+                    pronounToCharacter.putIfAbsent("我", character.getName());
+                }
+                
+                if (character.getGender() != null) {
+                    if ("female".equalsIgnoreCase(character.getGender())) {
+                        pronounToCharacter.putIfAbsent("她", character.getName());
+                    } else if ("male".equalsIgnoreCase(character.getGender())) {
+                        pronounToCharacter.putIfAbsent("他", character.getName());
+                    }
+                }
+            }
+        }
+        
+        for (Scene scene : segment.getScenes()) {
+            String characterName = scene.getCharacter();
+            if (characterName != null && pronouns.contains(characterName)) {
+                String resolvedName = pronounToCharacter.get(characterName);
+                if (resolvedName != null) {
+                    logger.info("[NovelParseService] Resolved pronoun '{}' to character '{}' in scene {}", 
+                        characterName, resolvedName, scene.getSceneNumber());
+                    scene.setCharacter(resolvedName);
+                } else {
+                    logger.warn("[NovelParseService] Could not resolve pronoun '{}' in scene {}, keeping as is", 
+                        characterName, scene.getSceneNumber());
+                }
+            }
+        }
     }
     
     private void enrichSegmentWithWorkCharacters(AnimeSegment segment, String workId) {
