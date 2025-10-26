@@ -17,17 +17,27 @@ function EpisodeViewer() {
   const [retrying, setRetrying] = useState(false)
   const [currentScene, setCurrentScene] = useState(0)
   const [autoPlay, setAutoPlay] = useState(true)
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const [modal, setModal] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null })
   const pollingIntervalRef = useRef(null)
   const audioRef = useRef(null)
   const imagePreloadRefs = useRef({})
+  const viewerContainerRef = useRef(null)
 
   useEffect(() => {
     loadEpisode()
+    
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+    
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    
     return () => {
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current)
       }
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
     }
   }, [episodeId])
 
@@ -289,6 +299,18 @@ function EpisodeViewer() {
     }
   }
 
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await viewerContainerRef.current?.requestFullscreen()
+      } else {
+        await document.exitFullscreen()
+      }
+    } catch (err) {
+      console.error('Fullscreen error:', err)
+    }
+  }
+
   if (loading) {
     return <div className="loading-page">加载中...</div>
   }
@@ -402,7 +424,7 @@ function EpisodeViewer() {
   return (
     <div className="episode-viewer-page">
       <audio ref={audioRef} preload="auto" autoPlay muted={false} />
-      <div className="viewer-container">
+      <div className="viewer-container" ref={viewerContainerRef}>
         <div className="viewer-header">
           <button onClick={() => navigate(-1)} className="btn-back">
             ← 返回
@@ -459,6 +481,22 @@ function EpisodeViewer() {
                   <svg viewBox="0 0 24 24" fill="currentColor">
                     <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
                   </svg>
+                </button>
+                
+                <button
+                  onClick={toggleFullscreen}
+                  className="btn-fullscreen"
+                  aria-label={isFullscreen ? "退出全屏" : "进入全屏"}
+                >
+                  {isFullscreen ? (
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                    </svg>
+                  )}
                 </button>
               </div>
               

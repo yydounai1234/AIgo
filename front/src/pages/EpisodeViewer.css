@@ -137,6 +137,35 @@
   right: 1rem;
 }
 
+.btn-fullscreen {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 44px;
+  height: 44px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 10;
+  padding: 0;
+}
+
+.btn-fullscreen svg {
+  width: 24px;
+  height: 24px;
+}
+
+.btn-fullscreen:hover {
+  background: rgba(102, 126, 234, 0.9);
+  transform: scale(1.1);
+}
+
 .scene-image img {
   max-width: 100%;
   max-height: 100%;
@@ -513,6 +542,18 @@
   
   .btn-arrow-right {
     right: 0.5rem;
+  }
+  
+  .btn-fullscreen {
+    width: 36px;
+    height: 36px;
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+  
+  .btn-fullscreen svg {
+    width: 20px;
+    height: 20px;
   }
   
   .scene-controls-row {
