@@ -54,6 +54,36 @@ public class CharacterEntity {
     @Column(name = "facial_features", columnDefinition = "TEXT")
     private String facialFeatures;
     
+    @Column(name = "hair_type", length = 100)
+    private String hairType;
+    
+    @Column(name = "hair_color", length = 100)
+    private String hairColor;
+    
+    @Column(name = "face_shape", length = 100)
+    private String faceShape;
+    
+    @Column(name = "eye_type", length = 100)
+    private String eyeType;
+    
+    @Column(name = "eye_color", length = 100)
+    private String eyeColor;
+    
+    @Column(name = "nose_type", length = 100)
+    private String noseType;
+    
+    @Column(name = "mouth_type", length = 100)
+    private String mouthType;
+    
+    @Column(name = "skin_tone", length = 100)
+    private String skinTone;
+    
+    @Column(name = "height", length = 100)
+    private String height;
+    
+    @Column(name = "build", length = 100)
+    private String build;
+    
     @Column(name = "clothing_style", columnDefinition = "TEXT")
     private String clothingStyle;
     

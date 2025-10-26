@@ -85,6 +85,26 @@ public class CharacterService {
                                                        String clothingStyle, String distinguishingFeatures,
                                                        Boolean isPlaceholderName,
                                                        List<String> nicknames) {
+        return createOrUpdateWorkCharacter(workId, characterName, description, appearance, 
+            personality, gender, isProtagonist, bodyType, facialFeatures, clothingStyle, 
+            distinguishingFeatures, isPlaceholderName, nicknames, null, null, null, null, 
+            null, null, null, null, null, null);
+    }
+    
+    @Transactional
+    public CharacterEntity createOrUpdateWorkCharacter(String workId, String characterName, 
+                                                       String description, String appearance, 
+                                                       String personality, String gender, 
+                                                       Boolean isProtagonist,
+                                                       String bodyType, String facialFeatures,
+                                                       String clothingStyle, String distinguishingFeatures,
+                                                       Boolean isPlaceholderName,
+                                                       List<String> nicknames,
+                                                       String hairType, String hairColor,
+                                                       String faceShape, String eyeType,
+                                                       String eyeColor, String noseType,
+                                                       String mouthType, String skinTone,
+                                                       String height, String build) {
         Optional<CharacterEntity> existing = characterRepository.findByWorkIdAndName(workId, characterName);
         
         CharacterEntity character;
@@ -117,6 +137,36 @@ public class CharacterService {
             if (distinguishingFeatures != null && !distinguishingFeatures.isEmpty()) {
                 character.setDistinguishingFeatures(distinguishingFeatures);
             }
+            if (hairType != null && !hairType.isEmpty()) {
+                character.setHairType(hairType);
+            }
+            if (hairColor != null && !hairColor.isEmpty()) {
+                character.setHairColor(hairColor);
+            }
+            if (faceShape != null && !faceShape.isEmpty()) {
+                character.setFaceShape(faceShape);
+            }
+            if (eyeType != null && !eyeType.isEmpty()) {
+                character.setEyeType(eyeType);
+            }
+            if (eyeColor != null && !eyeColor.isEmpty()) {
+                character.setEyeColor(eyeColor);
+            }
+            if (noseType != null && !noseType.isEmpty()) {
+                character.setNoseType(noseType);
+            }
+            if (mouthType != null && !mouthType.isEmpty()) {
+                character.setMouthType(mouthType);
+            }
+            if (skinTone != null && !skinTone.isEmpty()) {
+                character.setSkinTone(skinTone);
+            }
+            if (height != null && !height.isEmpty()) {
+                character.setHeight(height);
+            }
+            if (build != null && !build.isEmpty()) {
+                character.setBuild(build);
+            }
             if (isPlaceholderName != null && !isPlaceholderName && character.getIsPlaceholderName()) {
                 character.setIsPlaceholderName(false);
             }
@@ -146,6 +196,16 @@ public class CharacterService {
             character.setClothingStyle(clothingStyle);
             character.setDistinguishingFeatures(distinguishingFeatures);
             character.setIsPlaceholderName(isPlaceholderName != null ? isPlaceholderName : false);
+            character.setHairType(hairType);
+            character.setHairColor(hairColor);
+            character.setFaceShape(faceShape);
+            character.setEyeType(eyeType);
+            character.setEyeColor(eyeColor);
+            character.setNoseType(noseType);
+            character.setMouthType(mouthType);
+            character.setSkinTone(skinTone);
+            character.setHeight(height);
+            character.setBuild(build);
             if (nicknames != null && !nicknames.isEmpty()) {
                 List<String> filteredNicknames = new ArrayList<>();
                 for (String nickname : nicknames) {
@@ -240,6 +300,36 @@ public class CharacterService {
         if (isEmptyOrUnknown(character.getFacialFeatures())) {
             emptyFields.add("facialFeatures");
         }
+        if (isEmptyOrUnknown(character.getHairType())) {
+            emptyFields.add("hairType");
+        }
+        if (isEmptyOrUnknown(character.getHairColor())) {
+            emptyFields.add("hairColor");
+        }
+        if (isEmptyOrUnknown(character.getFaceShape())) {
+            emptyFields.add("faceShape");
+        }
+        if (isEmptyOrUnknown(character.getEyeType())) {
+            emptyFields.add("eyeType");
+        }
+        if (isEmptyOrUnknown(character.getEyeColor())) {
+            emptyFields.add("eyeColor");
+        }
+        if (isEmptyOrUnknown(character.getNoseType())) {
+            emptyFields.add("noseType");
+        }
+        if (isEmptyOrUnknown(character.getMouthType())) {
+            emptyFields.add("mouthType");
+        }
+        if (isEmptyOrUnknown(character.getSkinTone())) {
+            emptyFields.add("skinTone");
+        }
+        if (isEmptyOrUnknown(character.getHeight())) {
+            emptyFields.add("height");
+        }
+        if (isEmptyOrUnknown(character.getBuild())) {
+            emptyFields.add("build");
+        }
         if (isEmptyOrUnknown(character.getClothingStyle())) {
             emptyFields.add("clothingStyle");
         }
@@ -277,6 +367,36 @@ public class CharacterService {
                 }
                 if (generatedFeatures.containsKey("distinguishingFeatures") && isEmptyOrUnknown(character.getDistinguishingFeatures())) {
                     character.setDistinguishingFeatures(generatedFeatures.get("distinguishingFeatures"));
+                }
+                if (generatedFeatures.containsKey("hairType") && isEmptyOrUnknown(character.getHairType())) {
+                    character.setHairType(generatedFeatures.get("hairType"));
+                }
+                if (generatedFeatures.containsKey("hairColor") && isEmptyOrUnknown(character.getHairColor())) {
+                    character.setHairColor(generatedFeatures.get("hairColor"));
+                }
+                if (generatedFeatures.containsKey("faceShape") && isEmptyOrUnknown(character.getFaceShape())) {
+                    character.setFaceShape(generatedFeatures.get("faceShape"));
+                }
+                if (generatedFeatures.containsKey("eyeType") && isEmptyOrUnknown(character.getEyeType())) {
+                    character.setEyeType(generatedFeatures.get("eyeType"));
+                }
+                if (generatedFeatures.containsKey("eyeColor") && isEmptyOrUnknown(character.getEyeColor())) {
+                    character.setEyeColor(generatedFeatures.get("eyeColor"));
+                }
+                if (generatedFeatures.containsKey("noseType") && isEmptyOrUnknown(character.getNoseType())) {
+                    character.setNoseType(generatedFeatures.get("noseType"));
+                }
+                if (generatedFeatures.containsKey("mouthType") && isEmptyOrUnknown(character.getMouthType())) {
+                    character.setMouthType(generatedFeatures.get("mouthType"));
+                }
+                if (generatedFeatures.containsKey("skinTone") && isEmptyOrUnknown(character.getSkinTone())) {
+                    character.setSkinTone(generatedFeatures.get("skinTone"));
+                }
+                if (generatedFeatures.containsKey("height") && isEmptyOrUnknown(character.getHeight())) {
+                    character.setHeight(generatedFeatures.get("height"));
+                }
+                if (generatedFeatures.containsKey("build") && isEmptyOrUnknown(character.getBuild())) {
+                    character.setBuild(generatedFeatures.get("build"));
                 }
                 
                 logger.info("[CharacterService] Successfully generated {} character features", generatedFeatures.size());
@@ -335,8 +455,18 @@ public class CharacterService {
             2. appearance: 完整的外貌描述（50-100字），包含整体印象和主要特征
             3. bodyType: 身高和体型的简短描述（如："高挑匀称"、"中等身材"、"矮小精悍"）
             4. facialFeatures: 五官特征的详细描述（如："瓜子脸，丹凤眼，高挺的鼻子"）
-            5. clothingStyle: 典型的服装风格（如："休闲运动装"、"商务正装"、"校园风"）
-            6. distinguishingFeatures: 最显著的外貌特征（如："齐肩黑色长发"、"左眼角有颗泪痣"）
+            5. hairType: 发型（如："齐肩直发"、"短寸头"、"波浪长发"、"马尾"）
+            6. hairColor: 发色（如："黑色"、"棕色"、"金色"、"银灰色"）
+            7. faceShape: 脸型（如："瓜子脸"、"鹅蛋脸"、"方脸"、"圆脸"）
+            8. eyeType: 眼型（如："丹凤眼"、"圆眼"、"桃花眼"、"杏眼"）
+            9. eyeColor: 眼色（如："黑色"、"棕色"、"蓝色"、"绿色"）
+            10. noseType: 鼻型（如："高挺"、"小巧"、"秀气"、"立体"）
+            11. mouthType: 嘴型（如："樱桃小嘴"、"薄唇"、"厚唇"、"适中"）
+            12. skinTone: 肤色（如："白皙"、"健康小麦色"、"古铜色"、"白里透红"）
+            13. height: 身高（如："170cm左右"、"高挑（175cm以上）"、"娇小（155cm左右）"）
+            14. build: 体型（如："纤细"、"匀称"、"健壮"、"魁梧"、"丰满"）
+            15. clothingStyle: 典型的服装风格（如："休闲运动装"、"商务正装"、"校园风"）
+            16. distinguishingFeatures: 最显著的外貌特征（如："左眼角有颗泪痣"、"右手腕有纹身"）
             
             请以纯JSON格式返回，不要包含任何其他文字，格式如下：
             {
@@ -344,6 +474,16 @@ public class CharacterService {
               "appearance": "外貌描述...",
               "bodyType": "体型描述",
               "facialFeatures": "五官描述",
+              "hairType": "发型",
+              "hairColor": "发色",
+              "faceShape": "脸型",
+              "eyeType": "眼型",
+              "eyeColor": "眼色",
+              "noseType": "鼻型",
+              "mouthType": "嘴型",
+              "skinTone": "肤色",
+              "height": "身高",
+              "build": "体型",
               "clothingStyle": "服装风格",
               "distinguishingFeatures": "显著特征"
             }
