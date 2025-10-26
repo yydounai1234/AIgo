@@ -216,8 +216,8 @@ public class NovelParseService {
         prompt.append("   - **显著特征**: 疤痕、纹身、配饰或其他独特标记\n");
         prompt.append("   - 性格: 性格特点\n");
         prompt.append("   - 性别: male/female/unknown\n");
-        prompt.append("   **重要**: 如果文本中使用了第一人称代词"我"，请根据上下文识别代词指代的具体角色名称\n");
-        prompt.append("   **注意**: 只有在旁白/叙述文本中的第一人称"我"才应该被识别为角色的别名。对话中的"我"不应作为别名处理。\n");
+        prompt.append("   **重要**: 如果文本中使用了第一人称代词'我'，请根据上下文识别代词指代的具体角色名称\n");
+        prompt.append("   **注意**: 只有在旁白/叙述文本中的第一人称'我'才应该被识别为角色的别名。对话中的'我'不应作为别名处理。\n");
         prompt.append("2. 场景分镜 - 重要: 每个角色的每句对话都应该是一个独立的场景,用于生成独立的漫画图片\n");
         prompt.append("   - 场景编号: 连续递增的数字\n");
         prompt.append("   - 角色: **必须使用具体的角色名称，不要使用代词**\n");
@@ -262,7 +262,7 @@ public class NovelParseService {
         prompt.append("1. 每个角色的每句对话都必须是一个独立的场景对象,这样才能为每句对话生成对应的漫画图片\n");
         prompt.append("2. **关键**: 场景中的character字段必须使用具体的角色名称，绝对不能使用代词\n");
         prompt.append("3. 如果文本中使用了代词，请分析上下文确定是哪个角色，然后用该角色的真实名称\n");
-        prompt.append("4. **别名识别规则**: 只有旁白/叙述部分的第一人称"我"才识别为角色别名，对话中的"我"不作为别名\n");
+        prompt.append("4. **别名识别规则**: 只有旁白/叙述部分的第一人称'我'才识别为角色别名，对话中的'我'不作为别名\n");
         
         return prompt.toString();
     }
