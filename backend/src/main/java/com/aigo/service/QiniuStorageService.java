@@ -44,8 +44,8 @@ public class QiniuStorageService {
     
     public String uploadBase64Image(String base64Data, String filePrefix) {
         if ("demo-key".equals(accessKey)) {
-            logger.info("[QiniuStorageService] Using demo mode, returning placeholder URL");
-            return "http://via.placeholder.com/1024x1024.png?text=" + filePrefix;
+            logger.error("[QiniuStorageService] CRITICAL: Qiniu storage credentials not configured. Please set QINIU_STORAGE_ACCESS_KEY and QINIU_STORAGE_SECRET_KEY environment variables.");
+            throw new RuntimeException("七牛云存储服务未配置。请在环境变量中设置 QINIU_STORAGE_ACCESS_KEY 和 QINIU_STORAGE_SECRET_KEY 以启用图片上传功能。");
         }
         
         initializeIfNeeded();
@@ -92,8 +92,8 @@ public class QiniuStorageService {
     
     public String uploadBase64Audio(String base64Data, String filePrefix) {
         if ("demo-key".equals(accessKey)) {
-            logger.info("[QiniuStorageService] Using demo mode, returning placeholder audio URL");
-            return "https://example.com/audio/" + filePrefix + ".mp3";
+            logger.error("[QiniuStorageService] CRITICAL: Qiniu storage credentials not configured. Please set QINIU_STORAGE_ACCESS_KEY and QINIU_STORAGE_SECRET_KEY environment variables.");
+            throw new RuntimeException("七牛云存储服务未配置。请在环境变量中设置 QINIU_STORAGE_ACCESS_KEY 和 QINIU_STORAGE_SECRET_KEY 以启用音频上传功能。");
         }
         
         initializeIfNeeded();
