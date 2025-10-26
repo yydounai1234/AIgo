@@ -25,11 +25,14 @@ public class JwtUtil {
     }
     
     public String generateToken(String username, Map<String, Object> claims) {
-        return Jwts.builder()
-                .claims(claims)
+        var builder = Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .expiration(new Date(System.currentTimeMillis() + expiration));
+        
+        claims.forEach(builder::claim);
+        
+        return builder
                 .signWith(getSigningKey())
                 .compact();
     }
