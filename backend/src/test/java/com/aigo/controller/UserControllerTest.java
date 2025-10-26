@@ -4,7 +4,7 @@ import com.aigo.dto.user.BalanceResponse;
 import com.aigo.security.JwtUtil;
 import com.aigo.service.UserService;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.impl.DefaultClaims;
+import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +42,7 @@ class UserControllerTest {
         token = "Bearer test-token";
         userId = "user123";
         
-        claims = new DefaultClaims();
+        claims = Jwts.claims();
         claims.put("userId", userId);
 
         when(jwtUtil.extractClaims(anyString())).thenReturn(claims);

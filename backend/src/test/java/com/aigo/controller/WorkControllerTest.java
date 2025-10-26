@@ -8,7 +8,7 @@ import com.aigo.security.JwtUtil;
 import com.aigo.service.WorkService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.impl.DefaultClaims;
+import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +55,7 @@ class WorkControllerTest {
         token = "Bearer test-token";
         userId = "user123";
         
-        claims = new DefaultClaims();
+        claims = Jwts.claims();
         claims.put("userId", userId);
         
         workResponse = WorkResponse.builder()
