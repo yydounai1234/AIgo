@@ -28,6 +28,8 @@ function EpisodeViewer() {
   const imagePreloadRefs = useRef({})
   const viewerContainerRef = useRef(null)
   const hideControlsTimeoutRef = useRef(null)
+  const emptySceneTimerRef = useRef(null)
+  const [firstScenePlayClicked, setFirstScenePlayClicked] = useState(false)
 
   useEffect(() => {
     loadEpisode()
@@ -85,6 +87,29 @@ function EpisodeViewer() {
       }
     }
     
+    const handleEmptyTextScene = () => {
+      if (autoPlay && episode?.scenes && currentScene < episode.scenes.length - 1) {
+        const nextScene = currentScene + 1
+        emptySceneTimerRef.current = setTimeout(() => {
+          setCurrentScene(nextScene)
+          
+          setTimeout(() => {
+            if (audioRef.current && episode?.scenes?.[nextScene]?.audioUrl) {
+              const playPromise = audioRef.current.play()
+              if (playPromise !== undefined) {
+                playPromise.then(() => {
+                  setIsPlaying(true)
+                }).catch(err => {
+                  console.warn('Auto-play failed for next scene:', err)
+                  setIsPlaying(false)
+                })
+              }
+            }
+          }, 100)
+        }, 3000)
+      }
+    }
+    
     const handlePlay = () => setIsPlaying(true)
     const handlePause = () => setIsPlaying(false)
     
@@ -101,6 +126,21 @@ function EpisodeViewer() {
       audioRef.current.addEventListener('pause', handlePause)
     }
     
+    if (emptySceneTimerRef.current) {
+      clearTimeout(emptySceneTimerRef.current)
+      emptySceneTimerRef.current = null
+    }
+    
+    const isEmptyText = !currentSceneData?.text || currentSceneData?.text === '' || currentSceneData?.text === '无'
+    const isFirstScene = currentScene === 0
+    
+    if (isEmptyText) {
+      if (isFirstScene && !firstScenePlayClicked) {
+      } else {
+        handleEmptyTextScene()
+      }
+    }
+    
     preloadAdjacentImages()
     
     return () => {
@@ -110,8 +150,12 @@ function EpisodeViewer() {
         audioRef.current.removeEventListener('play', handlePlay)
         audioRef.current.removeEventListener('pause', handlePause)
       }
+      if (emptySceneTimerRef.current) {
+        clearTimeout(emptySceneTimerRef.current)
+        emptySceneTimerRef.current = null
+      }
     }
-  }, [currentScene, episode?.scenes, autoPlay])
+  }, [currentScene, episode?.scenes, autoPlay, firstScenePlayClicked])
 
   const preloadAdjacentImages = () => {
     if (!episode?.scenes) return
@@ -328,6 +372,34 @@ function EpisodeViewer() {
     if (!audioRef.current) return
     
     const currentSceneData = episode?.scenes?.[currentScene]
+    const isEmptyText = !currentSceneData?.text || currentSceneData?.text === '' || currentSceneData?.text === '无'
+    const isFirstScene = currentScene === 0
+    
+    if (isFirstScene && isEmptyText && !firstScenePlayClicked) {
+      setFirstScenePlayClicked(true)
+      if (autoPlay && episode?.scenes && currentScene < episode.scenes.length - 1) {
+        const nextScene = currentScene + 1
+        emptySceneTimerRef.current = setTimeout(() => {
+          setCurrentScene(nextScene)
+          
+          setTimeout(() => {
+            if (audioRef.current && episode?.scenes?.[nextScene]?.audioUrl) {
+              const playPromise = audioRef.current.play()
+              if (playPromise !== undefined) {
+                playPromise.then(() => {
+                  setIsPlaying(true)
+                }).catch(err => {
+                  console.warn('Auto-play failed for next scene:', err)
+                  setIsPlaying(false)
+                })
+              }
+            }
+          }, 100)
+        }, 3000)
+      }
+      return
+    }
+    
     if (!currentSceneData?.audioUrl || currentSceneData?.text === '无') {
       console.warn('No audio available for current scene')
       return
