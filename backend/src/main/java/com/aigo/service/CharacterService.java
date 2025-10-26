@@ -60,7 +60,7 @@ public class CharacterService {
                                                        String personality, String gender, 
                                                        Boolean isProtagonist) {
         return createOrUpdateWorkCharacter(workId, characterName, description, appearance, 
-            personality, gender, isProtagonist, null, null, null, null, null);
+            personality, gender, isProtagonist, null, null, null, null, null, null);
     }
     
     @Transactional
@@ -71,6 +71,20 @@ public class CharacterService {
                                                        String bodyType, String facialFeatures,
                                                        String clothingStyle, String distinguishingFeatures,
                                                        Boolean isPlaceholderName) {
+        return createOrUpdateWorkCharacter(workId, characterName, description, appearance, 
+            personality, gender, isProtagonist, bodyType, facialFeatures, clothingStyle, 
+            distinguishingFeatures, isPlaceholderName, null);
+    }
+    
+    @Transactional
+    public CharacterEntity createOrUpdateWorkCharacter(String workId, String characterName, 
+                                                       String description, String appearance, 
+                                                       String personality, String gender, 
+                                                       Boolean isProtagonist,
+                                                       String bodyType, String facialFeatures,
+                                                       String clothingStyle, String distinguishingFeatures,
+                                                       Boolean isPlaceholderName,
+                                                       List<String> nicknames) {
         Optional<CharacterEntity> existing = characterRepository.findByWorkIdAndName(workId, characterName);
         
         CharacterEntity character;
@@ -106,6 +120,18 @@ public class CharacterService {
             if (isPlaceholderName != null && !isPlaceholderName && character.getIsPlaceholderName()) {
                 character.setIsPlaceholderName(false);
             }
+            if (nicknames != null && !nicknames.isEmpty()) {
+                List<String> existingNicknames = character.getNicknames();
+                if (existingNicknames == null) {
+                    character.setNicknames(new ArrayList<>(nicknames));
+                } else {
+                    for (String nickname : nicknames) {
+                        if (!existingNicknames.contains(nickname) && !nickname.equals(characterName)) {
+                            existingNicknames.add(nickname);
+                        }
+                    }
+                }
+            }
         } else {
             character = new CharacterEntity();
             character.setWorkId(workId);
@@ -120,6 +146,15 @@ public class CharacterService {
             character.setClothingStyle(clothingStyle);
             character.setDistinguishingFeatures(distinguishingFeatures);
             character.setIsPlaceholderName(isPlaceholderName != null ? isPlaceholderName : false);
+            if (nicknames != null && !nicknames.isEmpty()) {
+                List<String> filteredNicknames = new ArrayList<>();
+                for (String nickname : nicknames) {
+                    if (!nickname.equals(characterName)) {
+                        filteredNicknames.add(nickname);
+                    }
+                }
+                character.setNicknames(filteredNicknames);
+            }
         }
         
         ensureCompleteCharacterFeatures(character, workId);

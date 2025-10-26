@@ -335,6 +335,16 @@ function WorkEditor() {
                       <strong>性格：</strong>{character.personality}
                     </div>
                   )}
+                  {character.nicknames && character.nicknames.length > 0 && (
+                    <div className="character-field">
+                      <strong>别名：</strong>
+                      <div className="character-nicknames">
+                        {character.nicknames.map((nickname, index) => (
+                          <span key={index} className="nickname-tag">{nickname}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

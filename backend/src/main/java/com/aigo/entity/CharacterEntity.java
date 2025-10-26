@@ -5,9 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "characters")
@@ -58,6 +62,10 @@ public class CharacterEntity {
     
     @Column(name = "is_placeholder_name")
     private Boolean isPlaceholderName = false;
+    
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "nicknames", columnDefinition = "JSON")
+    private List<String> nicknames = new ArrayList<>();
     
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
