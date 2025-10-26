@@ -24,6 +24,7 @@ public class WorkService {
     private final WorkRepository workRepository;
     private final LikeRepository likeRepository;
     private final EpisodeRepository episodeRepository;
+    private final com.aigo.repository.PurchaseRepository purchaseRepository;
     
     @Transactional
     public WorkResponse createWork(String userId, CreateWorkRequest request) {
@@ -47,7 +48,14 @@ public class WorkService {
         response.setEpisodes(
             episodeRepository.findByWorkIdAndIsPublishedTrueOrderByEpisodeNumberAsc(workId)
                 .stream()
-                .map(com.aigo.dto.episode.EpisodeListItem::fromEntity)
+                .map(episode -> {
+                    com.aigo.dto.episode.EpisodeListItem item = com.aigo.dto.episode.EpisodeListItem.fromEntity(episode);
+                    if (currentUserId != null && !episode.getIsFree()) {
+                        boolean isPurchased = purchaseRepository.existsByUserIdAndEpisodeId(currentUserId, episode.getId());
+                        item.setIsPurchased(isPurchased);
+                    }
+                    return item;
+                })
                 .collect(Collectors.toList())
         );
         boolean isLiked = currentUserId != null && 
