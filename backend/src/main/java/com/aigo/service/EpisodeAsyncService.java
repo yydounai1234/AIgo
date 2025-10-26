@@ -17,6 +17,7 @@ public class EpisodeAsyncService {
     
     private final EpisodeRepository episodeRepository;
     private final NovelParseService novelParseService;
+    private final CharacterService characterService;
     
     @Async
     public void processEpisodeAsync(String episodeId, String novelText) {
@@ -36,11 +37,36 @@ public class EpisodeAsyncService {
             episode.setStatus("PROCESSING");
             episodeRepository.save(episode);
             
-            AnimeSegment segment = novelParseService.parseNovelText(
+            AnimeSegment segment = novelParseService.parseNovelTextWithWorkId(
                 novelText, 
                 episode.getStyle(), 
-                episode.getTargetAudience()
+                episode.getTargetAudience(),
+                episode.getWorkId()
             );
+            
+            if (segment.getCharacters() != null && !segment.getCharacters().isEmpty()) {
+                for (com.aigo.model.Character character : segment.getCharacters()) {
+                    boolean isProtagonist = "我".equals(character.getName()) || 
+                                           "主角".equals(character.getName()) ||
+                                           "主人公".equals(character.getName());
+                    boolean isPlaceholder = character.getName().matches("^[男女未知][a-z]$");
+                    
+                    characterService.createOrUpdateWorkCharacter(
+                        episode.getWorkId(),
+                        character.getName(),
+                        character.getDescription(),
+                        character.getAppearance(),
+                        character.getPersonality(),
+                        character.getGender(),
+                        isProtagonist,
+                        character.getBodyType(),
+                        character.getFacialFeatures(),
+                        character.getClothingStyle(),
+                        character.getDistinguishingFeatures(),
+                        isPlaceholder
+                    );
+                }
+            }
             
             episode.setCharacters(segment.getCharacters());
             episode.setScenes(segment.getScenes().stream()

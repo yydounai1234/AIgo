@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,9 +19,86 @@ public class CharacterService {
     
     @Transactional
     public CharacterEntity createCharacter(CharacterEntity character) {
-        if (characterRepository.findByName(character.getName()).isPresent()) {
+        if (character.getWorkId() != null) {
+            Optional<CharacterEntity> existing = characterRepository.findByWorkIdAndName(
+                character.getWorkId(), character.getName());
+            if (existing.isPresent()) {
+                return existing.get();
+            }
+        } else if (characterRepository.findByName(character.getName()).isPresent()) {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "角色名称已存在");
         }
+        return characterRepository.save(character);
+    }
+    
+    @Transactional
+    public CharacterEntity createOrUpdateWorkCharacter(String workId, String characterName, 
+                                                       String description, String appearance, 
+                                                       String personality, String gender, 
+                                                       Boolean isProtagonist) {
+        return createOrUpdateWorkCharacter(workId, characterName, description, appearance, 
+            personality, gender, isProtagonist, null, null, null, null, null);
+    }
+    
+    @Transactional
+    public CharacterEntity createOrUpdateWorkCharacter(String workId, String characterName, 
+                                                       String description, String appearance, 
+                                                       String personality, String gender, 
+                                                       Boolean isProtagonist,
+                                                       String bodyType, String facialFeatures,
+                                                       String clothingStyle, String distinguishingFeatures,
+                                                       Boolean isPlaceholderName) {
+        Optional<CharacterEntity> existing = characterRepository.findByWorkIdAndName(workId, characterName);
+        
+        CharacterEntity character;
+        if (existing.isPresent()) {
+            character = existing.get();
+            if (description != null && !description.isEmpty()) {
+                character.setDescription(description);
+            }
+            if (appearance != null && !appearance.isEmpty()) {
+                character.setAppearance(appearance);
+            }
+            if (personality != null && !personality.isEmpty()) {
+                character.setPersonality(personality);
+            }
+            if (gender != null && !gender.isEmpty()) {
+                character.setGender(gender);
+            }
+            if (isProtagonist != null) {
+                character.setIsProtagonist(isProtagonist);
+            }
+            if (bodyType != null && !bodyType.isEmpty()) {
+                character.setBodyType(bodyType);
+            }
+            if (facialFeatures != null && !facialFeatures.isEmpty()) {
+                character.setFacialFeatures(facialFeatures);
+            }
+            if (clothingStyle != null && !clothingStyle.isEmpty()) {
+                character.setClothingStyle(clothingStyle);
+            }
+            if (distinguishingFeatures != null && !distinguishingFeatures.isEmpty()) {
+                character.setDistinguishingFeatures(distinguishingFeatures);
+            }
+            if (isPlaceholderName != null && !isPlaceholderName && character.getIsPlaceholderName()) {
+                character.setIsPlaceholderName(false);
+            }
+        } else {
+            character = new CharacterEntity();
+            character.setWorkId(workId);
+            character.setName(characterName);
+            character.setDescription(description);
+            character.setAppearance(appearance);
+            character.setPersonality(personality);
+            character.setGender(gender);
+            character.setIsProtagonist(isProtagonist != null ? isProtagonist : false);
+            character.setBodyType(bodyType);
+            character.setFacialFeatures(facialFeatures);
+            character.setClothingStyle(clothingStyle);
+            character.setDistinguishingFeatures(distinguishingFeatures);
+            character.setIsPlaceholderName(isPlaceholderName != null ? isPlaceholderName : false);
+        }
+        
         return characterRepository.save(character);
     }
     
@@ -70,5 +148,15 @@ public class CharacterService {
             throw new BusinessException(ErrorCode.NOT_FOUND, "角色不存在");
         }
         characterRepository.deleteById(id);
+    }
+    
+    @Transactional(readOnly = true)
+    public List<CharacterEntity> getCharactersByWorkId(String workId) {
+        return characterRepository.findByWorkIdOrderByCreatedAtAsc(workId);
+    }
+    
+    @Transactional(readOnly = true)
+    public Optional<CharacterEntity> getWorkCharacterByName(String workId, String name) {
+        return characterRepository.findByWorkIdAndName(workId, name);
     }
 }

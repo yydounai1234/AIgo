@@ -32,6 +32,33 @@ public class CharacterEntity {
     @Column(columnDefinition = "TEXT")
     private String personality;
     
+    @Column(name = "work_id", length = 36)
+    private String workId;
+    
+    @Column(name = "is_protagonist")
+    private Boolean isProtagonist = false;
+    
+    @Column(name = "image_url", length = 500)
+    private String imageUrl;
+    
+    @Column(length = 50)
+    private String gender;
+    
+    @Column(name = "body_type", columnDefinition = "TEXT")
+    private String bodyType;
+    
+    @Column(name = "facial_features", columnDefinition = "TEXT")
+    private String facialFeatures;
+    
+    @Column(name = "clothing_style", columnDefinition = "TEXT")
+    private String clothingStyle;
+    
+    @Column(name = "distinguishing_features", columnDefinition = "TEXT")
+    private String distinguishingFeatures;
+    
+    @Column(name = "is_placeholder_name")
+    private Boolean isPlaceholderName = false;
+    
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

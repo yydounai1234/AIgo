@@ -18,4 +18,12 @@ public class Character {
     private String personality;
     
     private String gender;
+    
+    private String bodyType;
+    
+    private String facialFeatures;
+    
+    private String clothingStyle;
+    
+    private String distinguishingFeatures;
 }
