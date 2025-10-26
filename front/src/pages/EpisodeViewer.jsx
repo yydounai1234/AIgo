@@ -46,8 +46,9 @@ function EpisodeViewer() {
       audioRef.current.currentTime = 0
     }
     
-    if (episode?.scenes && episode.scenes[currentScene]?.audioUrl) {
-      const audioUrl = episode.scenes[currentScene].audioUrl
+    const currentSceneData = episode?.scenes?.[currentScene]
+    if (currentSceneData?.audioUrl && currentSceneData?.text !== '无') {
+      const audioUrl = currentSceneData.audioUrl
       if (audioRef.current) {
         audioRef.current.src = audioUrl
         audioRef.current.load()
@@ -347,7 +348,7 @@ function EpisodeViewer() {
 
   return (
     <div className="episode-viewer-page">
-      <audio ref={audioRef} preload="auto" />
+      <audio ref={audioRef} preload="auto" autoPlay muted={false} />
       <div className="viewer-container">
         <div className="viewer-header">
           <button onClick={() => navigate(-1)} className="btn-back">
@@ -375,7 +376,7 @@ function EpisodeViewer() {
             <div className="scene-viewer">
               <div className="scene-image">
                 {currentSceneData?.imageUrl ? (
-                  <img src={currentSceneData.imageUrl} alt={`场景 ${currentScene + 1}`} />
+                  <img key={currentScene} src={currentSceneData.imageUrl} alt={`场景 ${currentScene + 1}`} />
                 ) : (
                   <div className="scene-placeholder">
                     <span>🎬</span>
