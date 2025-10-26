@@ -197,6 +197,7 @@ function EpisodeViewer() {
     setLoading(true)
     setError('')
     setNeedsPurchase(false)
+    setAutoPlay(false)
     
     try {
       const result = await api.getEpisode(episodeId)
@@ -221,6 +222,7 @@ function EpisodeViewer() {
       setError('加载集数时发生错误')
     } finally {
       setLoading(false)
+      setAutoPlay(true)
     }
   }
 
