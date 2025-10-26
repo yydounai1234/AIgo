@@ -33,8 +33,8 @@ class GlobalExceptionHandlerTest {
 
         assertNotNull(response);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertFalse(response.getBody().isSuccess());
-        assertEquals("Resource not found", response.getBody().getMessage());
+        assertFalse(response.getBody().getSuccess());
+        assertEquals("Resource not found", response.getBody().getError().getMessage());
     }
 
     @Test
@@ -44,7 +44,7 @@ class GlobalExceptionHandlerTest {
         ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleBusinessException(exception);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Invalid input", response.getBody().getMessage());
+        assertEquals("Invalid input", response.getBody().getError().getMessage());
     }
 
     @Test
@@ -78,8 +78,8 @@ class GlobalExceptionHandlerTest {
 
         assertNotNull(response);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertFalse(response.getBody().isSuccess());
-        assertTrue(response.getBody().getMessage().contains("field"));
+        assertFalse(response.getBody().getSuccess());
+        assertTrue(response.getBody().getError().getMessage().contains("must not be null"));
     }
 
     @Test
@@ -90,7 +90,8 @@ class GlobalExceptionHandlerTest {
 
         assertNotNull(response);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertFalse(response.getBody().isSuccess());
-        assertEquals("服务器内部错误", response.getBody().getMessage());
+        assertFalse(response.getBody().getSuccess());
+        assertNotNull(response.getBody().getError());
+        assertEquals(ErrorCode.INTERNAL_ERROR.getMessage(), response.getBody().getError().getMessage());
     }
 }
