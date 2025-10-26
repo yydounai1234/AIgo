@@ -79,7 +79,20 @@ function MyWorks() {
     <div className="my-works-page">
       <div className="my-works-container">
         <div className="page-header">
-          <h1>我的作品</h1>
+          <div className="page-header-left">
+            <h1>我的作品</h1>
+            <div className="h5-favorites-link">
+              <button
+                onClick={() => navigate('/my-favorites')}
+                className="btn-favorites-link"
+              >
+                <svg className="favorites-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                </svg>
+                我的收藏
+              </button>
+            </div>
+          </div>
           <button
             onClick={() => navigate('/')}
             className="btn btn-primary btn-fixed-width"

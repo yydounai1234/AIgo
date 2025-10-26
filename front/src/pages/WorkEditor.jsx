@@ -28,6 +28,11 @@ function WorkEditor() {
   const [actionLoading, setActionLoading] = useState(false)
   
   const [modal, setModal] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null })
+  
+  const [editingCharacter, setEditingCharacter] = useState(null)
+  const [showCharacterForm, setShowCharacterForm] = useState(false)
+  const [characterAppearance, setCharacterAppearance] = useState('')
+  const [characterGender, setCharacterGender] = useState('')
 
   useEffect(() => {
     loadWork()
@@ -189,7 +194,7 @@ function WorkEditor() {
         if (result.success) {
           await loadWork()
           setShowEpisodeForm(false)
-          setModal({ isOpen: true, type: 'alert', title: '成功', message: '集数已创建', onConfirm: null })
+          navigate(`/episode/${result.data.id}`)
         } else {
           setError(result.error?.message || '创建失败')
         }
@@ -234,6 +239,40 @@ function WorkEditor() {
 
   const handleViewEpisode = (episodeId) => {
     navigate(`/episode/${episodeId}`)
+  }
+
+  const handleEditCharacter = (character) => {
+    setEditingCharacter(character)
+    setCharacterAppearance(character.appearance || '')
+    setCharacterGender(character.gender || '')
+    setShowCharacterForm(true)
+  }
+
+  const handleSaveCharacter = async () => {
+    if (!editingCharacter) return
+    
+    setActionLoading(true)
+    setError('')
+    
+    try {
+      const result = await api.updateCharacter(editingCharacter.id, {
+        ...editingCharacter,
+        appearance: characterAppearance.trim(),
+        gender: characterGender
+      })
+      
+      if (result.success) {
+        await loadWork()
+        setShowCharacterForm(false)
+        setModal({ isOpen: true, type: 'alert', title: '成功', message: '角色信息已更新', onConfirm: null })
+      } else {
+        setError(result.error?.message || '更新失败')
+      }
+    } catch (err) {
+      setError('更新角色时发生错误')
+    } finally {
+      setActionLoading(false)
+    }
   }
 
   if (loading) {
@@ -309,12 +348,14 @@ function WorkEditor() {
                 <div key={character.id} className="character-card">
                   <div className="character-header">
                     <h3>{character.name}</h3>
-                    {character.isProtagonist && <span className="badge badge-primary">主角</span>}
-                    {character.gender && (
-                      <span className={`gender-badge ${character.gender}`}>
-                        {character.gender === 'male' ? '男' : character.gender === 'female' ? '女' : ''}
-                      </span>
-                    )}
+                    <div className="character-badges">
+                      {character.isProtagonist && <span className="badge badge-primary">主角</span>}
+                      {character.gender && (
+                        <span className={`gender-badge ${character.gender}`}>
+                          {character.gender === 'male' ? '男' : character.gender === 'female' ? '女' : ''}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   {character.appearance && (
                     <div className="character-field">
@@ -331,8 +372,63 @@ function WorkEditor() {
                       <strong>性格：</strong>{character.personality}
                     </div>
                   )}
+                  <div className="character-actions">
+                    <button
+                      onClick={() => handleEditCharacter(character)}
+                      className="btn-edit-character"
+                    >
+                      编辑外貌
+                    </button>
+                  </div>
                 </div>
               ))}
+            </div>
+          )}
+          
+          {showCharacterForm && editingCharacter && (
+            <div className="character-form-card">
+              <h3>编辑角色：{editingCharacter.name}</h3>
+              
+              <div className="form-group">
+                <label>外貌特征</label>
+                <textarea
+                  value={characterAppearance}
+                  onChange={(e) => setCharacterAppearance(e.target.value)}
+                  placeholder="描述角色的外貌特征，如发色、眼睛颜色、身高、服装等..."
+                  rows={4}
+                  disabled={actionLoading}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>性别</label>
+                <select
+                  value={characterGender}
+                  onChange={(e) => setCharacterGender(e.target.value)}
+                  disabled={actionLoading}
+                >
+                  <option value="">未设定</option>
+                  <option value="male">男性</option>
+                  <option value="female">女性</option>
+                </select>
+              </div>
+              
+              <div className="form-actions">
+                <button
+                  onClick={handleSaveCharacter}
+                  className="btn btn-primary"
+                  disabled={actionLoading}
+                >
+                  {actionLoading ? '保存中...' : '保存'}
+                </button>
+                <button
+                  onClick={() => setShowCharacterForm(false)}
+                  className="btn btn-secondary"
+                  disabled={actionLoading}
+                >
+                  取消
+                </button>
+              </div>
             </div>
           )}
         </div>
