@@ -165,7 +165,7 @@ public class TextToImageService {
         }
         
         prompt.append("高质量、细节丰富、所有场景中保持一致的角色设计。");
-        prompt.append("确保角色 ").append(characterKey).append(" 在所有场景中保持相同的面部特征、发型和服装。");
+        prompt.append("角色").append(characterKey).append("保持相同的面部、发型和服装。");
         
         return prompt.toString();
     }
