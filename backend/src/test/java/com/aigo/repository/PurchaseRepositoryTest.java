@@ -27,7 +27,7 @@ class PurchaseRepositoryTest {
         testPurchase = Purchase.builder()
                 .userId(userId)
                 .episodeId(episodeId)
-                .coinPrice(10)
+                .coinCost(10)
                 .build();
     }
 
@@ -38,7 +38,7 @@ class PurchaseRepositoryTest {
         assertNotNull(saved.getId());
         assertEquals(userId, saved.getUserId());
         assertEquals(episodeId, saved.getEpisodeId());
-        assertEquals(10, saved.getCoinPrice());
+        assertEquals(10, saved.getCoinCost());
     }
 
     @Test
@@ -57,7 +57,7 @@ class PurchaseRepositoryTest {
         Purchase purchase2 = Purchase.builder()
                 .userId(userId)
                 .episodeId("episode789")
-                .coinPrice(20)
+                .coinCost(20)
                 .build();
         purchaseRepository.save(purchase2);
 
