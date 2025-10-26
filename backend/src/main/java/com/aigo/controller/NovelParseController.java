@@ -52,12 +52,4 @@ public class NovelParseController {
             return ResponseEntity.internalServerError().body(error);
         }
     }
-    
-    @GetMapping("/health")
-    public Map<String, String> health() {
-        Map<String, String> response = new HashMap<>();
-        response.put("status", "ok");
-        response.put("service", "Novel Parse Service");
-        return response;
-    }
 }

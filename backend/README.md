@@ -18,7 +18,6 @@ backend/
 │   │   ├── java/com/aigo/
 │   │   │   ├── AigoApplication.java          # 主应用类
 │   │   │   └── controller/
-│   │   │       ├── HealthController.java     # 健康检查接口
 │   │   │       └── LangChainTestController.java  # LangChain测试接口
 │   │   └── resources/
 │   │       └── application.properties        # 应用配置
@@ -44,23 +43,7 @@ mvn spring-boot:run
 
 ### 测试接口
 
-#### 1. 健康检查
-
-```bash
-curl http://localhost:8080/api/health
-```
-
-响应示例：
-```json
-{
-  "status": "UP",
-  "timestamp": "2025-10-24T15:30:00",
-  "service": "AIgo Backend",
-  "version": "1.0.0"
-}
-```
-
-#### 2. Hello 接口
+#### 1. Hello 接口
 
 ```bash
 curl http://localhost:8080/api/hello
@@ -74,13 +57,13 @@ curl http://localhost:8080/api/hello
 }
 ```
 
-#### 3. LangChain 测试接口
+#### 2. LangChain 测试接口
 
 ```bash
 curl http://localhost:8080/api/langchain/test
 ```
 
-#### 4. AI 聊天接口
+#### 3. AI 聊天接口
 
 ```bash
 curl -X POST http://localhost:8080/api/langchain/chat \

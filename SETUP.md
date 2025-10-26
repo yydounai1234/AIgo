@@ -147,24 +147,7 @@ mvn clean package
 java -jar target/aigo-backend-1.0.0.jar
 ```
 
-### 4. 验证后端服务
-
-访问以下接口验证服务是否正常：
-
-```bash
-# 健康检查
-curl http://localhost:8080/api/health
-
-# 预期响应
-{
-  "status": "UP",
-  "timestamp": "2025-10-26T10:00:00",
-  "service": "AIgo Backend",
-  "version": "1.0.0"
-}
-```
-
-### 5. 测试 AI 功能（可选）
+### 4. 测试 AI 功能（可选）
 
 如果配置了 AI 服务，可以测试小说解析功能：
 
