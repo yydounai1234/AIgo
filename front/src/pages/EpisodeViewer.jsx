@@ -81,6 +81,10 @@ function EpisodeViewer() {
         audioRef.current.addEventListener('ended', handleAudioEnded)
         audioRef.current.addEventListener('play', handlePlay)
         audioRef.current.addEventListener('pause', handlePause)
+        
+        audioRef.current.addEventListener('canplaythrough', () => {
+          console.log('Audio ready to play for scene', currentScene)
+        }, { once: true })
       }
     }
     
@@ -284,21 +288,24 @@ function EpisodeViewer() {
       return
     }
     
-    // Ensure audio has been loaded
-    if (!audioRef.current.src || audioRef.current.src === '') {
-      audioRef.current.src = currentSceneData.audioUrl
-      audioRef.current.load()
-    }
-    
     if (isPlaying) {
       audioRef.current.pause()
+      setIsPlaying(false)
     } else {
-      audioRef.current.play().then(() => {
-        setIsPlaying(true)
-      }).catch(err => {
-        console.warn('Play failed:', err)
-        setIsPlaying(false)
-      })
+      if (!audioRef.current.src || audioRef.current.src === '') {
+        audioRef.current.src = currentSceneData.audioUrl
+        audioRef.current.load()
+      }
+      
+      const playPromise = audioRef.current.play()
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          setIsPlaying(true)
+        }).catch(err => {
+          console.warn('Play failed:', err)
+          setIsPlaying(false)
+        })
+      }
     }
   }
 
