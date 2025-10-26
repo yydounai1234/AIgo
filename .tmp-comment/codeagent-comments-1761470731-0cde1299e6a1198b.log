@@ -1,0 +1,41 @@
+# Historical Comments and Reviews
+
+## Discussion Comments
+
+**@yydounai1234** (Oct 26, 09:21)
+@xgopilot h5 模式下，我的收藏被 class 为 nav-user mobile-open 的 div 遮挡了，请修复下
+
+---
+
+**@xgopilot** (Oct 26, 09:21)
+### 已修复 H5 模式下的遮挡问题 ✓
+
+**问题描述：** 在 H5 模式下，"我的收藏"链接被 `nav-user mobile-open` div 遮挡。
+
+**解决方案：** 在 `MyWorks.css` 中为 `.my-works-page` 添加了 `position: relative` 和 `z-index: 1`，确保页面内容位于导航栏（z-index: 1000）下方的正确层级。
+
+**修改文件：**
+- `front/src/pages/MyWorks.css` - 添加了 z-index 层级控制
+
+**提交记录：** a52bc0a
+
+现在"我的收藏"链接应该可以正常点击，不会被导航栏的移动端下拉菜单遮挡了。
+
+---
+
+**@yydounai1234** (Oct 26, 09:25)
+@xgopilot @media (max-width: 768px) {
+    .nav-links.mobile-open ~ .nav-user {
+        top: calc(100% + 12rem);
+    }
+}
+这个 class 写的有问题，导致了我的收藏被这档了
+
+
+---
+
+**@xgopilot** (Oct 26, 09:25)
+codeagent is processing your request, please wait a moment...
+
+---
+

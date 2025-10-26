@@ -237,11 +237,11 @@
   }
 
   .nav-links.mobile-open ~ .nav-user {
-    top: calc(100% + 12rem);
+    top: calc(100% + 16rem);
   }
   
   .nav-links.mobile-open ~ .nav-user.mobile-open {
-    margin-top: 0;
+    top: calc(100% + 16rem);
   }
 
   .nav-user .user-info,

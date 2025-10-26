@@ -59,7 +59,8 @@
 
 .character-header {
   display: flex;
-  align-items: center;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 0.75rem;
   margin-bottom: 1rem;
   flex-wrap: wrap;
@@ -70,6 +71,14 @@
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
+  flex: 1;
+}
+
+.character-badges {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .gender-badge {
@@ -106,6 +115,68 @@
   margin-right: 0.25rem;
 }
 
+.character-nicknames {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.nickname-tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+  color: #667eea;
+  border: 1px solid #667eea30;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.nickname-tag:hover {
+  background: linear-gradient(135deg, #667eea25 0%, #764ba225 100%);
+  border-color: #667eea50;
+  transform: translateY(-1px);
+}
+
+.character-detailed-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.character-feature-item {
+  font-size: 0.9rem;
+  color: #2d3748;
+  padding: 0.5rem;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.character-feature-item strong {
+  color: #667eea;
+  display: inline-block;
+  margin-right: 0.5rem;
+  font-weight: 600;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.form-actions .btn {
+  flex: 1;
+}
+
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -130,7 +201,8 @@
 
 .form-group input[type="text"],
 .form-group input[type="number"],
-.form-group textarea {
+.form-group textarea,
+.form-group select {
   width: 100%;
   padding: 0.75rem;
   border: 2px solid #e0e0e0;
@@ -141,7 +213,8 @@
 
 .form-group input[type="text"]:focus,
 .form-group input[type="number"]:focus,
-.form-group textarea:focus {
+.form-group textarea:focus,
+.form-group select:focus {
   outline: none;
   border-color: #667eea;
 }

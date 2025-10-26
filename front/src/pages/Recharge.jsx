@@ -93,7 +93,12 @@ function Recharge() {
 
         <div className="recharge-card">
           <div className="balance-display">
-            <div className="balance-icon">💰</div>
+            <div className="balance-icon">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
+                <path d="M12 6v12M9 9h4.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5H9m0 3h4.5c.83 0 1.5-.67 1.5-1.5S14.33 12 13.5 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </div>
             <div className="balance-info">
               <span className="balance-label">当前余额</span>
               <span className="balance-amount">{user?.coinBalance || 0} 金币</span>
@@ -101,8 +106,8 @@ function Recharge() {
           </div>
 
           <div className="recharge-notice">
-            <p>💡 提示：目前为测试阶段，支付功能尚未打通，您可以免费充值金币用于体验功能</p>
-            <p>⚠️ 单次充值上限：1000 金币</p>
+            <p><span className="notice-icon">💡</span> 提示：目前为测试阶段，支付功能尚未打通，您可以免费充值金币用于体验功能</p>
+            <p><span className="notice-icon">⚠️</span> 单次充值上限：1000 金币</p>
           </div>
 
           <div className="preset-amounts">

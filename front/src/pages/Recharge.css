@@ -55,7 +55,14 @@
 }
 
 .balance-icon {
-  font-size: 3rem;
+  width: 48px;
+  height: 48px;
+  color: white;
+}
+
+.balance-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .balance-info {

@@ -506,7 +506,16 @@ function EpisodeViewer() {
                 className="btn btn-primary btn-large"
                 disabled={purchasing}
               >
-                {purchasing ? '购买中...' : isInsufficient ? '充值购买' : `购买 (${episode.coinPrice} 💰)`}
+                {purchasing ? '购买中...' : isInsufficient ? '充值购买' : (
+                  <>
+                    购买 (
+                    <svg className="coin-icon-inline" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
+                      <path d="M12 6v12M9 9h4.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5H9m0 3h4.5c.83 0 1.5-.67 1.5-1.5S14.33 12 13.5 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                    {episode.coinPrice})
+                  </>
+                )}
               </button>
               <button
                 onClick={() => navigate(-1)}
@@ -613,7 +622,13 @@ function EpisodeViewer() {
             {episode.isFree ? (
               <span className="badge badge-success">免费</span>
             ) : (
-              <span className="badge badge-primary">{episode.coinPrice} 💰</span>
+              <span className="badge badge-primary">
+                <svg className="coin-icon-badge" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M12 6v12M9 9h4.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5H9m0 3h4.5c.83 0 1.5-.67 1.5-1.5S14.33 12 13.5 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+                {episode.coinPrice}
+              </span>
             )}
           </div>
         </div>}

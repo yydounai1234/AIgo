@@ -28,6 +28,7 @@ function WorkEditor() {
   const [actionLoading, setActionLoading] = useState(false)
   
   const [modal, setModal] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null })
+  
 
   useEffect(() => {
     loadWork()
@@ -189,7 +190,7 @@ function WorkEditor() {
         if (result.success) {
           await loadWork()
           setShowEpisodeForm(false)
-          setModal({ isOpen: true, type: 'alert', title: '成功', message: '集数已创建', onConfirm: null })
+          navigate(`/episode/${result.data.id}`)
         } else {
           setError(result.error?.message || '创建失败')
         }
@@ -235,6 +236,7 @@ function WorkEditor() {
   const handleViewEpisode = (episodeId) => {
     navigate(`/episode/${episodeId}`)
   }
+
 
   if (loading) {
     return <div className="loading-page">加载中...</div>
@@ -309,18 +311,60 @@ function WorkEditor() {
                 <div key={character.id} className="character-card">
                   <div className="character-header">
                     <h3>{character.name}</h3>
-                    {character.isProtagonist && <span className="badge badge-primary">主角</span>}
-                    {character.gender && (
-                      <span className={`gender-badge ${character.gender}`}>
-                        {character.gender === 'male' ? '男' : character.gender === 'female' ? '女' : ''}
-                      </span>
-                    )}
+                    <div className="character-badges">
+                      {character.isProtagonist && <span className="badge badge-primary">主角</span>}
+                      {character.gender && (
+                        <span className={`gender-badge ${character.gender}`}>
+                          {character.gender === 'male' ? '男' : character.gender === 'female' ? '女' : ''}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   {character.appearance && (
                     <div className="character-field">
                       <strong>外貌：</strong>{character.appearance}
                     </div>
                   )}
+                  <div className="character-detailed-features">
+                    {(character.hairType || character.hairColor) && (
+                      <div className="character-feature-item">
+                        <strong>发型/发色：</strong>
+                        {[character.hairType, character.hairColor].filter(Boolean).join(' / ')}
+                      </div>
+                    )}
+                    {character.faceShape && (
+                      <div className="character-feature-item">
+                        <strong>脸型：</strong>{character.faceShape}
+                      </div>
+                    )}
+                    {(character.eyeType || character.eyeColor) && (
+                      <div className="character-feature-item">
+                        <strong>眼睛：</strong>
+                        {[character.eyeType, character.eyeColor].filter(Boolean).join(' / ')}
+                      </div>
+                    )}
+                    {character.noseType && (
+                      <div className="character-feature-item">
+                        <strong>鼻子：</strong>{character.noseType}
+                      </div>
+                    )}
+                    {character.mouthType && (
+                      <div className="character-feature-item">
+                        <strong>嘴型：</strong>{character.mouthType}
+                      </div>
+                    )}
+                    {character.skinTone && (
+                      <div className="character-feature-item">
+                        <strong>肤色：</strong>{character.skinTone}
+                      </div>
+                    )}
+                    {(character.height || character.build) && (
+                      <div className="character-feature-item">
+                        <strong>身高/体型：</strong>
+                        {[character.height, character.build].filter(Boolean).join(' / ')}
+                      </div>
+                    )}
+                  </div>
                   {character.description && (
                     <div className="character-field">
                       <strong>描述：</strong>{character.description}
@@ -329,6 +373,16 @@ function WorkEditor() {
                   {character.personality && (
                     <div className="character-field">
                       <strong>性格：</strong>{character.personality}
+                    </div>
+                  )}
+                  {character.nicknames && character.nicknames.length > 0 && (
+                    <div className="character-field">
+                      <strong>别名：</strong>
+                      <div className="character-nicknames">
+                        {character.nicknames.map((nickname, index) => (
+                          <span key={index} className="nickname-tag">{nickname}</span>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

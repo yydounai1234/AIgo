@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -19,6 +21,7 @@ public class EpisodeListItem {
     private Integer coinPrice;
     private Boolean isPublished;
     private Boolean isPurchased;
+    private List<Episode.SceneData> scenes;
     
     public static EpisodeListItem fromEntity(Episode episode) {
         return EpisodeListItem.builder()
@@ -30,6 +33,7 @@ public class EpisodeListItem {
                 .coinPrice(episode.getCoinPrice())
                 .isPublished(episode.getIsPublished())
                 .isPurchased(false)
+                .scenes(episode.getScenes())
                 .build();
     }
 }

@@ -44,12 +44,22 @@ public class EpisodeAsyncService {
                 episode.getWorkId()
             );
             
+            java.util.Map<String, java.util.List<String>> nicknameMap = new java.util.HashMap<>();
             if (segment.getCharacters() != null && !segment.getCharacters().isEmpty()) {
+                try {
+                    nicknameMap = novelParseService.detectCharacterNicknames(novelText, segment.getCharacters());
+                    logger.info("[EpisodeAsyncService] Detected nicknames for {} characters", nicknameMap.size());
+                } catch (Exception e) {
+                    logger.warn("[EpisodeAsyncService] Failed to detect nicknames, continuing without them", e);
+                }
+                
                 for (com.aigo.model.Character character : segment.getCharacters()) {
                     boolean isProtagonist = "我".equals(character.getName()) || 
                                            "主角".equals(character.getName()) ||
                                            "主人公".equals(character.getName());
                     boolean isPlaceholder = character.getName().matches("^[男女未知][a-z]$");
+                    
+                    java.util.List<String> nicknames = nicknameMap.get(character.getName());
                     
                     characterService.createOrUpdateWorkCharacter(
                         episode.getWorkId(),
@@ -63,7 +73,8 @@ public class EpisodeAsyncService {
                         character.getFacialFeatures(),
                         character.getClothingStyle(),
                         character.getDistinguishingFeatures(),
-                        isPlaceholder
+                        isPlaceholder,
+                        nicknames
                     );
                 }
             }

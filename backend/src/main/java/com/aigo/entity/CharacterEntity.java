@@ -5,9 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "characters")
@@ -50,6 +54,36 @@ public class CharacterEntity {
     @Column(name = "facial_features", columnDefinition = "TEXT")
     private String facialFeatures;
     
+    @Column(name = "hair_type", length = 100)
+    private String hairType;
+    
+    @Column(name = "hair_color", length = 100)
+    private String hairColor;
+    
+    @Column(name = "face_shape", length = 100)
+    private String faceShape;
+    
+    @Column(name = "eye_type", length = 100)
+    private String eyeType;
+    
+    @Column(name = "eye_color", length = 100)
+    private String eyeColor;
+    
+    @Column(name = "nose_type", length = 100)
+    private String noseType;
+    
+    @Column(name = "mouth_type", length = 100)
+    private String mouthType;
+    
+    @Column(name = "skin_tone", length = 100)
+    private String skinTone;
+    
+    @Column(name = "height", length = 100)
+    private String height;
+    
+    @Column(name = "build", length = 100)
+    private String build;
+    
     @Column(name = "clothing_style", columnDefinition = "TEXT")
     private String clothingStyle;
     
@@ -58,6 +92,10 @@ public class CharacterEntity {
     
     @Column(name = "is_placeholder_name")
     private Boolean isPlaceholderName = false;
+    
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "nicknames", columnDefinition = "JSON")
+    private List<String> nicknames = new ArrayList<>();
     
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

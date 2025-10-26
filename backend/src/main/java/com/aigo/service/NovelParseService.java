@@ -216,11 +216,12 @@ public class NovelParseService {
         prompt.append("   - **显著特征**: 疤痕、纹身、配饰或其他独特标记\n");
         prompt.append("   - 性格: 性格特点\n");
         prompt.append("   - 性别: male/female/unknown\n");
-        prompt.append("   **重要**: 如果文本中使用了代词（我、你、她、他、它），请根据上下文识别代词指代的具体角色名称\n");
+        prompt.append("   **重要**: 如果文本中使用了第一人称代词"我"，请根据上下文识别代词指代的具体角色名称\n");
+        prompt.append("   **注意**: 只有在旁白/叙述文本中的第一人称"我"才应该被识别为角色的别名。对话中的"我"不应作为别名处理。\n");
         prompt.append("2. 场景分镜 - 重要: 每个角色的每句对话都应该是一个独立的场景,用于生成独立的漫画图片\n");
         prompt.append("   - 场景编号: 连续递增的数字\n");
-        prompt.append("   - 角色: **必须使用具体的角色名称，不要使用代词（我、你、她、他、它）**\n");
-        prompt.append("   - 如果文本中某句对话使用了代词，请根据上下文和已知角色信息，将代词替换为实际的角色名称\n");
+        prompt.append("   - 角色: **必须使用具体的角色名称，不要使用代词**\n");
+        prompt.append("   - 如果文本中使用了代词，请根据上下文和已知角色信息，将代词替换为实际的角色名称\n");
         prompt.append("   - 对话: 该角色在这个场景中说的话\n");
         prompt.append("   - 画面描述: 这个场景的视觉画面,包括人物动作、表情、背景等\n");
         prompt.append("   - 氛围: 场景的情绪氛围\n");
@@ -259,8 +260,9 @@ public class NovelParseService {
         prompt.append("}\n\n");
         prompt.append("注意事项:\n");
         prompt.append("1. 每个角色的每句对话都必须是一个独立的场景对象,这样才能为每句对话生成对应的漫画图片\n");
-        prompt.append("2. **关键**: 场景中的character字段必须使用具体的角色名称，绝对不能使用代词（我、你、她、他、它）\n");
-        prompt.append("3. 如果文本中角色用代词说话，请分析上下文确定是哪个角色，然后用该角色的真实名称\n");
+        prompt.append("2. **关键**: 场景中的character字段必须使用具体的角色名称，绝对不能使用代词\n");
+        prompt.append("3. 如果文本中使用了代词，请分析上下文确定是哪个角色，然后用该角色的真实名称\n");
+        prompt.append("4. **别名识别规则**: 只有旁白/叙述部分的第一人称"我"才识别为角色别名，对话中的"我"不作为别名\n");
         
         return prompt.toString();
     }
@@ -466,7 +468,7 @@ public class NovelParseService {
             return;
         }
         
-        Set<String> pronouns = new HashSet<>(Arrays.asList("我", "你", "她", "他", "它"));
+        Set<String> pronouns = new HashSet<>(Arrays.asList("我"));
         Map<String, String> pronounToCharacter = new HashMap<>();
         
         if (workCharacters != null && !workCharacters.isEmpty()) {
@@ -563,5 +565,111 @@ public class NovelParseService {
         } catch (Exception e) {
             logger.warn("[NovelParseService] Failed to enrich segment with work characters", e);
         }
+    }
+    
+    public Map<String, List<String>> detectCharacterNicknames(String text, List<Character> characters) {
+        if ("demo-key".equals(apiKey) || characters == null || characters.isEmpty()) {
+            return new HashMap<>();
+        }
+        
+        logger.info("[NovelParseService] Detecting character nicknames from text");
+        
+        try {
+            StringBuilder characterInfo = new StringBuilder();
+            for (Character character : characters) {
+                characterInfo.append("- ").append(character.getName());
+                if (character.getGender() != null) {
+                    characterInfo.append("(").append(character.getGender()).append(")");
+                }
+                characterInfo.append("\n");
+            }
+            
+            String prompt = String.format("""
+                请分析以下小说文本，识别角色的昵称和别称关系。
+                
+                文本内容：
+                %s
+                
+                已识别的角色列表：
+                %s
+                
+                请找出文本中所有对角色的不同称呼方式，包括代词（我、你、他、她、它）、昵称、别名等。
+                
+                要求：
+                1. 分析哪些称呼指向同一个角色
+                2. 将代词和昵称映射到具体的角色名称
+                3. 只返回有明确关联的称呼关系
+                
+                请以纯JSON格式返回，格式如下：
+                {
+                  "小王": ["我", "老王", "王哥"],
+                  "李明": ["他", "小李"]
+                }
+                
+                注意：
+                - 键是角色的主要名称（从角色列表中选择）
+                - 值是该角色的所有昵称/别称数组
+                - 如果某个代词可能指向多个角色，选择最可能的一个
+                - 如果无法确定，不要包含该称呼
+                - 只返回JSON，不要有其他文字
+                """,
+                text,
+                characterInfo.toString()
+            );
+            
+            ChatLanguageModel model = OpenAiChatModel.builder()
+                .apiKey(apiKey)
+                .baseUrl(baseUrl)
+                .modelName(modelName)
+                .temperature(0.3)
+                .timeout(Duration.ofSeconds(30))
+                .maxRetries(2)
+                .build();
+            
+            String response = model.generate(prompt);
+            logger.info("[NovelParseService] Nickname detection response: {}", response);
+            
+            String jsonContent = extractJsonFromResponse(response);
+            Map<String, List<String>> nicknameMap = objectMapper.readValue(
+                jsonContent, 
+                objectMapper.getTypeFactory().constructMapType(HashMap.class, String.class, List.class)
+            );
+            
+            logger.info("[NovelParseService] Detected {} characters with nicknames", nicknameMap.size());
+            return nicknameMap;
+            
+        } catch (Exception e) {
+            logger.error("[NovelParseService] Failed to detect character nicknames", e);
+            return new HashMap<>();
+        }
+    }
+    
+    private String extractJsonFromResponse(String response) {
+        if (response == null) {
+            return "{}";
+        }
+        
+        response = response.trim();
+        
+        if (response.startsWith("```json")) {
+            response = response.substring(7);
+        } else if (response.startsWith("```")) {
+            response = response.substring(3);
+        }
+        
+        if (response.endsWith("```")) {
+            response = response.substring(0, response.length() - 3);
+        }
+        
+        response = response.trim();
+        
+        int start = response.indexOf('{');
+        int end = response.lastIndexOf('}');
+        
+        if (start >= 0 && end > start) {
+            return response.substring(start, end + 1);
+        }
+        
+        return response;
     }
 }
