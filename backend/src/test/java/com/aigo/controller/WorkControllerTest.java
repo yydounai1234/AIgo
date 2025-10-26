@@ -55,8 +55,7 @@ class WorkControllerTest {
         token = "Bearer test-token";
         userId = "user123";
         
-        claims = Jwts.claims();
-        claims.put("userId", userId);
+        claims = Jwts.claims().add("userId", userId).build();
         
         workResponse = WorkResponse.builder()
                 .id("work123")

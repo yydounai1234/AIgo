@@ -42,8 +42,7 @@ class UserControllerTest {
         token = "Bearer test-token";
         userId = "user123";
         
-        claims = Jwts.claims();
-        claims.put("userId", userId);
+        claims = Jwts.claims().add("userId", userId).build();
 
         when(jwtUtil.extractClaims(anyString())).thenReturn(claims);
     }
