@@ -64,7 +64,22 @@ function EpisodeViewer() {
     const handleAudioEnded = () => {
       setIsPlaying(false)
       if (autoPlay && episode?.scenes && currentScene < episode.scenes.length - 1) {
-        setCurrentScene(prev => prev + 1)
+        const nextScene = currentScene + 1
+        setCurrentScene(nextScene)
+        
+        setTimeout(() => {
+          if (audioRef.current && episode?.scenes?.[nextScene]?.audioUrl) {
+            const playPromise = audioRef.current.play()
+            if (playPromise !== undefined) {
+              playPromise.then(() => {
+                setIsPlaying(true)
+              }).catch(err => {
+                console.warn('Auto-play failed for next scene:', err)
+                setIsPlaying(false)
+              })
+            }
+          }
+        }, 100)
       }
     }
     
@@ -455,7 +470,7 @@ function EpisodeViewer() {
 
   return (
     <div className="episode-viewer-page">
-      <audio ref={audioRef} preload="auto" autoPlay muted={false} />
+      <audio ref={audioRef} preload="auto" muted={false} />
       <div 
         className={`viewer-container ${isFullscreen ? 'fullscreen-mode' : ''}`} 
         ref={viewerContainerRef}
