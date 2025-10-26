@@ -142,30 +142,30 @@ public class TextToImageService {
     private String buildImagePrompt(Scene scene, String characterDescription) {
         StringBuilder prompt = new StringBuilder();
         
-        prompt.append("Anime/manga style illustration. ");
+        prompt.append("动漫/漫画风格插画。");
         
-        prompt.append("Character: ").append(characterDescription)
-            .append(". IMPORTANT: Keep this character's appearance consistent with previous scenes - ");
+        prompt.append("角色：").append(characterDescription)
+            .append("。重要提示：保持此角色外观与之前场景一致 - ");
         
         String characterKey = scene.getCharacter();
         if (characterDescriptions.containsKey(characterKey)) {
-            prompt.append("use this exact description: ").append(characterDescriptions.get(characterKey)).append(". ");
+            prompt.append("使用这个精确描述：").append(characterDescriptions.get(characterKey)).append("。");
         }
         
         if (scene.getVisualDescription() != null && !scene.getVisualDescription().isEmpty()) {
-            prompt.append("Scene: ").append(scene.getVisualDescription()).append(". ");
+            prompt.append("场景：").append(scene.getVisualDescription()).append("。");
         }
         
         if (scene.getAction() != null && !scene.getAction().isEmpty()) {
-            prompt.append("Action: ").append(scene.getAction()).append(". ");
+            prompt.append("动作：").append(scene.getAction()).append("。");
         }
         
         if (scene.getAtmosphere() != null && !scene.getAtmosphere().isEmpty()) {
-            prompt.append("Atmosphere: ").append(scene.getAtmosphere()).append(". ");
+            prompt.append("氛围：").append(scene.getAtmosphere()).append("。");
         }
         
-        prompt.append("High quality, detailed, consistent character design across all scenes. ");
-        prompt.append("Same face, same hairstyle, same clothing for character ").append(characterKey).append(".");
+        prompt.append("高质量、细节丰富、所有场景中保持一致的角色设计。");
+        prompt.append("角色").append(characterKey).append("保持相同的面部、发型和服装。");
         
         return prompt.toString();
     }
