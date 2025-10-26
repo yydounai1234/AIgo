@@ -67,6 +67,8 @@ CREATE DATABASE aigo CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 #### 配置数据库连接
 
+> **⚠️ 重要提示**：数据库账号密码等敏感信息请联系 **童捷** 获取，请勿在 GitHub 等公开平台展示。
+
 在 `backend/src/main/resources/application.properties` 中配置数据库连接：
 
 ```properties
