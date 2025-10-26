@@ -58,9 +58,11 @@ function EpisodeViewer() {
     if (audioRef.current) {
       audioRef.current.pause()
       audioRef.current.currentTime = 0
+      setIsPlaying(false)
     }
     
     const handleAudioEnded = () => {
+      setIsPlaying(false)
       if (autoPlay && currentScene < episode.scenes.length - 1) {
         setCurrentScene(prev => prev + 1)
       }
@@ -79,30 +81,6 @@ function EpisodeViewer() {
         audioRef.current.addEventListener('ended', handleAudioEnded)
         audioRef.current.addEventListener('play', handlePlay)
         audioRef.current.addEventListener('pause', handlePause)
-        
-        const playPromise = audioRef.current.play()
-        if (playPromise !== undefined) {
-          playPromise.then(() => {
-            setIsPlaying(true)
-          }).catch(err => {
-            console.warn('Audio autoplay failed:', err)
-            setIsPlaying(false)
-            setModal({
-              isOpen: true,
-              type: 'confirm',
-              title: '🔊 音频播放',
-              message: '由于浏览器限制，需要您点击确认后才能播放音频',
-              onConfirm: () => {
-                if (audioRef.current) {
-                  audioRef.current.play().then(() => {
-                    setIsPlaying(true)
-                  }).catch(e => console.warn('Manual play failed:', e))
-                }
-                setModal(prev => ({ ...prev, isOpen: false }))
-              }
-            })
-          })
-        }
       }
     }
     
@@ -175,35 +153,6 @@ function EpisodeViewer() {
           }
         }
         
-        if (result.data.scenes && result.data.scenes.length > 0) {
-          const firstScene = result.data.scenes[0]
-          if (firstScene.audioUrl && firstScene.text !== '无') {
-            setTimeout(() => {
-              if (audioRef.current) {
-                audioRef.current.src = firstScene.audioUrl
-                audioRef.current.load()
-                const playPromise = audioRef.current.play()
-                if (playPromise !== undefined) {
-                  playPromise.catch(err => {
-                    console.warn('Audio autoplay failed:', err)
-                    setModal({
-                      isOpen: true,
-                      type: 'confirm',
-                      title: '🔊 音频播放',
-                      message: '由于浏览器限制，需要您点击确认后才能播放音频',
-                      onConfirm: () => {
-                        if (audioRef.current) {
-                          audioRef.current.play().catch(e => console.warn('Manual play failed:', e))
-                        }
-                        setModal({ ...modal, isOpen: false })
-                      }
-                    })
-                  })
-                }
-              }
-            }, 100)
-          }
-        }
       } else {
         setError(result.error?.message || '加载失败')
       }
@@ -595,7 +544,7 @@ function EpisodeViewer() {
                     <span>自动播放</span>
                   </label>
                   <p className="playback-tip">
-                    {autoPlay ? '✓ 音频结束后自动播放下一场景' : '手动点击箭头按钮切换'}
+                    {autoPlay ? '✓ 音频结束后自动切换到下一场景' : '音频结束后需手动切换场景'}
                   </p>
                 </div>
               </div>}
