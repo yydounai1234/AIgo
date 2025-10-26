@@ -2,6 +2,7 @@ package com.aigo.service;
 
 import com.aigo.dto.ErrorCode;
 import com.aigo.dto.user.BalanceResponse;
+import com.aigo.dto.user.RechargeResponse;
 import com.aigo.entity.User;
 import com.aigo.exception.BusinessException;
 import com.aigo.repository.UserRepository;
@@ -22,6 +23,28 @@ public class UserService {
         
         return BalanceResponse.builder()
                 .balance(user.getCoinBalance())
+                .build();
+    }
+    
+    @Transactional
+    public RechargeResponse rechargeCoins(String userId, Integer amount) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "用户不存在"));
+        
+        if (amount == null || amount <= 0) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "充值金额必须大于0");
+        }
+        
+        if (amount > 1000) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "单次充值金额不能超过1000金币");
+        }
+        
+        user.setCoinBalance(user.getCoinBalance() + amount);
+        userRepository.save(user);
+        
+        return RechargeResponse.builder()
+                .rechargeAmount(amount)
+                .newBalance(user.getCoinBalance())
                 .build();
     }
 }
