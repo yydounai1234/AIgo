@@ -73,7 +73,12 @@ CREATE DATABASE aigo CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 spring.datasource.url=jdbc:mysql://localhost:3306/aigo?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=UTC
 spring.datasource.username=your_mysql_username
 spring.datasource.password=your_mysql_password
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
 spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+spring.jpa.properties.hibernate.format_sql=true
 ```
 
 ### 2. 配置 AI 服务（可选）
