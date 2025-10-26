@@ -74,6 +74,18 @@ function EpisodeViewer() {
     const handlePause = () => setIsPlaying(false)
     
     const currentSceneData = episode?.scenes?.[currentScene]
+    
+    const handleAudioEnded = () => {
+      if (autoPlay && episode?.scenes && currentScene < episode.scenes.length - 1) {
+        setCurrentScene(prev => prev + 1)
+      }
+    }
+    
+    if (audioRef.current) {
+      audioRef.current.removeEventListener('ended', handleAudioEnded)
+      audioRef.current.addEventListener('ended', handleAudioEnded)
+    }
+    
     if (currentSceneData?.audioUrl && currentSceneData?.text !== '无') {
       const audioUrl = currentSceneData.audioUrl
       if (audioRef.current) {
