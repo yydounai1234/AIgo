@@ -380,22 +380,33 @@
   height: 100%;
   max-width: 100%;
   max-height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .fullscreen-controls {
   position: absolute;
-  bottom: 5rem;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 1rem;
+  left: 1rem;
   z-index: 20;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .fullscreen-controls .autoplay-toggle {
-  background: rgba(0, 0, 0, 0.7);
-  padding: 0.75rem 1.5rem;
-  border-radius: 24px;
-  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.6);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+}
+
+.hidden {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none;
+}
+
+.btn-arrow.hidden,
+.btn-fullscreen.hidden,
+.fullscreen-controls.hidden {
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .purchase-prompt {

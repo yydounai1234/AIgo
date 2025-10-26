@@ -18,11 +18,13 @@ function EpisodeViewer() {
   const [currentScene, setCurrentScene] = useState(0)
   const [autoPlay, setAutoPlay] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [showControls, setShowControls] = useState(true)
   const [modal, setModal] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null })
   const pollingIntervalRef = useRef(null)
   const audioRef = useRef(null)
   const imagePreloadRefs = useRef({})
   const viewerContainerRef = useRef(null)
+  const hideControlsTimeoutRef = useRef(null)
 
   useEffect(() => {
     loadEpisode()
@@ -311,6 +313,43 @@ function EpisodeViewer() {
     }
   }
 
+  const resetHideControlsTimer = () => {
+    if (hideControlsTimeoutRef.current) {
+      clearTimeout(hideControlsTimeoutRef.current)
+    }
+
+    setShowControls(true)
+
+    if (isFullscreen) {
+      hideControlsTimeoutRef.current = setTimeout(() => {
+        setShowControls(false)
+      }, 3000)
+    }
+  }
+
+  const handleMouseMove = () => {
+    if (isFullscreen) {
+      resetHideControlsTimer()
+    }
+  }
+
+  useEffect(() => {
+    if (isFullscreen) {
+      resetHideControlsTimer()
+    } else {
+      setShowControls(true)
+      if (hideControlsTimeoutRef.current) {
+        clearTimeout(hideControlsTimeoutRef.current)
+      }
+    }
+
+    return () => {
+      if (hideControlsTimeoutRef.current) {
+        clearTimeout(hideControlsTimeoutRef.current)
+      }
+    }
+  }, [isFullscreen])
+
   if (loading) {
     return <div className="loading-page">加载中...</div>
   }
@@ -424,7 +463,11 @@ function EpisodeViewer() {
   return (
     <div className="episode-viewer-page">
       <audio ref={audioRef} preload="auto" autoPlay muted={false} />
-      <div className={`viewer-container ${isFullscreen ? 'fullscreen-mode' : ''}`} ref={viewerContainerRef}>
+      <div 
+        className={`viewer-container ${isFullscreen ? 'fullscreen-mode' : ''}`} 
+        ref={viewerContainerRef}
+        onMouseMove={handleMouseMove}
+      >
         {!isFullscreen && <div className="viewer-header">
           <button onClick={() => navigate(-1)} className="btn-back">
             ← 返回
@@ -452,7 +495,7 @@ function EpisodeViewer() {
               <div className="scene-image-container">
                 <button
                   onClick={handlePrevScene}
-                  className="btn-arrow btn-arrow-left"
+                  className={`btn-arrow btn-arrow-left ${isFullscreen && !showControls ? 'hidden' : ''}`}
                   disabled={currentScene === 0}
                   aria-label="上一个场景"
                 >
@@ -474,7 +517,7 @@ function EpisodeViewer() {
                 
                 <button
                   onClick={handleNextScene}
-                  className="btn-arrow btn-arrow-right"
+                  className={`btn-arrow btn-arrow-right ${isFullscreen && !showControls ? 'hidden' : ''}`}
                   disabled={currentScene === scenes.length - 1}
                   aria-label="下一个场景"
                 >
@@ -485,7 +528,7 @@ function EpisodeViewer() {
                 
                 <button
                   onClick={toggleFullscreen}
-                  className="btn-fullscreen"
+                  className={`btn-fullscreen ${isFullscreen && !showControls ? 'hidden' : ''}`}
                   aria-label={isFullscreen ? "退出全屏" : "进入全屏"}
                 >
                   {isFullscreen ? (
@@ -516,7 +559,7 @@ function EpisodeViewer() {
                 </div>
               </div>}
               
-              {isFullscreen && <div className="fullscreen-controls">
+              {isFullscreen && <div className={`fullscreen-controls ${!showControls ? 'hidden' : ''}`}>
                 <label className="autoplay-toggle">
                   <input
                     type="checkbox"
