@@ -21,4 +21,7 @@ public interface WorkRepository extends JpaRepository<Work, String> {
     
     @Query("SELECT w FROM Work w LEFT JOIN FETCH w.episodes WHERE w.id = :id")
     Optional<Work> findByIdWithEpisodes(String id);
+    
+    @Query("SELECT w FROM Work w WHERE w.id IN (SELECT l.workId FROM Like l WHERE l.userId = :userId) ORDER BY w.createdAt DESC")
+    List<Work> findLikedWorksByUserId(String userId);
 }

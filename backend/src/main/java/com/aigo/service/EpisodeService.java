@@ -65,7 +65,7 @@ public class EpisodeService {
         return EpisodeResponse.fromEntity(episode);
     }
     
-    @Transactional(readOnly = true)
+    @Transactional
     public Object getEpisode(String userId, String episodeId) {
         Episode episode = episodeRepository.findById(episodeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "集数不存在"));
@@ -79,6 +79,9 @@ public class EpisodeService {
         
         if (episode.getIsFree() || work.getUserId().equals(userId) || 
             (userId != null && purchaseRepository.existsByUserIdAndEpisodeId(userId, episodeId))) {
+            work.setViewsCount(work.getViewsCount() + 1);
+            workRepository.save(work);
+            
             return EpisodeResponse.fromEntity(episode);
         }
         

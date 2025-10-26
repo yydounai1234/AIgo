@@ -115,6 +115,10 @@ export const realApi = {
     return await request('/api/my-works')
   },
 
+  async getMyFavorites() {
+    return await request('/api/my-favorites')
+  },
+
   async getGallery(options = {}) {
     const { sortBy = 'latest' } = options
     return await request(`/api/gallery?sortBy=${sortBy}`)

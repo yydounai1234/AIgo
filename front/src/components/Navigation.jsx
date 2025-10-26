@@ -59,9 +59,14 @@ function Navigation({ userBalance }) {
             作品广场
           </Link>
           {isAuthenticated() && (
-            <Link to="/my-works" className={isActive('/my-works')} onClick={handleLinkClick}>
-              我的作品
-            </Link>
+            <>
+              <Link to="/my-works" className={isActive('/my-works')} onClick={handleLinkClick}>
+                我的作品
+              </Link>
+              <Link to="/my-favorites" className={isActive('/my-favorites')} onClick={handleLinkClick}>
+                我的收藏
+              </Link>
+            </>
           )}
         </div>
         
