@@ -142,5 +142,16 @@ export const realApi = {
     return await request(`/api/episodes/${episodeId}/retry`, {
       method: 'POST'
     })
+  },
+
+  async getWorkCharacters(workId) {
+    return await request(`/api/characters/work/${workId}`)
+  },
+
+  async updateCharacter(characterId, updates) {
+    return await request(`/api/characters/${characterId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates)
+    })
   }
 }

@@ -42,9 +42,16 @@ public class NovelParseService {
     @Autowired
     private TextToSpeechService textToSpeechService;
     
+    @Autowired
+    private CharacterService characterService;
+    
     private final ObjectMapper objectMapper = new ObjectMapper();
     
     public AnimeSegment parseNovelText(String text, String style, String targetAudience) {
+        return parseNovelTextWithWorkId(text, style, targetAudience, null);
+    }
+    
+    public AnimeSegment parseNovelTextWithWorkId(String text, String style, String targetAudience, String workId) {
         logger.info("[NovelParseService] Starting parseNovelText - text length: {}, style: {}, targetAudience: {}",
             text != null ? text.length() : 0, style, targetAudience);
         
@@ -77,6 +84,7 @@ public class NovelParseService {
                 segment.getCharacters() != null ? segment.getCharacters().size() : 0,
                 segment.getScenes() != null ? segment.getScenes().size() : 0);
             
+            enrichSegmentWithWorkCharacters(segment, workId);
             generateImagesForSegment(segment);
             generateAudioForSegment(segment);
             
@@ -314,5 +322,40 @@ public class NovelParseService {
         }
         
         return "neutral";
+    }
+    
+    private void enrichSegmentWithWorkCharacters(AnimeSegment segment, String workId) {
+        if (workId == null || segment.getCharacters() == null) {
+            return;
+        }
+        
+        try {
+            List<com.aigo.entity.CharacterEntity> workCharacters = characterService.getCharactersByWorkId(workId);
+            Map<String, com.aigo.entity.CharacterEntity> workCharacterMap = new HashMap<>();
+            for (com.aigo.entity.CharacterEntity workChar : workCharacters) {
+                workCharacterMap.put(workChar.getName(), workChar);
+            }
+            
+            for (Character character : segment.getCharacters()) {
+                com.aigo.entity.CharacterEntity existingChar = workCharacterMap.get(character.getName());
+                if (existingChar != null) {
+                    if (existingChar.getAppearance() != null && !existingChar.getAppearance().isEmpty()) {
+                        character.setAppearance(existingChar.getAppearance());
+                    }
+                    if (existingChar.getDescription() != null && !existingChar.getDescription().isEmpty()) {
+                        character.setDescription(existingChar.getDescription());
+                    }
+                    if (existingChar.getPersonality() != null && !existingChar.getPersonality().isEmpty()) {
+                        character.setPersonality(existingChar.getPersonality());
+                    }
+                    if (existingChar.getGender() != null && !existingChar.getGender().isEmpty()) {
+                        character.setGender(existingChar.getGender());
+                    }
+                    logger.info("[NovelParseService] Enriched character '{}' with existing work data", character.getName());
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("[NovelParseService] Failed to enrich segment with work characters", e);
+        }
     }
 }

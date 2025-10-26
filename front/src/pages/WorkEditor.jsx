@@ -10,6 +10,7 @@ function WorkEditor() {
   
   const [work, setWork] = useState(null)
   const [episodes, setEpisodes] = useState([])
+  const [characters, setCharacters] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   
@@ -50,6 +51,11 @@ function WorkEditor() {
           if (currentWork) {
             setEpisodes(currentWork.episodes || [])
           }
+        }
+        
+        const charactersResult = await api.getWorkCharacters(workId)
+        if (charactersResult.success) {
+          setCharacters(charactersResult.data || [])
         }
       } else {
         setError(workResult.error?.message || '加载失败')
@@ -285,6 +291,45 @@ function WorkEditor() {
               {actionLoading ? '保存中...' : '修改作品信息'}
             </button>
           </div>
+        </div>
+        
+        <div className="characters-section">
+          <h2>角色库</h2>
+          <p className="section-description">作品中出现的所有角色，确保角色在各集中保持一致性</p>
+          {characters.length === 0 ? (
+            <p className="empty-message">还没有角色信息，创建并处理集数后会自动提取角色</p>
+          ) : (
+            <div className="characters-grid">
+              {characters.map(character => (
+                <div key={character.id} className="character-card">
+                  <div className="character-header">
+                    <h3>{character.name}</h3>
+                    {character.isProtagonist && <span className="badge badge-primary">主角</span>}
+                    {character.gender && (
+                      <span className={`gender-badge ${character.gender}`}>
+                        {character.gender === 'male' ? '男' : character.gender === 'female' ? '女' : ''}
+                      </span>
+                    )}
+                  </div>
+                  {character.appearance && (
+                    <div className="character-field">
+                      <strong>外貌：</strong>{character.appearance}
+                    </div>
+                  )}
+                  {character.description && (
+                    <div className="character-field">
+                      <strong>描述：</strong>{character.description}
+                    </div>
+                  )}
+                  {character.personality && (
+                    <div className="character-field">
+                      <strong>性格：</strong>{character.personality}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         
         <div className="episodes-section">

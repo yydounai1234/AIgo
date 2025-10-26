@@ -61,4 +61,10 @@ public class CharacterController {
         characterService.deleteCharacter(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
+    
+    @GetMapping("/work/{workId}")
+    public ResponseEntity<ApiResponse<List<CharacterEntity>>> getCharactersByWork(@PathVariable String workId) {
+        List<CharacterEntity> characters = characterService.getCharactersByWorkId(workId);
+        return ResponseEntity.ok(ApiResponse.success(characters));
+    }
 }

@@ -15,6 +15,7 @@
 }
 
 .work-info-section,
+.characters-section,
 .episodes-section {
   background: white;
   border-radius: 12px;
@@ -24,9 +25,85 @@
 }
 
 .work-info-section h2,
+.characters-section h2,
 .episodes-section h2 {
   color: #333;
   margin-bottom: 1.5rem;
+}
+
+.section-description {
+  color: #666;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.characters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.character-card {
+  background: #f8f9fa;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.character-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #667eea;
+  transform: translateY(-2px);
+}
+
+.character-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.character-header h3 {
+  color: #333;
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.gender-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.gender-badge.male {
+  background: #cfe2ff;
+  color: #084298;
+}
+
+.gender-badge.female {
+  background: #f8d7da;
+  color: #842029;
+}
+
+.character-field {
+  color: #555;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+}
+
+.character-field:last-child {
+  margin-bottom: 0;
+}
+
+.character-field strong {
+  color: #333;
+  display: inline-block;
+  margin-right: 0.25rem;
 }
 
 .section-header {
