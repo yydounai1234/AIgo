@@ -162,6 +162,38 @@ Authorization: Bearer <JWT_TOKEN>
 
 ---
 
+### 1.4 金币充值
+
+**端点**: `POST /api/user/recharge`
+
+**描述**: 为当前用户充值金币
+
+**认证**: 必需
+
+**请求体**:
+```json
+{
+  "amount": 100
+}
+```
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": {
+    "newBalance": 600,
+    "rechargeAmount": 100
+  }
+}
+```
+
+**说明**:
+- `amount` 必须为正整数
+- 充值成功后返回新的金币余额
+
+---
+
 ## 2. 作品管理
 
 ### 2.1 创建作品
@@ -488,9 +520,338 @@ Authorization: Bearer <JWT_TOKEN>
 
 ---
 
-## 4. 作品浏览
+### 3.5 重试生成集数
 
-### 4.1 获取我的作品列表
+**端点**: `POST /api/episodes/:id/retry`
+
+**描述**: 重新生成失败或需要重新生成的集数内容
+
+**认证**: 必需
+
+**参数**:
+- `id` (path): 集数ID
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": {
+    "message": "集数重新生成任务已提交",
+    "episodeId": "string"
+  }
+}
+```
+
+**权限**: 仅创建者可重试
+
+**说明**:
+- 用于重新生成集数的场景和图片
+- 异步处理，返回任务提交成功消息
+
+---
+
+## 4. 角色管理
+
+### 4.1 创建角色
+
+**端点**: `POST /api/characters`
+
+**描述**: 为作品创建角色
+
+**认证**: 必需
+
+**请求体**:
+```json
+{
+  "workId": "string",
+  "name": "string (角色名称)",
+  "description": "string (角色描述)",
+  "appearance": "string (外貌特征)",
+  "personality": "string (性格特点)"
+}
+```
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "string",
+    "workId": "string",
+    "name": "string",
+    "description": "string",
+    "appearance": "string",
+    "personality": "string",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  }
+}
+```
+
+---
+
+### 4.2 根据 ID 获取角色
+
+**端点**: `GET /api/characters/:id`
+
+**描述**: 获取单个角色的详细信息
+
+**参数**:
+- `id` (path): 角色ID
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "string",
+    "workId": "string",
+    "name": "string",
+    "description": "string",
+    "appearance": "string",
+    "personality": "string",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  }
+}
+```
+
+---
+
+### 4.3 根据名称获取角色
+
+**端点**: `GET /api/characters/name/:name`
+
+**描述**: 根据角色名称获取角色信息
+
+**参数**:
+- `name` (path): 角色名称
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "string",
+    "workId": "string",
+    "name": "string",
+    "description": "string",
+    "appearance": "string",
+    "personality": "string",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  }
+}
+```
+
+---
+
+### 4.4 获取所有角色
+
+**端点**: `GET /api/characters`
+
+**描述**: 获取所有角色列表
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "string",
+      "workId": "string",
+      "name": "string",
+      "description": "string",
+      "appearance": "string",
+      "personality": "string",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+### 4.5 搜索角色
+
+**端点**: `GET /api/characters/search`
+
+**描述**: 根据名称搜索角色
+
+**查询参数**:
+- `name` (必需): 角色名称关键词
+
+**示例**: `GET /api/characters/search?name=主角`
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "string",
+      "workId": "string",
+      "name": "string",
+      "description": "string",
+      "appearance": "string",
+      "personality": "string",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+### 4.6 获取作品的所有角色
+
+**端点**: `GET /api/characters/work/:workId`
+
+**描述**: 获取指定作品的所有角色
+
+**参数**:
+- `workId` (path): 作品ID
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "string",
+      "workId": "string",
+      "name": "string",
+      "description": "string",
+      "appearance": "string",
+      "personality": "string",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+### 4.7 更新角色
+
+**端点**: `PUT /api/characters/:id`
+
+**描述**: 更新角色信息
+
+**认证**: 必需
+
+**参数**:
+- `id` (path): 角色ID
+
+**请求体** (所有字段可选):
+```json
+{
+  "name": "string",
+  "description": "string",
+  "appearance": "string",
+  "personality": "string"
+}
+```
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "string",
+    "workId": "string",
+    "name": "string",
+    "description": "string",
+    "appearance": "string",
+    "personality": "string",
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-02T00:00:00.000Z"
+  }
+}
+```
+
+**权限**: 仅作品创建者可更新
+
+---
+
+### 4.8 删除角色
+
+**端点**: `DELETE /api/characters/:id`
+
+**描述**: 删除角色
+
+**认证**: 必需
+
+**参数**:
+- `id` (path): 角色ID
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": {
+    "message": "角色已删除"
+  }
+}
+```
+
+**权限**: 仅作品创建者可删除
+
+---
+
+## 5. 小说解析
+
+### 5.1 解析小说文本
+
+**端点**: `POST /api/novel/parse`
+
+**描述**: 将小说文本解析为动漫分镜格式，自动提取角色和场景信息
+
+**认证**: 必需
+
+**请求体**:
+```json
+{
+  "text": "string (小说文本内容)",
+  "style": "string (可选，画面风格，如：写实、卡通、水墨等)",
+  "targetAudience": "string (可选，目标受众，如：少年、青年、成人等)"
+}
+```
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": {
+    "characters": [
+      {
+        "name": "string",
+        "description": "string",
+        "appearance": "string",
+        "personality": "string"
+      }
+    ],
+    "scenes": [
+      {
+        "id": 1,
+        "text": "string (场景描述)",
+        "characters": ["string (角色名称)"],
+        "setting": "string (场景设定)",
+        "mood": "string (氛围)"
+      }
+    ],
+    "summary": "string (内容摘要)"
+  }
+}
+```
+
+**说明**:
+- 使用 AI 自动分析小说文本，提取角色和场景信息
+- `style` 和 `targetAudience` 参数会影响生成的场景描述风格
+- 返回的数据可直接用于创建作品的集数和角色
+
+---
+
+## 6. 作品浏览
+
+### 6.1 获取我的作品列表
 
 **端点**: `GET /api/my-works`
 
@@ -531,7 +892,42 @@ Authorization: Bearer <JWT_TOKEN>
 
 ---
 
-### 4.2 获取作品广场
+### 6.2 获取我的收藏列表
+
+**端点**: `GET /api/my-favorites`
+
+**描述**: 获取当前用户收藏的所有作品
+
+**认证**: 必需
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "string",
+      "userId": "string",
+      "title": "string",
+      "description": "string",
+      "coverImage": "string",
+      "likesCount": 156,
+      "viewsCount": 1240,
+      "isLiked": true,
+      "episodeCount": 5,
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+**说明**:
+- 返回用户点赞过的所有公开作品
+- 按收藏时间倒序排列
+
+---
+
+### 6.3 获取作品广场
 
 **端点**: `GET /api/gallery`
 
@@ -570,9 +966,9 @@ Authorization: Bearer <JWT_TOKEN>
 
 ---
 
-## 5. 购买系统
+## 7. 购买系统
 
-### 5.1 购买付费集数
+### 7.1 购买付费集数
 
 **端点**: `POST /api/episodes/:id/purchase`
 
@@ -615,9 +1011,9 @@ Authorization: Bearer <JWT_TOKEN>
 
 ---
 
-## 6. 社交功能
+## 8. 社交功能
 
-### 6.1 点赞作品
+### 8.1 点赞作品
 
 **端点**: `POST /api/works/:id/like`
 
@@ -642,7 +1038,7 @@ Authorization: Bearer <JWT_TOKEN>
 
 ---
 
-### 6.2 取消点赞
+### 8.2 取消点赞
 
 **端点**: `DELETE /api/works/:id/like`
 
