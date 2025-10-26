@@ -26,6 +26,7 @@ function EpisodeViewer() {
   const imagePreloadRefs = useRef({})
   const viewerContainerRef = useRef(null)
   const hideControlsTimeoutRef = useRef(null)
+  const shouldAutoPlayNextRef = useRef(false)
 
   useEffect(() => {
     loadEpisode()
@@ -64,6 +65,7 @@ function EpisodeViewer() {
     const handleAudioEnded = () => {
       setIsPlaying(false)
       if (autoPlay && currentScene < episode.scenes.length - 1) {
+        shouldAutoPlayNextRef.current = true
         setCurrentScene(prev => prev + 1)
       }
     }
@@ -84,6 +86,21 @@ function EpisodeViewer() {
         
         audioRef.current.addEventListener('canplaythrough', () => {
           console.log('Audio ready to play for scene', currentScene)
+          
+          if (shouldAutoPlayNextRef.current && autoPlay) {
+            const playPromise = audioRef.current.play()
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => {
+                  setIsPlaying(true)
+                  shouldAutoPlayNextRef.current = false
+                })
+                .catch(err => {
+                  console.warn('Auto-play failed:', err)
+                  shouldAutoPlayNextRef.current = false
+                })
+            }
+          }
         }, { once: true })
       }
     }
