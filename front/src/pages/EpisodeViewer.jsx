@@ -56,6 +56,18 @@ function EpisodeViewer() {
         if (playPromise !== undefined) {
           playPromise.catch(err => {
             console.warn('Audio autoplay failed:', err)
+            setModal({
+              isOpen: true,
+              type: 'confirm',
+              title: '🔊 音频播放',
+              message: '由于浏览器限制，需要您点击确认后才能播放音频',
+              onConfirm: () => {
+                if (audioRef.current) {
+                  audioRef.current.play().catch(e => console.warn('Manual play failed:', e))
+                }
+                setModal(prev => ({ ...prev, isOpen: false }))
+              }
+            })
           })
         }
       }
@@ -138,6 +150,18 @@ function EpisodeViewer() {
                 if (playPromise !== undefined) {
                   playPromise.catch(err => {
                     console.warn('Audio autoplay failed:', err)
+                    setModal({
+                      isOpen: true,
+                      type: 'confirm',
+                      title: '🔊 音频播放',
+                      message: '由于浏览器限制，需要您点击确认后才能播放音频',
+                      onConfirm: () => {
+                        if (audioRef.current) {
+                          audioRef.current.play().catch(e => console.warn('Manual play failed:', e))
+                        }
+                        setModal({ ...modal, isOpen: false })
+                      }
+                    })
                   })
                 }
               }
