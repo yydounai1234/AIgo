@@ -90,9 +90,13 @@ public class EpisodeService {
         needsPurchase.put("needsPurchase", true);
         
         Map<String, Object> data = new HashMap<>();
+        data.put("id", episode.getId());
         data.put("episodeId", episode.getId());
+        data.put("episodeNumber", episode.getEpisodeNumber());
         data.put("title", episode.getTitle());
         data.put("coinPrice", episode.getCoinPrice());
+        data.put("workId", episode.getWorkId());
+        data.put("isFree", episode.getIsFree());
         needsPurchase.put("data", data);
         
         return needsPurchase;
@@ -119,9 +123,6 @@ public class EpisodeService {
         }
         if (request.getNovelText() != null) {
             episode.setNovelText(request.getNovelText());
-        }
-        if (request.getScenes() != null) {
-            episode.setScenes(request.getScenes());
         }
         if (request.getIsFree() != null) {
             episode.setIsFree(request.getIsFree());

@@ -80,13 +80,16 @@ function Navigation({ userBalance }) {
                 </svg>
                 {user?.username}
               </span>
-              <span className="coin-balance">
+              <Link to="/recharge" className="coin-balance" onClick={handleLinkClick}>
                 <svg className="coin-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
                   <path d="M12 6v12M9 9h4.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5H9m0 3h4.5c.83 0 1.5-.67 1.5-1.5S14.33 12 13.5 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                 </svg>
                 {userBalance} 金币
-              </span>
+              </Link>
+              <Link to="/recharge" className="btn-recharge" onClick={handleLinkClick}>
+                充值
+              </Link>
               <button className="btn-logout" onClick={handleLogout}>
                 退出
               </button>

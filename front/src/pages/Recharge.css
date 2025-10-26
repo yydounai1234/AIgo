@@ -1,0 +1,240 @@
+.recharge-page {
+  min-height: calc(100vh - 60px);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem 1rem;
+}
+
+.recharge-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.recharge-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.recharge-header h2 {
+  color: white;
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+.btn-back {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.recharge-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.balance-display {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.balance-icon {
+  font-size: 3rem;
+}
+
+.balance-info {
+  display: flex;
+  flex-direction: column;
+  color: white;
+}
+
+.balance-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-bottom: 0.25rem;
+}
+
+.balance-amount {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.recharge-notice {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.recharge-notice p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #856404;
+}
+
+.preset-amounts h3,
+.custom-amount h3 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.preset-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.preset-btn:hover {
+  background: #e9ecef;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.preset-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+  color: white;
+}
+
+.preset-amount {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.preset-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.custom-amount {
+  margin-bottom: 2rem;
+}
+
+.amount-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.amount-input {
+  flex: 1;
+  padding: 1rem;
+  padding-right: 4rem;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+.amount-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.input-suffix {
+  position: absolute;
+  right: 1rem;
+  color: #6c757d;
+  font-size: 1rem;
+}
+
+.recharge-action {
+  margin-bottom: 2rem;
+}
+
+.btn-large {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.recharge-info {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.recharge-info h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.recharge-info ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  list-style: none;
+}
+
+.recharge-info li {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #6c757d;
+  position: relative;
+  padding-left: 1rem;
+}
+
+.recharge-info li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #667eea;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .recharge-page {
+    padding: 1rem 0.5rem;
+  }
+
+  .recharge-card {
+    padding: 1.5rem;
+  }
+
+  .preset-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .balance-display {
+    padding: 1rem;
+  }
+
+  .balance-amount {
+    font-size: 1.5rem;
+  }
+}

@@ -90,6 +90,33 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.coin-balance:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.btn-recharge {
+  background: rgba(255, 200, 0, 0.9);
+  color: white;
+  text-decoration: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.btn-recharge:hover {
+  background: rgba(255, 200, 0, 1);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 200, 0, 0.3);
 }
 
 .mobile-menu-toggle {
@@ -219,6 +246,7 @@
 
   .nav-user .user-info,
   .nav-user .coin-balance,
+  .nav-user .btn-recharge,
   .nav-user .btn-logout,
   .nav-user .btn-login,
   .nav-user .btn-register {
@@ -231,6 +259,11 @@
 
   .nav-user .coin-balance {
     background: transparent;
+    margin-bottom: 0.5rem;
+  }
+
+  .nav-user .btn-recharge {
+    background: rgba(255, 200, 0, 0.9);
     margin-bottom: 0.5rem;
   }
 

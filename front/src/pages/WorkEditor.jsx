@@ -73,6 +73,11 @@ function WorkEditor() {
       return
     }
     
+    if (!workDescription.trim()) {
+      setError('请输入作品简介')
+      return
+    }
+    
     setActionLoading(true)
     setError('')
     
@@ -260,7 +265,7 @@ function WorkEditor() {
           </div>
           
           <div className="form-group">
-            <label>作品简介</label>
+            <label>作品简介 *</label>
             <textarea
               value={workDescription}
               onChange={(e) => setWorkDescription(e.target.value)}

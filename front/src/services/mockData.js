@@ -254,5 +254,13 @@ export const mockData = {
       return true
     }
     return false
+  },
+  
+  rechargeCoins: (amount) => {
+    if (amount > 0 && amount <= 1000) {
+      currentUser.coinBalance += amount
+      return { newBalance: currentUser.coinBalance }
+    }
+    return null
   }
 }

@@ -177,9 +177,13 @@ export const mockApi = {
             success: false,
             needsPurchase: true,
             data: {
+              id: episode.id,
               episodeId: episode.id,
+              episodeNumber: episode.episodeNumber,
               title: episode.title,
-              coinPrice: episode.coinPrice
+              coinPrice: episode.coinPrice,
+              workId: episode.workId,
+              isFree: episode.isFree
             }
           }
         }
@@ -404,6 +408,71 @@ export const mockApi = {
     return {
       success: true,
       data: { message: '取消点赞成功' }
+    }
+  },
+
+  async rechargeCoins(amount) {
+    await delay(500)
+    
+    if (!amount || amount <= 0) {
+      return {
+        success: false,
+        error: { message: '充值金额必须大于0', code: 'INVALID_AMOUNT' }
+      }
+    }
+    
+    if (amount > 1000) {
+      return {
+        success: false,
+        error: { message: '单次充值金额不能超过1000金币', code: 'AMOUNT_EXCEEDS_LIMIT' }
+      }
+    }
+    
+    const result = mockData.rechargeCoins(amount)
+    if (result) {
+      return {
+        success: true,
+        data: {
+          rechargeAmount: amount,
+          newBalance: result.newBalance
+        }
+      }
+    }
+    
+    return {
+      success: false,
+      error: { message: '充值失败', code: 'RECHARGE_FAILED' }
+    }
+  },
+
+  async retryEpisode(episodeId) {
+    await delay(500)
+    const user = mockData.getCurrentUser()
+    const episode = mockData.getEpisode(episodeId)
+    
+    if (!episode) {
+      return {
+        success: false,
+        error: { message: '集数不存在', code: 'NOT_FOUND' }
+      }
+    }
+    
+    const work = mockData.getWork(episode.workId)
+    if (!work || work.userId !== user.id) {
+      return {
+        success: false,
+        error: { message: '无权限重试此集数', code: 'FORBIDDEN' }
+      }
+    }
+    
+    const updated = mockData.updateEpisode(episodeId, { 
+      status: 'PENDING',
+      errorMessage: null
+    })
+    
+    return {
+      success: true,
+      data: updated
     }
   }
 }

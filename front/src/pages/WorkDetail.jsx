@@ -203,6 +203,8 @@ function WorkDetail() {
                     <div className="episode-meta">
                       {episode.isFree ? (
                         <span className="badge badge-free">免费</span>
+                      ) : episode.isPurchased ? (
+                        <span className="badge badge-purchased">✓ 已付费</span>
                       ) : (
                         <span className="badge badge-paid">
                           <svg className="coin-icon-sm" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

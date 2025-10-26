@@ -157,5 +157,12 @@ export const realApi = {
       method: 'PUT',
       body: JSON.stringify(updates)
     })
+  },
+
+  async rechargeCoins(amount) {
+    return await request('/api/user/recharge', {
+      method: 'POST',
+      body: JSON.stringify({ amount })
+    })
   }
 }
