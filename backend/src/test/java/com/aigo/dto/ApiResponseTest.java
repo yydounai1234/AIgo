@@ -11,51 +11,86 @@ class ApiResponseTest {
         String data = "Test Data";
         ApiResponse<String> response = ApiResponse.success(data);
 
-        assertTrue(response.isSuccess());
+        assertTrue(response.getSuccess());
         assertEquals(data, response.getData());
-        assertNull(response.getMessage());
+        assertNull(response.getError());
     }
 
     @Test
     void testSuccessWithNullData() {
         ApiResponse<String> response = ApiResponse.success(null);
 
-        assertTrue(response.isSuccess());
+        assertTrue(response.getSuccess());
         assertNull(response.getData());
+        assertNull(response.getError());
     }
 
     @Test
-    void testError() {
+    void testSuccessWithNoArgs() {
+        ApiResponse<String> response = ApiResponse.success();
+
+        assertTrue(response.getSuccess());
+        assertNull(response.getData());
+        assertNull(response.getError());
+    }
+
+    @Test
+    void testErrorWithCodeAndMessage() {
+        String errorCode = "TEST_ERROR";
         String errorMessage = "Error occurred";
-        ApiResponse<String> response = ApiResponse.error(errorMessage);
+        ApiResponse<String> response = ApiResponse.error(errorCode, errorMessage);
 
-        assertFalse(response.isSuccess());
-        assertEquals(errorMessage, response.getMessage());
+        assertFalse(response.getSuccess());
         assertNull(response.getData());
+        assertNotNull(response.getError());
+        assertEquals(errorCode, response.getError().getCode());
+        assertEquals(errorMessage, response.getError().getMessage());
     }
 
     @Test
-    void testBuilder() {
-        ApiResponse<Integer> response = ApiResponse.<Integer>builder()
-                .success(true)
-                .data(42)
-                .message("Success message")
-                .build();
+    void testErrorWithErrorCode() {
+        ApiResponse<String> response = ApiResponse.error(ErrorCode.NOT_FOUND);
 
-        assertTrue(response.isSuccess());
-        assertEquals(42, response.getData());
-        assertEquals("Success message", response.getMessage());
+        assertFalse(response.getSuccess());
+        assertNull(response.getData());
+        assertNotNull(response.getError());
+        assertEquals(ErrorCode.NOT_FOUND.getCode(), response.getError().getCode());
+        assertEquals(ErrorCode.NOT_FOUND.getMessage(), response.getError().getMessage());
+    }
+
+    @Test
+    void testErrorWithErrorCodeAndCustomMessage() {
+        String customMessage = "Custom error message";
+        ApiResponse<String> response = ApiResponse.error(ErrorCode.BAD_REQUEST, customMessage);
+
+        assertFalse(response.getSuccess());
+        assertNull(response.getData());
+        assertNotNull(response.getError());
+        assertEquals(ErrorCode.BAD_REQUEST.getCode(), response.getError().getCode());
+        assertEquals(customMessage, response.getError().getMessage());
+    }
+
+    @Test
+    void testConstructorWithAllArgs() {
+        ErrorInfo errorInfo = new ErrorInfo("CODE", "Message");
+        ApiResponse<Integer> response = new ApiResponse<>(false, null, errorInfo);
+
+        assertFalse(response.getSuccess());
+        assertNull(response.getData());
+        assertEquals(errorInfo, response.getError());
     }
 
     @Test
     void testSettersAndGetters() {
         ApiResponse<String> response = new ApiResponse<>();
+        ErrorInfo errorInfo = new ErrorInfo("ERROR_CODE", "Error message");
+        
         response.setSuccess(true);
         response.setData("test");
-        response.setMessage("message");
+        response.setError(errorInfo);
 
-        assertTrue(response.isSuccess());
+        assertTrue(response.getSuccess());
         assertEquals("test", response.getData());
-        assertEquals("message", response.getMessage());
+        assertEquals(errorInfo, response.getError());
     }
 }
