@@ -236,6 +236,10 @@
     padding: 1rem 0;
   }
 
+  .nav-links.mobile-open ~ .nav-user {
+    top: calc(100% + 16rem);
+  }
+  
   .nav-links.mobile-open ~ .nav-user.mobile-open {
     top: calc(100% + 10rem);
   }
