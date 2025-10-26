@@ -177,9 +177,13 @@ export const mockApi = {
             success: false,
             needsPurchase: true,
             data: {
+              id: episode.id,
               episodeId: episode.id,
+              episodeNumber: episode.episodeNumber,
               title: episode.title,
-              coinPrice: episode.coinPrice
+              coinPrice: episode.coinPrice,
+              workId: episode.workId,
+              isFree: episode.isFree
             }
           }
         }
