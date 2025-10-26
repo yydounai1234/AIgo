@@ -86,7 +86,7 @@ class GlobalExceptionHandlerTest {
     void testHandleGenericException() {
         Exception exception = new RuntimeException("Unexpected error");
 
-        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleGenericException(exception);
+        ResponseEntity<ApiResponse<Void>> response = exceptionHandler.handleException(exception);
 
         assertNotNull(response);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
