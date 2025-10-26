@@ -85,6 +85,29 @@ function EpisodeViewer() {
       }
     }
     
+    const handleEmptyTextScene = () => {
+      if (autoPlay && episode?.scenes && currentScene < episode.scenes.length - 1) {
+        const nextScene = currentScene + 1
+        setTimeout(() => {
+          setCurrentScene(nextScene)
+          
+          setTimeout(() => {
+            if (audioRef.current && episode?.scenes?.[nextScene]?.audioUrl) {
+              const playPromise = audioRef.current.play()
+              if (playPromise !== undefined) {
+                playPromise.then(() => {
+                  setIsPlaying(true)
+                }).catch(err => {
+                  console.warn('Auto-play failed for next scene:', err)
+                  setIsPlaying(false)
+                })
+              }
+            }
+          }, 100)
+        }, 3000)
+      }
+    }
+    
     const handlePlay = () => setIsPlaying(true)
     const handlePause = () => setIsPlaying(false)
     
@@ -99,6 +122,10 @@ function EpisodeViewer() {
       audioRef.current.addEventListener('ended', handleAudioEnded)
       audioRef.current.addEventListener('play', handlePlay)
       audioRef.current.addEventListener('pause', handlePause)
+    }
+    
+    if (!currentSceneData?.text || currentSceneData?.text === '' || currentSceneData?.text === '无') {
+      handleEmptyTextScene()
     }
     
     preloadAdjacentImages()
