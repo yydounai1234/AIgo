@@ -105,9 +105,6 @@ public class EpisodeService {
         if (request.getNovelText() != null) {
             episode.setNovelText(request.getNovelText());
         }
-        if (request.getScenes() != null) {
-            episode.setScenes(request.getScenes());
-        }
         if (request.getIsFree() != null) {
             episode.setIsFree(request.getIsFree());
         }
