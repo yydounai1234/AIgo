@@ -424,8 +424,8 @@ function EpisodeViewer() {
   return (
     <div className="episode-viewer-page">
       <audio ref={audioRef} preload="auto" autoPlay muted={false} />
-      <div className="viewer-container" ref={viewerContainerRef}>
-        <div className="viewer-header">
+      <div className={`viewer-container ${isFullscreen ? 'fullscreen-mode' : ''}`} ref={viewerContainerRef}>
+        {!isFullscreen && <div className="viewer-header">
           <button onClick={() => navigate(-1)} className="btn-back">
             ← 返回
           </button>
@@ -440,7 +440,7 @@ function EpisodeViewer() {
               <span className="badge badge-primary">{episode.coinPrice} 💰</span>
             )}
           </div>
-        </div>
+        </div>}
 
         {scenes.length === 0 ? (
           <div className="no-scenes">
@@ -500,7 +500,7 @@ function EpisodeViewer() {
                 </button>
               </div>
               
-              <div className="scene-controls-row">
+              {!isFullscreen && <div className="scene-controls-row">
                 <div className="playback-controls">
                   <label className="autoplay-toggle">
                     <input
@@ -514,17 +514,28 @@ function EpisodeViewer() {
                     {autoPlay ? '✓ 音频结束后自动播放下一场景' : '手动点击箭头按钮切换'}
                   </p>
                 </div>
-              </div>
+              </div>}
               
-              <div className="scene-text">
+              {isFullscreen && <div className="fullscreen-controls">
+                <label className="autoplay-toggle">
+                  <input
+                    type="checkbox"
+                    checked={autoPlay}
+                    onChange={(e) => setAutoPlay(e.target.checked)}
+                  />
+                  <span>自动播放</span>
+                </label>
+              </div>}
+              
+              {!isFullscreen && <div className="scene-text">
                 <div className="scene-number">
                   场景 {currentScene + 1} / {scenes.length}
                 </div>
                 <p className="scene-content">{currentSceneData?.text}</p>
-              </div>
+              </div>}
             </div>
 
-            <div className="viewer-controls">
+            {!isFullscreen && <div className="viewer-controls">
               <div className="scene-progress">
                 <div className="progress-bar">
                   <div 
@@ -536,9 +547,9 @@ function EpisodeViewer() {
                   {currentScene + 1} / {scenes.length}
                 </span>
               </div>
-            </div>
+            </div>}
 
-            <div className="scene-thumbnails">
+            {!isFullscreen && <div className="scene-thumbnails">
               {scenes.map((scene, index) => (
                 <div
                   key={index}
@@ -553,7 +564,7 @@ function EpisodeViewer() {
                   )}
                 </div>
               ))}
-            </div>
+            </div>}
           </>
         )}
       </div>
