@@ -38,6 +38,9 @@ public class SceneEntity {
     @Column(columnDefinition = "TEXT")
     private String action;
     
+    @Column(columnDefinition = "TEXT")
+    private String content;
+    
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

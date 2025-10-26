@@ -14,6 +14,8 @@ public interface CharacterRepository extends JpaRepository<CharacterEntity, Long
     
     List<CharacterEntity> findByNameContaining(String name);
     
+    List<CharacterEntity> findByNameContainingIgnoreCase(String name);
+    
     List<CharacterEntity> findByWorkId(String workId);
     
     Optional<CharacterEntity> findByWorkIdAndName(String workId, String name);
