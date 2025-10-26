@@ -216,11 +216,12 @@ public class NovelParseService {
         prompt.append("   - **显著特征**: 疤痕、纹身、配饰或其他独特标记\n");
         prompt.append("   - 性格: 性格特点\n");
         prompt.append("   - 性别: male/female/unknown\n");
-        prompt.append("   **重要**: 如果文本中使用了代词（我、你、她、他、它），请根据上下文识别代词指代的具体角色名称\n");
+        prompt.append("   **重要**: 如果文本中使用了第一人称代词"我"，请根据上下文识别代词指代的具体角色名称\n");
+        prompt.append("   **注意**: 只有在旁白/叙述文本中的第一人称"我"才应该被识别为角色的别名。对话中的"我"不应作为别名处理。\n");
         prompt.append("2. 场景分镜 - 重要: 每个角色的每句对话都应该是一个独立的场景,用于生成独立的漫画图片\n");
         prompt.append("   - 场景编号: 连续递增的数字\n");
-        prompt.append("   - 角色: **必须使用具体的角色名称，不要使用代词（我、你、她、他、它）**\n");
-        prompt.append("   - 如果文本中某句对话使用了代词，请根据上下文和已知角色信息，将代词替换为实际的角色名称\n");
+        prompt.append("   - 角色: **必须使用具体的角色名称，不要使用代词**\n");
+        prompt.append("   - 如果文本中使用了代词，请根据上下文和已知角色信息，将代词替换为实际的角色名称\n");
         prompt.append("   - 对话: 该角色在这个场景中说的话\n");
         prompt.append("   - 画面描述: 这个场景的视觉画面,包括人物动作、表情、背景等\n");
         prompt.append("   - 氛围: 场景的情绪氛围\n");
@@ -259,8 +260,9 @@ public class NovelParseService {
         prompt.append("}\n\n");
         prompt.append("注意事项:\n");
         prompt.append("1. 每个角色的每句对话都必须是一个独立的场景对象,这样才能为每句对话生成对应的漫画图片\n");
-        prompt.append("2. **关键**: 场景中的character字段必须使用具体的角色名称，绝对不能使用代词（我、你、她、他、它）\n");
-        prompt.append("3. 如果文本中角色用代词说话，请分析上下文确定是哪个角色，然后用该角色的真实名称\n");
+        prompt.append("2. **关键**: 场景中的character字段必须使用具体的角色名称，绝对不能使用代词\n");
+        prompt.append("3. 如果文本中使用了代词，请分析上下文确定是哪个角色，然后用该角色的真实名称\n");
+        prompt.append("4. **别名识别规则**: 只有旁白/叙述部分的第一人称"我"才识别为角色别名，对话中的"我"不作为别名\n");
         
         return prompt.toString();
     }
@@ -466,7 +468,7 @@ public class NovelParseService {
             return;
         }
         
-        Set<String> pronouns = new HashSet<>(Arrays.asList("我", "你", "她", "他", "它"));
+        Set<String> pronouns = new HashSet<>(Arrays.asList("我"));
         Map<String, String> pronounToCharacter = new HashMap<>();
         
         if (workCharacters != null && !workCharacters.isEmpty()) {
