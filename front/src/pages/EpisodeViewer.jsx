@@ -276,14 +276,29 @@ function EpisodeViewer() {
   }
 
   const togglePlayPause = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause()
-      } else {
-        audioRef.current.play().catch(err => {
-          console.warn('Play failed:', err)
-        })
-      }
+    if (!audioRef.current) return
+    
+    const currentSceneData = episode?.scenes?.[currentScene]
+    if (!currentSceneData?.audioUrl || currentSceneData?.text === '无') {
+      console.warn('No audio available for current scene')
+      return
+    }
+    
+    // Ensure audio has been loaded
+    if (!audioRef.current.src || audioRef.current.src === '') {
+      audioRef.current.src = currentSceneData.audioUrl
+      audioRef.current.load()
+    }
+    
+    if (isPlaying) {
+      audioRef.current.pause()
+    } else {
+      audioRef.current.play().then(() => {
+        setIsPlaying(true)
+      }).catch(err => {
+        console.warn('Play failed:', err)
+        setIsPlaying(false)
+      })
     }
   }
 
