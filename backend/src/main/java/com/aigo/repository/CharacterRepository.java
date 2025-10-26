@@ -13,4 +13,6 @@ public interface CharacterRepository extends JpaRepository<CharacterEntity, Long
     Optional<CharacterEntity> findByName(String name);
     
     List<CharacterEntity> findByNameContaining(String name);
+    
+    List<CharacterEntity> findByNameContainingIgnoreCase(String name);
 }
