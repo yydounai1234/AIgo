@@ -345,7 +345,7 @@ function EpisodeViewer() {
             )}
             <div className="purchase-actions">
               <button
-                onClick={handlePurchase}
+                onClick={isInsufficient ? () => navigate('/recharge') : handlePurchase}
                 className="btn btn-primary btn-large"
                 disabled={purchasing}
               >
