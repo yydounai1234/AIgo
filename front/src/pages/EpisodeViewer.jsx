@@ -17,6 +17,7 @@ function EpisodeViewer() {
   const [retrying, setRetrying] = useState(false)
   const [currentScene, setCurrentScene] = useState(0)
   const [autoPlay, setAutoPlay] = useState(true)
+  const [isPlaying, setIsPlaying] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [showControls, setShowControls] = useState(true)
   const [modal, setModal] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null })
@@ -65,6 +66,9 @@ function EpisodeViewer() {
       }
     }
     
+    const handlePlay = () => setIsPlaying(true)
+    const handlePause = () => setIsPlaying(false)
+    
     const currentSceneData = episode?.scenes?.[currentScene]
     if (currentSceneData?.audioUrl && currentSceneData?.text !== '无') {
       const audioUrl = currentSceneData.audioUrl
@@ -73,11 +77,16 @@ function EpisodeViewer() {
         audioRef.current.load()
         
         audioRef.current.addEventListener('ended', handleAudioEnded)
+        audioRef.current.addEventListener('play', handlePlay)
+        audioRef.current.addEventListener('pause', handlePause)
         
         const playPromise = audioRef.current.play()
         if (playPromise !== undefined) {
-          playPromise.catch(err => {
+          playPromise.then(() => {
+            setIsPlaying(true)
+          }).catch(err => {
             console.warn('Audio autoplay failed:', err)
+            setIsPlaying(false)
             setModal({
               isOpen: true,
               type: 'confirm',
@@ -85,7 +94,9 @@ function EpisodeViewer() {
               message: '由于浏览器限制，需要您点击确认后才能播放音频',
               onConfirm: () => {
                 if (audioRef.current) {
-                  audioRef.current.play().catch(e => console.warn('Manual play failed:', e))
+                  audioRef.current.play().then(() => {
+                    setIsPlaying(true)
+                  }).catch(e => console.warn('Manual play failed:', e))
                 }
                 setModal(prev => ({ ...prev, isOpen: false }))
               }
@@ -101,6 +112,8 @@ function EpisodeViewer() {
       if (audioRef.current) {
         audioRef.current.pause()
         audioRef.current.removeEventListener('ended', handleAudioEnded)
+        audioRef.current.removeEventListener('play', handlePlay)
+        audioRef.current.removeEventListener('pause', handlePause)
       }
     }
   }, [currentScene, episode?.scenes, autoPlay])
@@ -310,6 +323,18 @@ function EpisodeViewer() {
       }
     } catch (err) {
       console.error('Fullscreen error:', err)
+    }
+  }
+
+  const togglePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause()
+      } else {
+        audioRef.current.play().catch(err => {
+          console.warn('Play failed:', err)
+        })
+      }
     }
   }
 
@@ -526,6 +551,22 @@ function EpisodeViewer() {
                   </svg>
                 </button>
                 
+                <button
+                  onClick={togglePlayPause}
+                  className={`btn-play-pause ${isFullscreen && !showControls ? 'hidden' : ''}`}
+                  aria-label={isPlaying ? "暂停" : "播放"}
+                >
+                  {isPlaying ? (
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  )}
+                </button>
+
                 <button
                   onClick={toggleFullscreen}
                   className={`btn-fullscreen ${isFullscreen && !showControls ? 'hidden' : ''}`}
