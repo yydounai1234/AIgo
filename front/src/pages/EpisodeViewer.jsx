@@ -18,17 +18,31 @@ function EpisodeViewer() {
   const [purchasing, setPurchasing] = useState(false)
   const [retrying, setRetrying] = useState(false)
   const [currentScene, setCurrentScene] = useState(0)
+  const [autoPlay, setAutoPlay] = useState(true)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [showControls, setShowControls] = useState(true)
   const [modal, setModal] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null })
   const pollingIntervalRef = useRef(null)
   const audioRef = useRef(null)
   const imagePreloadRefs = useRef({})
+  const viewerContainerRef = useRef(null)
+  const hideControlsTimeoutRef = useRef(null)
 
   useEffect(() => {
     loadEpisode()
+    
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+    
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    
     return () => {
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current)
       }
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
     }
   }, [episodeId])
 
@@ -46,33 +60,45 @@ function EpisodeViewer() {
     if (audioRef.current) {
       audioRef.current.pause()
       audioRef.current.currentTime = 0
+      setIsPlaying(false)
     }
     
-    const currentSceneData = episode?.scenes?.[currentScene]
-    if (currentSceneData?.audioUrl && currentSceneData?.text !== '无') {
-      const audioUrl = currentSceneData.audioUrl
-      if (audioRef.current) {
-        audioRef.current.src = audioUrl
-        audioRef.current.load()
-        const playPromise = audioRef.current.play()
-        if (playPromise !== undefined) {
-          playPromise.catch(err => {
-            console.warn('Audio autoplay failed:', err)
-            setModal({
-              isOpen: true,
-              type: 'confirm',
-              title: '🔊 音频播放',
-              message: '由于浏览器限制，需要您点击确认后才能播放音频',
-              onConfirm: () => {
-                if (audioRef.current) {
-                  audioRef.current.play().catch(e => console.warn('Manual play failed:', e))
-                }
-                setModal(prev => ({ ...prev, isOpen: false }))
-              }
-            })
-          })
-        }
+    const handleAudioEnded = () => {
+      setIsPlaying(false)
+      if (autoPlay && episode?.scenes && currentScene < episode.scenes.length - 1) {
+        const nextScene = currentScene + 1
+        setCurrentScene(nextScene)
+        
+        setTimeout(() => {
+          if (audioRef.current && episode?.scenes?.[nextScene]?.audioUrl) {
+            const playPromise = audioRef.current.play()
+            if (playPromise !== undefined) {
+              playPromise.then(() => {
+                setIsPlaying(true)
+              }).catch(err => {
+                console.warn('Auto-play failed for next scene:', err)
+                setIsPlaying(false)
+              })
+            }
+          }
+        }, 100)
       }
+    }
+    
+    const handlePlay = () => setIsPlaying(true)
+    const handlePause = () => setIsPlaying(false)
+    
+    const currentSceneData = episode?.scenes?.[currentScene]
+    
+    if (audioRef.current) {
+      if (currentSceneData?.audioUrl && currentSceneData?.text !== '无') {
+        audioRef.current.src = currentSceneData.audioUrl
+        audioRef.current.load()
+      }
+      
+      audioRef.current.addEventListener('ended', handleAudioEnded)
+      audioRef.current.addEventListener('play', handlePlay)
+      audioRef.current.addEventListener('pause', handlePause)
     }
     
     preloadAdjacentImages()
@@ -80,9 +106,12 @@ function EpisodeViewer() {
     return () => {
       if (audioRef.current) {
         audioRef.current.pause()
+        audioRef.current.removeEventListener('ended', handleAudioEnded)
+        audioRef.current.removeEventListener('play', handlePlay)
+        audioRef.current.removeEventListener('pause', handlePause)
       }
     }
-  }, [currentScene, episode?.scenes])
+  }, [currentScene, episode?.scenes, autoPlay])
 
   const preloadAdjacentImages = () => {
     if (!episode?.scenes) return
@@ -141,35 +170,6 @@ function EpisodeViewer() {
           }
         }
         
-        if (result.data.scenes && result.data.scenes.length > 0) {
-          const firstScene = result.data.scenes[0]
-          if (firstScene.audioUrl && firstScene.text !== '无') {
-            setTimeout(() => {
-              if (audioRef.current) {
-                audioRef.current.src = firstScene.audioUrl
-                audioRef.current.load()
-                const playPromise = audioRef.current.play()
-                if (playPromise !== undefined) {
-                  playPromise.catch(err => {
-                    console.warn('Audio autoplay failed:', err)
-                    setModal({
-                      isOpen: true,
-                      type: 'confirm',
-                      title: '🔊 音频播放',
-                      message: '由于浏览器限制，需要您点击确认后才能播放音频',
-                      onConfirm: () => {
-                        if (audioRef.current) {
-                          audioRef.current.play().catch(e => console.warn('Manual play failed:', e))
-                        }
-                        setModal({ ...modal, isOpen: false })
-                      }
-                    })
-                  })
-                }
-              }
-            }, 100)
-          }
-        }
       } else {
         setError(result.error?.message || '加载失败')
       }
@@ -312,6 +312,85 @@ function EpisodeViewer() {
     }
   }
 
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await viewerContainerRef.current?.requestFullscreen()
+      } else {
+        await document.exitFullscreen()
+      }
+    } catch (err) {
+      console.error('Fullscreen error:', err)
+    }
+  }
+
+  const togglePlayPause = () => {
+    if (!audioRef.current) return
+    
+    const currentSceneData = episode?.scenes?.[currentScene]
+    if (!currentSceneData?.audioUrl || currentSceneData?.text === '无') {
+      console.warn('No audio available for current scene')
+      return
+    }
+    
+    if (isPlaying) {
+      audioRef.current.pause()
+      setIsPlaying(false)
+    } else {
+      if (!audioRef.current.src || audioRef.current.src === '') {
+        audioRef.current.src = currentSceneData.audioUrl
+        audioRef.current.load()
+      }
+      
+      const playPromise = audioRef.current.play()
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          setIsPlaying(true)
+        }).catch(err => {
+          console.warn('Play failed:', err)
+          setIsPlaying(false)
+        })
+      }
+    }
+  }
+
+  const resetHideControlsTimer = () => {
+    if (hideControlsTimeoutRef.current) {
+      clearTimeout(hideControlsTimeoutRef.current)
+    }
+
+    setShowControls(true)
+
+    if (isFullscreen) {
+      hideControlsTimeoutRef.current = setTimeout(() => {
+        setShowControls(false)
+      }, 3000)
+    }
+  }
+
+  const handleMouseMove = () => {
+    if (isFullscreen) {
+      resetHideControlsTimer()
+    }
+  }
+
+  useEffect(() => {
+    if (isFullscreen) {
+      resetHideControlsTimer()
+    } else {
+      setShowControls(true)
+      if (hideControlsTimeoutRef.current) {
+        clearTimeout(hideControlsTimeoutRef.current)
+      }
+    }
+
+    return () => {
+      if (hideControlsTimeoutRef.current) {
+        clearTimeout(hideControlsTimeoutRef.current)
+      }
+    }
+  }, [isFullscreen])
+
   if (loading) {
     return <div className="loading-page">加载中...</div>
   }
@@ -444,9 +523,13 @@ function EpisodeViewer() {
 
   return (
     <div className="episode-viewer-page">
-      <audio ref={audioRef} preload="auto" autoPlay muted={false} />
-      <div className="viewer-container">
-        <div className="viewer-header">
+      <audio ref={audioRef} preload="auto" muted={false} />
+      <div 
+        className={`viewer-container ${isFullscreen ? 'fullscreen-mode' : ''}`} 
+        ref={viewerContainerRef}
+        onMouseMove={handleMouseMove}
+      >
+        {!isFullscreen && <div className="viewer-header">
           <button onClick={() => navigate(-1)} className="btn-back">
             ← 返回
           </button>
@@ -461,7 +544,7 @@ function EpisodeViewer() {
               <span className="badge badge-primary">{episode.coinPrice} 💰</span>
             )}
           </div>
-        </div>
+        </div>}
 
         {scenes.length === 0 ? (
           <div className="no-scenes">
@@ -470,34 +553,109 @@ function EpisodeViewer() {
         ) : (
           <>
             <div className="scene-viewer">
-              <div className="scene-image">
-                {currentSceneData?.imageUrl ? (
-                  <img key={currentScene} src={currentSceneData.imageUrl} alt={`场景 ${currentScene + 1}`} />
-                ) : (
-                  <div className="scene-placeholder">
-                    <span>🎬</span>
-                    <p>场景 {currentScene + 1}</p>
-                  </div>
-                )}
+              <div className="scene-image-container">
+                <button
+                  onClick={handlePrevScene}
+                  className={`btn-arrow btn-arrow-left ${isFullscreen && !showControls ? 'hidden' : ''}`}
+                  disabled={currentScene === 0}
+                  aria-label="上一个场景"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                  </svg>
+                </button>
+                
+                <div className="scene-image">
+                  {currentSceneData?.imageUrl ? (
+                    <img key={currentScene} src={currentSceneData.imageUrl} alt={`场景 ${currentScene + 1}`} />
+                  ) : (
+                    <div className="scene-placeholder">
+                      <span>🎬</span>
+                      <p>场景 {currentScene + 1}</p>
+                    </div>
+                  )}
+                </div>
+                
+                <button
+                  onClick={handleNextScene}
+                  className={`btn-arrow btn-arrow-right ${isFullscreen && !showControls ? 'hidden' : ''}`}
+                  disabled={currentScene === scenes.length - 1}
+                  aria-label="下一个场景"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                  </svg>
+                </button>
+                
+                <button
+                  onClick={togglePlayPause}
+                  className={`btn-play-pause ${isFullscreen && !showControls ? 'hidden' : ''}`}
+                  aria-label={isPlaying ? "暂停" : "播放"}
+                >
+                  {isPlaying ? (
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  )}
+                </button>
+
+                <button
+                  onClick={toggleFullscreen}
+                  className={`btn-fullscreen ${isFullscreen && !showControls ? 'hidden' : ''}`}
+                  aria-label={isFullscreen ? "退出全屏" : "进入全屏"}
+                >
+                  {isFullscreen ? (
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                    </svg>
+                  )}
+                </button>
               </div>
               
-              <div className="scene-text">
+              {!isFullscreen && <div className="scene-controls-row">
+                <div className="playback-controls">
+                  <label className="autoplay-toggle">
+                    <input
+                      type="checkbox"
+                      checked={autoPlay}
+                      onChange={(e) => setAutoPlay(e.target.checked)}
+                    />
+                    <span>自动播放</span>
+                  </label>
+                  <p className="playback-tip">
+                    {autoPlay ? '✓ 音频结束后自动切换到下一场景' : '音频结束后需手动切换场景'}
+                  </p>
+                </div>
+              </div>}
+              
+              {isFullscreen && <div className={`fullscreen-controls ${!showControls ? 'hidden' : ''}`}>
+                <label className="autoplay-toggle">
+                  <input
+                    type="checkbox"
+                    checked={autoPlay}
+                    onChange={(e) => setAutoPlay(e.target.checked)}
+                  />
+                  <span>自动播放</span>
+                </label>
+              </div>}
+              
+              {!isFullscreen && <div className="scene-text">
                 <div className="scene-number">
                   场景 {currentScene + 1} / {scenes.length}
                 </div>
                 <p className="scene-content">{currentSceneData?.text}</p>
-              </div>
+              </div>}
             </div>
 
-            <div className="viewer-controls">
-              <button
-                onClick={handlePrevScene}
-                className="btn btn-control"
-                disabled={currentScene === 0}
-              >
-                ← 上一个场景
-              </button>
-              
+            {!isFullscreen && <div className="viewer-controls">
               <div className="scene-progress">
                 <div className="progress-bar">
                   <div 
@@ -509,17 +667,9 @@ function EpisodeViewer() {
                   {currentScene + 1} / {scenes.length}
                 </span>
               </div>
-              
-              <button
-                onClick={handleNextScene}
-                className="btn btn-control"
-                disabled={currentScene === scenes.length - 1}
-              >
-                下一个场景 →
-              </button>
-            </div>
+            </div>}
 
-            <div className="scene-thumbnails">
+            {!isFullscreen && <div className="scene-thumbnails">
               {scenes.map((scene, index) => (
                 <div
                   key={index}
@@ -534,7 +684,7 @@ function EpisodeViewer() {
                   )}
                 </div>
               ))}
-            </div>
+            </div>}
           </>
         )}
       </div>
