@@ -88,16 +88,15 @@ function EpisodeViewer() {
     
     const currentSceneData = episode?.scenes?.[currentScene]
     
-    if (currentSceneData?.audioUrl && currentSceneData?.text !== '无') {
-      const audioUrl = currentSceneData.audioUrl
-      if (audioRef.current) {
-        audioRef.current.src = audioUrl
+    if (audioRef.current) {
+      if (currentSceneData?.audioUrl && currentSceneData?.text !== '无') {
+        audioRef.current.src = currentSceneData.audioUrl
         audioRef.current.load()
-        
-        audioRef.current.addEventListener('ended', handleAudioEnded)
-        audioRef.current.addEventListener('play', handlePlay)
-        audioRef.current.addEventListener('pause', handlePause)
       }
+      
+      audioRef.current.addEventListener('ended', handleAudioEnded)
+      audioRef.current.addEventListener('play', handlePlay)
+      audioRef.current.addEventListener('pause', handlePause)
     }
     
     preloadAdjacentImages()
