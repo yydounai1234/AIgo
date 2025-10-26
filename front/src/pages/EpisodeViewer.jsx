@@ -47,12 +47,21 @@ function EpisodeViewer() {
       audioRef.current.currentTime = 0
     }
     
+    const handleAudioEnded = () => {
+      if (autoPlay && currentScene < episode.scenes.length - 1) {
+        setCurrentScene(prev => prev + 1)
+      }
+    }
+    
     const currentSceneData = episode?.scenes?.[currentScene]
     if (currentSceneData?.audioUrl && currentSceneData?.text !== '无') {
       const audioUrl = currentSceneData.audioUrl
       if (audioRef.current) {
         audioRef.current.src = audioUrl
         audioRef.current.load()
+        
+        audioRef.current.addEventListener('ended', handleAudioEnded)
+        
         const playPromise = audioRef.current.play()
         if (playPromise !== undefined) {
           playPromise.catch(err => {
@@ -79,36 +88,10 @@ function EpisodeViewer() {
     return () => {
       if (audioRef.current) {
         audioRef.current.pause()
-      }
-    }
-  }, [currentScene, episode?.scenes])
-
-  useEffect(() => {
-    if (!autoPlay || !episode?.scenes || currentScene >= episode.scenes.length - 1) {
-      return
-    }
-
-    const currentSceneData = episode.scenes[currentScene]
-    if (!currentSceneData?.audioUrl || currentSceneData?.text === '无') {
-      return
-    }
-
-    const handleAudioEnded = () => {
-      if (autoPlay && currentScene < episode.scenes.length - 1) {
-        setCurrentScene(prev => prev + 1)
-      }
-    }
-
-    if (audioRef.current) {
-      audioRef.current.addEventListener('ended', handleAudioEnded)
-    }
-
-    return () => {
-      if (audioRef.current) {
         audioRef.current.removeEventListener('ended', handleAudioEnded)
       }
     }
-  }, [autoPlay, currentScene, episode?.scenes])
+  }, [currentScene, episode?.scenes, autoPlay])
 
   const preloadAdjacentImages = () => {
     if (!episode?.scenes) return
