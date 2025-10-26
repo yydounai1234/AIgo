@@ -16,7 +16,7 @@ function EpisodeViewer() {
   const [purchasing, setPurchasing] = useState(false)
   const [retrying, setRetrying] = useState(false)
   const [currentScene, setCurrentScene] = useState(0)
-  const [autoPlay, setAutoPlay] = useState(false)
+  const [autoPlay, setAutoPlay] = useState(true)
   const [modal, setModal] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null })
   const pollingIntervalRef = useRef(null)
   const audioRef = useRef(null)
@@ -444,15 +444,55 @@ function EpisodeViewer() {
         ) : (
           <>
             <div className="scene-viewer">
-              <div className="scene-image">
-                {currentSceneData?.imageUrl ? (
-                  <img key={currentScene} src={currentSceneData.imageUrl} alt={`场景 ${currentScene + 1}`} />
-                ) : (
-                  <div className="scene-placeholder">
-                    <span>🎬</span>
-                    <p>场景 {currentScene + 1}</p>
-                  </div>
-                )}
+              <div className="scene-image-container">
+                <button
+                  onClick={handlePrevScene}
+                  className="btn-arrow btn-arrow-left"
+                  disabled={currentScene === 0}
+                  aria-label="上一个场景"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                  </svg>
+                </button>
+                
+                <div className="scene-image">
+                  {currentSceneData?.imageUrl ? (
+                    <img key={currentScene} src={currentSceneData.imageUrl} alt={`场景 ${currentScene + 1}`} />
+                  ) : (
+                    <div className="scene-placeholder">
+                      <span>🎬</span>
+                      <p>场景 {currentScene + 1}</p>
+                    </div>
+                  )}
+                </div>
+                
+                <button
+                  onClick={handleNextScene}
+                  className="btn-arrow btn-arrow-right"
+                  disabled={currentScene === scenes.length - 1}
+                  aria-label="下一个场景"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="scene-controls-row">
+                <div className="playback-controls">
+                  <label className="autoplay-toggle">
+                    <input
+                      type="checkbox"
+                      checked={autoPlay}
+                      onChange={(e) => setAutoPlay(e.target.checked)}
+                    />
+                    <span>自动播放</span>
+                  </label>
+                  <p className="playback-tip">
+                    {autoPlay ? '✓ 音频结束后自动播放下一场景' : '手动点击箭头按钮切换'}
+                  </p>
+                </div>
               </div>
               
               <div className="scene-text">
@@ -464,14 +504,6 @@ function EpisodeViewer() {
             </div>
 
             <div className="viewer-controls">
-              <button
-                onClick={handlePrevScene}
-                className="btn btn-control"
-                disabled={currentScene === 0}
-              >
-                ← 上一个场景
-              </button>
-              
               <div className="scene-progress">
                 <div className="progress-bar">
                   <div 
@@ -483,28 +515,6 @@ function EpisodeViewer() {
                   {currentScene + 1} / {scenes.length}
                 </span>
               </div>
-              
-              <button
-                onClick={handleNextScene}
-                className="btn btn-control"
-                disabled={currentScene === scenes.length - 1}
-              >
-                下一个场景 →
-              </button>
-            </div>
-
-            <div className="playback-controls">
-              <label className="autoplay-toggle">
-                <input
-                  type="checkbox"
-                  checked={autoPlay}
-                  onChange={(e) => setAutoPlay(e.target.checked)}
-                />
-                <span>自动播放</span>
-              </label>
-              <p className="playback-tip">
-                {autoPlay ? '✓ 音频结束后自动播放下一场景' : '手动点击「下一个场景」按钮切换'}
-              </p>
             </div>
 
             <div className="scene-thumbnails">
