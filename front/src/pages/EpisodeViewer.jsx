@@ -19,6 +19,7 @@ function EpisodeViewer() {
   const [modal, setModal] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null })
   const pollingIntervalRef = useRef(null)
   const audioRef = useRef(null)
+  const imagePreloadRefs = useRef({})
 
   useEffect(() => {
     loadEpisode()
@@ -45,15 +46,34 @@ function EpisodeViewer() {
       audioRef.current.currentTime = 0
     }
     
-    if (episode?.scenes && episode.scenes[currentScene]?.audioUrl) {
-      const audioUrl = episode.scenes[currentScene].audioUrl
+    const currentSceneData = episode?.scenes?.[currentScene]
+    if (currentSceneData?.audioUrl && currentSceneData?.text !== '无') {
+      const audioUrl = currentSceneData.audioUrl
       if (audioRef.current) {
         audioRef.current.src = audioUrl
-        audioRef.current.play().catch(err => {
-          console.warn('Audio autoplay failed:', err)
-        })
+        audioRef.current.load()
+        const playPromise = audioRef.current.play()
+        if (playPromise !== undefined) {
+          playPromise.catch(err => {
+            console.warn('Audio autoplay failed:', err)
+            setModal({
+              isOpen: true,
+              type: 'confirm',
+              title: '🔊 音频播放',
+              message: '由于浏览器限制，需要您点击确认后才能播放音频',
+              onConfirm: () => {
+                if (audioRef.current) {
+                  audioRef.current.play().catch(e => console.warn('Manual play failed:', e))
+                }
+                setModal(prev => ({ ...prev, isOpen: false }))
+              }
+            })
+          })
+        }
       }
     }
+    
+    preloadAdjacentImages()
     
     return () => {
       if (audioRef.current) {
@@ -61,6 +81,27 @@ function EpisodeViewer() {
       }
     }
   }, [currentScene, episode?.scenes])
+
+  const preloadAdjacentImages = () => {
+    if (!episode?.scenes) return
+    
+    const imagesToPreload = []
+    if (currentScene > 0) {
+      imagesToPreload.push(currentScene - 1)
+    }
+    if (currentScene < episode.scenes.length - 1) {
+      imagesToPreload.push(currentScene + 1)
+    }
+    
+    imagesToPreload.forEach(index => {
+      const scene = episode.scenes[index]
+      if (scene?.imageUrl && !imagePreloadRefs.current[index]) {
+        const img = new Image()
+        img.src = scene.imageUrl
+        imagePreloadRefs.current[index] = img
+      }
+    })
+  }
 
   const startPolling = () => {
     if (pollingIntervalRef.current) return
@@ -95,6 +136,36 @@ function EpisodeViewer() {
           const workResult = await api.getWork(result.data.workId)
           if (workResult.success) {
             setWork(workResult.data)
+          }
+        }
+        
+        if (result.data.scenes && result.data.scenes.length > 0) {
+          const firstScene = result.data.scenes[0]
+          if (firstScene.audioUrl && firstScene.text !== '无') {
+            setTimeout(() => {
+              if (audioRef.current) {
+                audioRef.current.src = firstScene.audioUrl
+                audioRef.current.load()
+                const playPromise = audioRef.current.play()
+                if (playPromise !== undefined) {
+                  playPromise.catch(err => {
+                    console.warn('Audio autoplay failed:', err)
+                    setModal({
+                      isOpen: true,
+                      type: 'confirm',
+                      title: '🔊 音频播放',
+                      message: '由于浏览器限制，需要您点击确认后才能播放音频',
+                      onConfirm: () => {
+                        if (audioRef.current) {
+                          audioRef.current.play().catch(e => console.warn('Manual play failed:', e))
+                        }
+                        setModal({ ...modal, isOpen: false })
+                      }
+                    })
+                  })
+                }
+              }
+            }, 100)
           }
         }
       } else {
@@ -261,7 +332,12 @@ function EpisodeViewer() {
       <div className="episode-viewer-page">
         <div className="generation-status">
           <div className="status-card">
-            <div className="spinner"></div>
+            <div className="status-icon">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2"/>
+                <path d="M4 20C4 16.6863 6.68629 14 10 14H14C17.3137 14 20 16.6863 20 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </div>
             <h2>🎬 生成中...</h2>
             <h3>{episode.title}</h3>
             <p className="status-message">
@@ -314,7 +390,7 @@ function EpisodeViewer() {
 
   return (
     <div className="episode-viewer-page">
-      <audio ref={audioRef} />
+      <audio ref={audioRef} preload="auto" autoPlay muted={false} />
       <div className="viewer-container">
         <div className="viewer-header">
           <button onClick={() => navigate(-1)} className="btn-back">
@@ -342,7 +418,7 @@ function EpisodeViewer() {
             <div className="scene-viewer">
               <div className="scene-image">
                 {currentSceneData?.imageUrl ? (
-                  <img src={currentSceneData.imageUrl} alt={`场景 ${currentScene + 1}`} />
+                  <img key={currentScene} src={currentSceneData.imageUrl} alt={`场景 ${currentScene + 1}`} />
                 ) : (
                   <div className="scene-placeholder">
                     <span>🎬</span>

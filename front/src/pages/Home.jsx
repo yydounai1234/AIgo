@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Autoplay, Pagination } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/pagination'
 import './Home.css'
 
 function Home() {
@@ -40,11 +44,64 @@ function Home() {
     }
   }
 
+  const bannerSlides = [
+    {
+      title: '创作你的动漫世界',
+      subtitle: '输入小说文本，AI 自动生成精美动漫场景',
+      color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    },
+    {
+      title: '探索无限可能',
+      subtitle: '让 AI 为你的故事注入生命',
+      color: 'linear-gradient(135deg, #9d50bb 0%, #6e48aa 100%)'
+    },
+    {
+      title: '打造专属作品',
+      subtitle: '分享你的创意，收获粉丝与回报',
+      color: 'linear-gradient(135deg, #8e54e9 0%, #4776e6 100%)'
+    }
+  ]
+
   return (
     <div className="home-page">
       <div className="home-hero">
-        <h1>创作你的动漫世界</h1>
-        <p>输入小说文本，AI 自动生成精美动漫场景</p>
+        <Swiper
+          modules={[Autoplay, Pagination]}
+          spaceBetween={0}
+          slidesPerView={1}
+          autoplay={{
+            delay: 5000,
+            disableOnInteraction: false,
+          }}
+          pagination={{
+            clickable: true,
+          }}
+          loop={true}
+          className="hero-swiper"
+        >
+          {bannerSlides.map((slide, index) => (
+            <SwiperSlide key={index}>
+              <div className="hero-slide" style={{ background: slide.color }}>
+                <div className="hero-content">
+                  <h1>{slide.title}</h1>
+                  <p>{slide.subtitle}</p>
+                </div>
+                <div className="hero-decoration">
+                  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="100" cy="70" r="30" fill="rgba(255,255,255,0.2)" />
+                    <circle cx="100" cy="70" r="20" fill="rgba(255,255,255,0.3)" />
+                    <circle cx="95" cy="65" r="5" fill="rgba(255,255,255,0.8)" />
+                    <circle cx="105" cy="65" r="5" fill="rgba(255,255,255,0.8)" />
+                    <path d="M85 75 Q100 85 115 75" stroke="rgba(255,255,255,0.8)" strokeWidth="3" fill="none" strokeLinecap="round" />
+                    <path d="M70 100 L130 100 L120 140 L80 140 Z" fill="rgba(255,255,255,0.25)" />
+                    <path d="M65 140 L75 170 M135 140 L125 170" stroke="rgba(255,255,255,0.25)" strokeWidth="8" strokeLinecap="round" />
+                    <ellipse cx="100" cy="45" rx="35" ry="20" fill="rgba(255,255,255,0.15)" />
+                  </svg>
+                </div>
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </div>
 
       <div className="home-content">
