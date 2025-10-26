@@ -241,7 +241,7 @@
   }
   
   .nav-links.mobile-open ~ .nav-user.mobile-open {
-    top: calc(100% + 10rem);
+    top: calc(100% + 16rem);
   }
 
   .nav-user .user-info,
