@@ -22,6 +22,11 @@ function Home() {
       return
     }
     
+    if (!description.trim()) {
+      setError('请输入作品简介')
+      return
+    }
+    
     setLoading(true)
     setError('')
     
@@ -122,7 +127,7 @@ function Home() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="description">作品简介</label>
+              <label htmlFor="description">作品简介 *</label>
               <textarea
                 id="description"
                 value={description}
