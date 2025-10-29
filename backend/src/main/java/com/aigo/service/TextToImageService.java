@@ -609,6 +609,7 @@ public class TextToImageService {
         
         prompt.append("动漫/漫画风格角色立绘。");
         prompt.append("正面全身像，标准姿势，白色或简单纯色背景。");
+        prompt.append("统一时代风格，所有角色应处于相同的历史时期或现代背景，避免跨时代元素混合。");
         
         if (character.getName() != null && !character.getName().isEmpty()) {
             prompt.append("角色名称：").append(character.getName()).append("。");
@@ -651,6 +652,7 @@ public class TextToImageService {
         }
         
         prompt.append("高质量，细节丰富，角色清晰完整。");
+        prompt.append("保持与其他角色相同的时代背景和艺术风格。");
         
         return prompt.toString();
     }
