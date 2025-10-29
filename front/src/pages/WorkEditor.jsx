@@ -309,6 +309,11 @@ function WorkEditor() {
             <div className="characters-grid">
               {characters.map(character => (
                 <div key={character.id} className="character-card">
+                  {character.firstImageUrl && (
+                    <div className="character-image">
+                      <img src={character.firstImageUrl} alt={character.name} />
+                    </div>
+                  )}
                   <div className="character-header">
                     <h3>{character.name}</h3>
                     <div className="character-badges">

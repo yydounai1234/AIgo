@@ -39,8 +39,8 @@ function CharacterLibrary({ characters, onUpdateCharacter }) {
             onClick={() => handleCharacterClick(character)}
           >
             <div className="character-avatar">
-              {character.imageUrl ? (
-                <img src={character.imageUrl} alt={character.name} />
+              {character.firstImageUrl ? (
+                <img src={character.firstImageUrl} alt={character.name} />
               ) : (
                 <div className="character-placeholder">
                   {character.name.charAt(0)}

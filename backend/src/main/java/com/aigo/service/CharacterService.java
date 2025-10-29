@@ -280,6 +280,31 @@ public class CharacterService {
         return characterRepository.findByWorkIdAndName(workId, name);
     }
     
+    @Transactional
+    public CharacterEntity saveBaseImage(Long characterId, String imageUrl) {
+        CharacterEntity character = getCharacterById(characterId);
+        character.setFirstImageUrl(imageUrl);
+        CharacterEntity saved = characterRepository.save(character);
+        logger.info("[CharacterService] Saved base image for character '{}': {}", character.getName(), imageUrl);
+        return saved;
+    }
+    
+    @Transactional
+    public CharacterEntity saveBaseImageByWorkIdAndName(String workId, String characterName, String imageUrl) {
+        Optional<CharacterEntity> optChar = characterRepository.findByWorkIdAndName(workId, characterName);
+        if (optChar.isPresent()) {
+            CharacterEntity character = optChar.get();
+            character.setFirstImageUrl(imageUrl);
+            CharacterEntity saved = characterRepository.save(character);
+            logger.info("[CharacterService] Saved base image for character '{}' in work '{}': {}", 
+                characterName, workId, imageUrl);
+            return saved;
+        } else {
+            logger.warn("[CharacterService] Character '{}' not found in work '{}'", characterName, workId);
+            throw new BusinessException(ErrorCode.NOT_FOUND, "角色不存在");
+        }
+    }
+    
     private void ensureCompleteCharacterFeatures(CharacterEntity character, String workId) {
         if ("demo-key".equals(apiKey)) {
             logger.info("[CharacterService] Skipping AI feature generation in demo mode");
