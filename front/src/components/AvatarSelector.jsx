@@ -15,8 +15,10 @@ const SYSTEM_AVATARS = [
 function AvatarSelector({ onConfirm, onCancel }) {
   const [selectedType, setSelectedType] = useState(null)
   const [selectedAvatar, setSelectedAvatar] = useState(null)
+  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState(null)
   const [uploadedImage, setUploadedImage] = useState(null)
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const fileInputRef = useRef(null)
 
   const handleFileSelect = (e) => {
@@ -39,16 +41,39 @@ function AvatarSelector({ onConfirm, onCancel }) {
       const base64Data = event.target.result
       setUploadedImage(base64Data)
       setSelectedAvatar(base64Data)
+      setSelectedAvatarUrl(null)
       setSelectedType('upload')
     }
     reader.readAsDataURL(file)
   }
 
-  const handleSystemAvatarSelect = (avatarUrl) => {
-    setSelectedAvatar(avatarUrl)
-    setSelectedType('system')
-    setUploadedImage(null)
+  const handleSystemAvatarSelect = async (avatarUrl) => {
+    setLoading(true)
     setError('')
+    
+    try {
+      const response = await fetch(avatarUrl)
+      const blob = await response.blob()
+      
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        const base64Data = event.target.result
+        setSelectedAvatar(base64Data)
+        setSelectedAvatarUrl(avatarUrl)
+        setSelectedType('system')
+        setUploadedImage(base64Data)
+        setLoading(false)
+      }
+      reader.onerror = () => {
+        setError('系统头像加载失败，请重试')
+        setLoading(false)
+      }
+      reader.readAsDataURL(blob)
+    } catch (err) {
+      console.error('Failed to fetch system avatar:', err)
+      setError('系统头像加载失败，请重试')
+      setLoading(false)
+    }
   }
 
   const handleConfirm = () => {
@@ -95,7 +120,7 @@ function AvatarSelector({ onConfirm, onCancel }) {
               {SYSTEM_AVATARS.map((avatarUrl, index) => (
                 <div
                   key={index}
-                  className={`system-avatar-item ${selectedType === 'system' && selectedAvatar === avatarUrl ? 'selected' : ''}`}
+                  className={`system-avatar-item ${selectedType === 'system' && selectedAvatarUrl === avatarUrl ? 'selected' : ''}`}
                   onClick={() => handleSystemAvatarSelect(avatarUrl)}
                 >
                   <img src={avatarUrl} alt={`系统头像 ${index + 1}`} />
@@ -113,9 +138,9 @@ function AvatarSelector({ onConfirm, onCancel }) {
             <button
               className="btn-confirm"
               onClick={handleConfirm}
-              disabled={!selectedAvatar}
+              disabled={!selectedAvatar || loading}
             >
-              确认
+              {loading ? '加载中...' : '确认'}
             </button>
           </div>
         </div>
