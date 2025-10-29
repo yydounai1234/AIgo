@@ -67,7 +67,7 @@ public class EpisodeService {
     
     @Transactional
     public Object getEpisode(String userId, String episodeId) {
-        Episode episode = episodeRepository.findById(episodeId)
+        Episode episode = episodeRepository.findByIdWithWorkAndUser(episodeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "集数不存在"));
         
         Work work = workRepository.findById(episode.getWorkId())

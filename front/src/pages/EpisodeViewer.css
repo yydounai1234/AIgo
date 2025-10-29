@@ -48,7 +48,40 @@
 
 .episode-info h2 {
   color: white;
-  margin: 0;
+  margin: 0 0 0.75rem 0;
+}
+
+.episode-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.episode-author-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #444;
+}
+
+.episode-author-avatar-placeholder {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  border: 2px solid #444;
+}
+
+.episode-author-name {
+  color: #999;
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .episode-meta {

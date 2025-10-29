@@ -619,6 +619,16 @@ function EpisodeViewer() {
           <div className="episode-info">
             {work && <span className="work-title">{work.title}</span>}
             <h2>第{episode.episodeNumber}集：{episode.title}</h2>
+            {(episode.authorName || episode.authorAvatar) && (
+              <div className="episode-author">
+                {episode.authorAvatar ? (
+                  <img src={episode.authorAvatar} alt={episode.authorName || '作者'} className="episode-author-avatar" />
+                ) : (
+                  <div className="episode-author-avatar-placeholder">👤</div>
+                )}
+                <span className="episode-author-name">{episode.authorName || '匿名作者'}</span>
+              </div>
+            )}
           </div>
           <div className="episode-meta">
             {episode.isFree ? (

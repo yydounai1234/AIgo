@@ -42,7 +42,7 @@ public class WorkService {
     
     @Transactional(readOnly = true)
     public WorkResponse getWork(String workId, String currentUserId) {
-        Work work = workRepository.findById(workId)
+        Work work = workRepository.findByIdWithUser(workId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "作品不存在"));
         WorkResponse response = WorkResponse.fromEntity(work);
         response.setEpisodes(
@@ -117,9 +117,9 @@ public class WorkService {
         List<Work> works;
         
         if ("likes".equals(sortBy)) {
-            works = workRepository.findByIsPublicTrueOrderByLikesCountDesc();
+            works = workRepository.findByIsPublicTrueWithUserOrderByLikesCountDesc();
         } else {
-            works = workRepository.findByIsPublicTrueOrderByCreatedAtDesc();
+            works = workRepository.findByIsPublicTrueWithUserOrderByCreatedAtDesc();
         }
         
         return works.stream()
@@ -169,7 +169,7 @@ public class WorkService {
     
     @Transactional(readOnly = true)
     public List<GalleryItemResponse> getMyFavorites(String userId) {
-        List<Work> likedWorks = workRepository.findLikedWorksByUserId(userId);
+        List<Work> likedWorks = workRepository.findLikedWorksByUserIdWithUser(userId);
         
         return likedWorks.stream()
                 .map(work -> {
