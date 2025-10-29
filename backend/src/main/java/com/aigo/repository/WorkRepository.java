@@ -24,4 +24,16 @@ public interface WorkRepository extends JpaRepository<Work, String> {
     
     @Query("SELECT w FROM Work w WHERE w.id IN (SELECT l.workId FROM Like l WHERE l.userId = :userId) ORDER BY w.createdAt DESC")
     List<Work> findLikedWorksByUserId(String userId);
+    
+    @Query("SELECT w FROM Work w LEFT JOIN FETCH w.user WHERE w.isPublic = true ORDER BY w.createdAt DESC")
+    List<Work> findByIsPublicTrueWithUserOrderByCreatedAtDesc();
+    
+    @Query("SELECT w FROM Work w LEFT JOIN FETCH w.user WHERE w.isPublic = true ORDER BY w.likesCount DESC")
+    List<Work> findByIsPublicTrueWithUserOrderByLikesCountDesc();
+    
+    @Query("SELECT w FROM Work w LEFT JOIN FETCH w.user WHERE w.id = :id")
+    Optional<Work> findByIdWithUser(String id);
+    
+    @Query("SELECT w FROM Work w LEFT JOIN FETCH w.user WHERE w.id IN (SELECT l.workId FROM Like l WHERE l.userId = :userId) ORDER BY w.createdAt DESC")
+    List<Work> findLikedWorksByUserIdWithUser(String userId);
 }

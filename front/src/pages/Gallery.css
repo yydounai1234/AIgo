@@ -180,6 +180,37 @@
   flex: 1;
 }
 
+.work-author {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.author-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.author-avatar-placeholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.author-name {
+  color: #666;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
 .work-content h3 {
   color: #333;
   margin-bottom: 0.75rem;

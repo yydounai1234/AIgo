@@ -3,6 +3,7 @@ let currentUser = {
   username: 'demo_user',
   email: 'demo@example.com',
   coinBalance: 500,
+  avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo_user',
   token: 'mock-jwt-token-12345'
 }
 
@@ -17,7 +18,9 @@ let works = [
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-20T15:30:00Z',
     likesCount: 156,
-    viewsCount: 1240
+    viewsCount: 1240,
+    authorName: 'demo_user',
+    authorAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo_user'
   },
   {
     id: '2',
@@ -29,7 +32,9 @@ let works = [
     createdAt: '2024-02-01T09:00:00Z',
     updatedAt: '2024-02-10T14:20:00Z',
     likesCount: 89,
-    viewsCount: 650
+    viewsCount: 650,
+    authorName: 'demo_user',
+    authorAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo_user'
   }
 ]
 
@@ -48,7 +53,9 @@ let episodes = [
     isFree: true,
     coinPrice: 0,
     isPublished: true,
-    createdAt: '2024-01-15T10:30:00Z'
+    createdAt: '2024-01-15T10:30:00Z',
+    authorName: 'demo_user',
+    authorAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo_user'
   },
   {
     id: '2',
@@ -64,7 +71,9 @@ let episodes = [
     isFree: false,
     coinPrice: 50,
     isPublished: true,
-    createdAt: '2024-01-16T11:00:00Z'
+    createdAt: '2024-01-16T11:00:00Z',
+    authorName: 'demo_user',
+    authorAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo_user'
   },
   {
     id: '3',
@@ -79,7 +88,9 @@ let episodes = [
     isFree: false,
     coinPrice: 100,
     isPublished: false,
-    createdAt: '2024-01-17T09:00:00Z'
+    createdAt: '2024-01-17T09:00:00Z',
+    authorName: 'demo_user',
+    authorAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo_user'
   },
   {
     id: '4',
@@ -94,7 +105,9 @@ let episodes = [
     isFree: true,
     coinPrice: 0,
     isPublished: true,
-    createdAt: '2024-02-01T10:00:00Z'
+    createdAt: '2024-02-01T10:00:00Z',
+    authorName: 'demo_user',
+    authorAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo_user'
   },
   {
     id: '5',
@@ -109,7 +122,9 @@ let episodes = [
     isFree: false,
     coinPrice: 60,
     isPublished: true,
-    createdAt: '2024-02-05T11:00:00Z'
+    createdAt: '2024-02-05T11:00:00Z',
+    authorName: 'demo_user',
+    authorAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo_user'
   }
 ]
 

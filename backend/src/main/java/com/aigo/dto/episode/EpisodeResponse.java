@@ -33,6 +33,8 @@ public class EpisodeResponse {
     private String style;
     private String targetAudience;
     private LocalDateTime createdAt;
+    private String authorName;
+    private String authorAvatar;
     
     public static EpisodeResponse fromEntity(Episode episode) {
         return EpisodeResponse.builder()
@@ -54,6 +56,8 @@ public class EpisodeResponse {
                 .style(episode.getStyle())
                 .targetAudience(episode.getTargetAudience())
                 .createdAt(episode.getCreatedAt())
+                .authorName(episode.getWork() != null && episode.getWork().getUser() != null ? episode.getWork().getUser().getUsername() : null)
+                .authorAvatar(episode.getWork() != null && episode.getWork().getUser() != null ? episode.getWork().getUser().getAvatarUrl() : null)
                 .build();
     }
 }

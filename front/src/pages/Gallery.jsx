@@ -143,6 +143,14 @@ function Gallery() {
                 </div>
 
                 <div className="work-content">
+                  <div className="work-author">
+                    {work.authorAvatar ? (
+                      <img src={work.authorAvatar} alt={work.authorName || '作者'} className="author-avatar" />
+                    ) : (
+                      <div className="author-avatar-placeholder">👤</div>
+                    )}
+                    <span className="author-name">{work.authorName || '匿名作者'}</span>
+                  </div>
                   <h3>{work.title}</h3>
                   {work.description && (
                     <p className="work-description">{work.description}</p>

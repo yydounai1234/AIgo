@@ -21,4 +21,7 @@ public interface EpisodeRepository extends JpaRepository<Episode, String> {
     Optional<Integer> findMaxEpisodeNumberByWorkId(String workId);
     
     Long countByWorkIdAndIsPublishedTrue(String workId);
+    
+    @Query("SELECT e FROM Episode e LEFT JOIN FETCH e.work w LEFT JOIN FETCH w.user WHERE e.id = :id")
+    Optional<Episode> findByIdWithWorkAndUser(String id);
 }

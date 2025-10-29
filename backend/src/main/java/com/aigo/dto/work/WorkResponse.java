@@ -28,6 +28,8 @@ public class WorkResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<EpisodeListItem> episodes;
+    private String authorName;
+    private String authorAvatar;
     
     public static WorkResponse fromEntity(Work work) {
         return WorkResponse.builder()
@@ -41,6 +43,8 @@ public class WorkResponse {
                 .viewsCount(work.getViewsCount())
                 .createdAt(work.getCreatedAt())
                 .updatedAt(work.getUpdatedAt())
+                .authorName(work.getUser() != null ? work.getUser().getUsername() : null)
+                .authorAvatar(work.getUser() != null ? work.getUser().getAvatarUrl() : null)
                 .build();
     }
     

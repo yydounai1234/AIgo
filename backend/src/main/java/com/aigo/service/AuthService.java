@@ -26,6 +26,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    private static final String DEFAULT_AVATAR_URL = "http://demo-videos.qnsdk.com/avatar_1761751958257_cab6c0720b704146bdde2fb59c00e546.png";
     
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -42,6 +43,7 @@ public class AuthService {
             .email(request.getEmail())
             .passwordHash(passwordEncoder.encode(request.getPassword()))
             .coinBalance(100)
+            .avatarUrl(DEFAULT_AVATAR_URL)
             .build();
         
         user = userRepository.save(user);

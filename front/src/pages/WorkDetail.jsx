@@ -135,6 +135,14 @@ function WorkDetail() {
           </div>
 
           <div className="work-info">
+            <div className="work-author-info">
+              {work.authorAvatar ? (
+                <img src={work.authorAvatar} alt={work.authorName || '作者'} className="author-avatar-large" />
+              ) : (
+                <div className="author-avatar-placeholder-large">👤</div>
+              )}
+              <span className="author-name-large">{work.authorName || '匿名作者'}</span>
+            </div>
             <h1 className="work-title">{work.title}</h1>
             
             {work.description && (

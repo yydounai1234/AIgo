@@ -23,6 +23,8 @@ public class GalleryItemResponse {
     private Boolean isLiked;
     private Integer episodeCount;
     private LocalDateTime createdAt;
+    private String authorName;
+    private String authorAvatar;
     
     public static GalleryItemResponse fromEntity(Work work, boolean isLiked, int episodeCount) {
         return GalleryItemResponse.builder()
@@ -36,6 +38,8 @@ public class GalleryItemResponse {
                 .isLiked(isLiked)
                 .episodeCount(episodeCount)
                 .createdAt(work.getCreatedAt())
+                .authorName(work.getUser() != null ? work.getUser().getUsername() : null)
+                .authorAvatar(work.getUser() != null ? work.getUser().getAvatarUrl() : null)
                 .build();
     }
 }
