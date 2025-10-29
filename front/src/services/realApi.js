@@ -181,5 +181,12 @@ export const realApi = {
     return await request(`/api/comments/${commentId}`, {
       method: 'DELETE'
     })
+  },
+
+  async uploadAvatar(avatarData) {
+    return await request('/api/user/avatar', {
+      method: 'POST',
+      body: JSON.stringify({ avatarData })
+    })
   }
 }

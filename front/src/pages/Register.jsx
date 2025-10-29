@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
+import AvatarSelector from '../components/AvatarSelector'
 import './Register.css'
 
 function Register() {
@@ -11,6 +12,9 @@ function Register() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showAvatarSelector, setShowAvatarSelector] = useState(false)
+  const [registeredUser, setRegisteredUser] = useState(null)
+  const [registeredToken, setRegisteredToken] = useState(null)
   
   const { login } = useAuth()
   const navigate = useNavigate()
@@ -74,25 +78,69 @@ function Register() {
       const result = await api.register(username, email, password)
       
       if (result.success) {
-        login(result.data.user, result.data.token)
-        navigate('/', { replace: true })
+        setRegisteredUser(result.data.user)
+        setRegisteredToken(result.data.token)
+        setShowAvatarSelector(true)
+        setLoading(false)
       } else {
         setError(result.error?.message || '注册失败')
+        setLoading(false)
       }
     } catch (err) {
       setError('注册失败，请稍后重试')
       console.error('Register error:', err)
-    } finally {
       setLoading(false)
     }
   }
+
+  const handleAvatarConfirm = async (avatarData) => {
+    login(registeredUser, registeredToken)
+    
+    setLoading(true)
+    setShowAvatarSelector(false)
+    
+    try {
+      const result = await api.uploadAvatar(avatarData)
+      
+      if (result.success) {
+        const updatedUser = { ...registeredUser, avatarUrl: result.data.avatarUrl }
+        login(updatedUser, registeredToken)
+        navigate('/', { replace: true })
+      } else {
+        console.error('头像上传失败:', result.error)
+        setError('头像上传失败，请重试')
+        setShowAvatarSelector(true)
+        setLoading(false)
+      }
+    } catch (err) {
+      console.error('头像上传失败:', err)
+      setError('头像上传失败，请重试')
+      setShowAvatarSelector(true)
+      setLoading(false)
+    }
+  }
+
+  const handleAvatarCancel = () => {
+    setShowAvatarSelector(false)
+    login(registeredUser, registeredToken)
+    navigate('/', { replace: true })
+  }
   
   return (
-    <div className="register-container">
-      <div className="register-box">
-        <h1>用户注册</h1>
-        
-        <form onSubmit={handleSubmit}>
+    <>
+      {showAvatarSelector && (
+        <AvatarSelector
+          onConfirm={handleAvatarConfirm}
+          onError={setError}
+          onCancel={handleAvatarCancel}
+        />
+      )}
+      
+      <div className="register-container">
+        <div className="register-box">
+          <h1>用户注册</h1>
+          
+          <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="username">用户名</label>
             <input
@@ -153,8 +201,9 @@ function Register() {
             已有账号？ <Link to="/login">立即登录</Link>
           </p>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 
