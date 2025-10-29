@@ -154,24 +154,36 @@ function CommentSection({ targetType, targetId }) {
           <p>还没有评论，来发表第一条评论吧！</p>
         </div>
       ) : (
-        <div className="comments-list">
+<div className="comments-list">
           {comments.map((comment) => (
             <div key={comment.id} className="comment-item">
-              <div className="comment-header">
-                <span className="comment-author">{comment.username}</span>
-                <span className="comment-time">{formatTime(comment.createdAt)}</span>
-              </div>
-              <div className="comment-content">{comment.content}</div>
-              {user && user.id === comment.userId && (
-                <div className="comment-actions">
-                  <button
-                    className="btn-comment-action btn-comment-delete"
-                    onClick={() => handleDeleteComment(comment.id)}
-                  >
-                    删除
-                  </button>
+              {comment.avatarUrl ? (
+                <img src={comment.avatarUrl} alt={comment.username} className="comment-avatar" />
+              ) : (
+                <div className="comment-avatar-placeholder">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M4 20C4 16.6863 6.68629 14 10 14H14C17.3137 14 20 16.6863 20 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
                 </div>
               )}
+              <div className="comment-body">
+                <div className="comment-header">
+                  <span className="comment-author">{comment.username}</span>
+                  <span className="comment-time">{formatTime(comment.createdAt)}</span>
+                </div>
+                <div className="comment-content">{comment.content}</div>
+                {user && user.id === comment.userId && (
+                  <div className="comment-actions">
+                    <button
+                      className="btn-comment-action btn-comment-delete"
+                      onClick={() => handleDeleteComment(comment.id)}
+                    >
+                      删除
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>

@@ -46,6 +46,7 @@ public class CommentService {
         
         CommentResponse response = toCommentResponse(saved);
         response.setUsername(user.getUsername());
+        response.setAvatarUrl(user.getAvatarUrl());
         return response;
     }
     
@@ -68,6 +69,7 @@ public class CommentService {
                 .targetId(comment.getTargetId())
                 .userId(comment.getUserId())
                 .username(comment.getUser() != null ? comment.getUser().getUsername() : null)
+                .avatarUrl(comment.getUser() != null ? comment.getUser().getAvatarUrl() : null)
                 .content(comment.getContent())
                 .createdAt(comment.getCreatedAt())
                 .build();
