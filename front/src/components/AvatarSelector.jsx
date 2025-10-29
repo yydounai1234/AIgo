@@ -52,25 +52,55 @@ function AvatarSelector({ onConfirm, onCancel }) {
     setError('')
     
     try {
-      const response = await fetch(avatarUrl)
-      const blob = await response.blob()
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
       
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        const base64Data = event.target.result
-        setSelectedAvatar(base64Data)
-        setSelectedAvatarUrl(avatarUrl)
-        setSelectedType('system')
-        setUploadedImage(base64Data)
-        setLoading(false)
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas')
+          canvas.width = 256
+          canvas.height = 256
+          
+          const ctx = canvas.getContext('2d')
+          ctx.drawImage(img, 0, 0, 256, 256)
+          
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              setError('系统头像转换失败，请重试')
+              setLoading(false)
+              return
+            }
+            
+            const reader = new FileReader()
+            reader.onload = (event) => {
+              const base64Data = event.target.result
+              setSelectedAvatar(base64Data)
+              setSelectedAvatarUrl(avatarUrl)
+              setSelectedType('system')
+              setUploadedImage(base64Data)
+              setLoading(false)
+            }
+            reader.onerror = () => {
+              setError('系统头像加载失败，请重试')
+              setLoading(false)
+            }
+            reader.readAsDataURL(blob)
+          }, 'image/png', 0.95)
+        } catch (err) {
+          console.error('Failed to convert SVG to PNG:', err)
+          setError('系统头像转换失败，请重试')
+          setLoading(false)
+        }
       }
-      reader.onerror = () => {
+      
+      img.onerror = () => {
         setError('系统头像加载失败，请重试')
         setLoading(false)
       }
-      reader.readAsDataURL(blob)
+      
+      img.src = avatarUrl
     } catch (err) {
-      console.error('Failed to fetch system avatar:', err)
+      console.error('Failed to load system avatar:', err)
       setError('系统头像加载失败，请重试')
       setLoading(false)
     }
