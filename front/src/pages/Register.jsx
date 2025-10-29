@@ -123,6 +123,7 @@ function Register() {
       {showAvatarSelector && (
         <AvatarSelector
           onConfirm={handleAvatarConfirm}
+          onError={setError}
         />
       )}
       

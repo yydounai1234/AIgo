@@ -12,12 +12,11 @@ const SYSTEM_AVATARS = [
   'https://api.dicebear.com/7.x/avataaars/svg?seed=Lucy'
 ]
 
-function AvatarSelector({ onConfirm }) {
+function AvatarSelector({ onConfirm, onError }) {
   const [selectedType, setSelectedType] = useState(null)
   const [selectedAvatar, setSelectedAvatar] = useState(null)
   const [selectedAvatarUrl, setSelectedAvatarUrl] = useState(null)
   const [uploadedImage, setUploadedImage] = useState(null)
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const fileInputRef = useRef(null)
 
@@ -26,16 +25,16 @@ function AvatarSelector({ onConfirm }) {
     if (!file) return
 
     if (!file.type.startsWith('image/')) {
-      setError('请选择图片文件')
+      onError?.('请选择图片文件')
       return
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setError('图片大小不能超过5MB')
+      onError?.('图片大小不能超过5MB')
       return
     }
 
-    setError('')
+    onError?.('')
     const reader = new FileReader()
     reader.onload = (event) => {
       const base64Data = event.target.result
@@ -49,11 +48,14 @@ function AvatarSelector({ onConfirm }) {
 
   const handleSystemAvatarSelect = async (avatarUrl) => {
     setLoading(true)
-    setError('')
+    onError?.('')
     
     try {
+      const response = await fetch(avatarUrl)
+      const blob = await response.blob()
+      
       const img = new Image()
-      img.crossOrigin = 'anonymous'
+      const blobUrl = URL.createObjectURL(blob)
       
       img.onload = () => {
         try {
@@ -64,9 +66,11 @@ function AvatarSelector({ onConfirm }) {
           const ctx = canvas.getContext('2d')
           ctx.drawImage(img, 0, 0, 256, 256)
           
-          canvas.toBlob((blob) => {
-            if (!blob) {
-              setError('系统头像转换失败，请重试')
+          URL.revokeObjectURL(blobUrl)
+          
+          canvas.toBlob((pngBlob) => {
+            if (!pngBlob) {
+              onError?.('系统头像转换失败，请重试')
               setLoading(false)
               return
             }
@@ -81,34 +85,35 @@ function AvatarSelector({ onConfirm }) {
               setLoading(false)
             }
             reader.onerror = () => {
-              setError('系统头像加载失败，请重试')
+              onError?.('系统头像加载失败，请重试')
               setLoading(false)
             }
-            reader.readAsDataURL(blob)
+            reader.readAsDataURL(pngBlob)
           }, 'image/png', 0.95)
         } catch (err) {
           console.error('Failed to convert SVG to PNG:', err)
-          setError('系统头像转换失败，请重试')
+          onError?.('系统头像转换失败，请重试')
           setLoading(false)
         }
       }
       
       img.onerror = () => {
-        setError('系统头像加载失败，请重试')
+        URL.revokeObjectURL(blobUrl)
+        onError?.('系统头像加载失败，请重试')
         setLoading(false)
       }
       
-      img.src = avatarUrl
+      img.src = blobUrl
     } catch (err) {
       console.error('Failed to load system avatar:', err)
-      setError('系统头像加载失败，请重试')
+      onError?.('系统头像加载失败，请重试')
       setLoading(false)
     }
   }
 
   const handleConfirm = () => {
     if (!selectedAvatar) {
-      setError('请选择或上传一个头像')
+      onError?.('请选择或上传一个头像')
       return
     }
     onConfirm(selectedAvatar, selectedType)
@@ -158,8 +163,6 @@ function AvatarSelector({ onConfirm }) {
               ))}
             </div>
           </div>
-
-          {error && <div className="error-message">{error}</div>}
 
           <div className="avatar-selector-actions">
             <button

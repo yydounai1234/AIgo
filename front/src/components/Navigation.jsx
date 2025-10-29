@@ -31,6 +31,12 @@ function Navigation({ userBalance }) {
     setMobileMenuOpen(false)
   }
   
+  const handleAvatarError = (errorMessage) => {
+    if (errorMessage) {
+      alert(errorMessage)
+    }
+  }
+  
   const handleAvatarConfirm = async (avatarData, avatarType) => {
     try {
       const result = await api.uploadAvatar(avatarData, avatarType)
@@ -54,6 +60,7 @@ function Navigation({ userBalance }) {
       {showAvatarSelector && (
         <AvatarSelector
           onConfirm={handleAvatarConfirm}
+          onError={handleAvatarError}
         />
       )}
       
