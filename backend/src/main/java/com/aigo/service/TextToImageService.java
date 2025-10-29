@@ -53,7 +53,12 @@ public class TextToImageService {
         this.qiniuStorageService = qiniuStorageService;
     }
     
-    public String generateImageForScene(Scene scene, Map<String, String> characterAppearances) {\n        return generateImageForScene(scene, characterAppearances, null);\n    }\n    \n    public String generateImageForScene(Scene scene, Map<String, String> characterAppearances, \n                                       Map<String, Map<String, Object>> existingEmbeddings) {
+    public String generateImageForScene(Scene scene, Map<String, String> characterAppearances) {
+        return generateImageForScene(scene, characterAppearances, null);
+    }
+    
+    public String generateImageForScene(Scene scene, Map<String, String> characterAppearances, 
+                                       Map<String, Map<String, Object>> existingEmbeddings) {
         if ("demo-key".equals(apiKey)) {
             logger.info("[TextToImageService] Using demo mode for scene {}", scene.getSceneNumber());
             return createDemoImageUrl(scene);
