@@ -559,6 +559,169 @@ public class TextToImageService {
             logger.info("[TextToImageService] Set character embedding for '{}'", characterName);
         }
     }
+    
+    public String generateBaseCharacterImage(CharacterEntity character) {
+        if ("demo-key".equals(apiKey)) {
+            logger.info("[TextToImageService] Using demo mode for base character image: {}", character.getName());
+            return "http://via.placeholder.com/1024x1024.png?text=Character+" + character.getName();
+        }
+        
+        try {
+            String prompt = buildBaseCharacterPrompt(character);
+            
+            logger.info("[TextToImageService] Generating base image for character '{}'", character.getName());
+            String base64ImageData = callTextToImageApi(prompt);
+            
+            String filePrefix = "character_base_" + character.getName() + "_" + System.currentTimeMillis();
+            String publicUrl = qiniuStorageService.uploadBase64Image(base64ImageData, filePrefix);
+            
+            logger.info("[TextToImageService] Base character image generated: {}", publicUrl);
+            return publicUrl;
+            
+        } catch (Exception e) {
+            logger.error("[TextToImageService] Failed to generate base character image for '{}'", character.getName(), e);
+            throw new RuntimeException("基础角色图片生成失败: " + e.getMessage(), e);
+        }
+    }
+    
+    private String buildBaseCharacterPrompt(CharacterEntity character) {
+        StringBuilder prompt = new StringBuilder();
+        
+        prompt.append("动漫/漫画风格角色立绘。");
+        prompt.append("正面全身像，标准姿势，白色或简单纯色背景。");
+        
+        if (character.getName() != null && !character.getName().isEmpty()) {
+            prompt.append("角色名称：").append(character.getName()).append("。");
+        }
+        if (character.getDescription() != null && !character.getDescription().isEmpty()) {
+            prompt.append("角色描述：").append(character.getDescription()).append("。");
+        }
+        if (character.getHairColor() != null && !character.getHairColor().isEmpty()) {
+            prompt.append("发色：").append(character.getHairColor()).append("。");
+        }
+        if (character.getHairType() != null && !character.getHairType().isEmpty()) {
+            prompt.append("发型：").append(character.getHairType()).append("。");
+        }
+        if (character.getEyeColor() != null && !character.getEyeColor().isEmpty()) {
+            prompt.append("眼睛颜色：").append(character.getEyeColor()).append("。");
+        }
+        if (character.getEyeType() != null && !character.getEyeType().isEmpty()) {
+            prompt.append("眼型：").append(character.getEyeType()).append("。");
+        }
+        if (character.getFaceShape() != null && !character.getFaceShape().isEmpty()) {
+            prompt.append("脸型：").append(character.getFaceShape()).append("。");
+        }
+        if (character.getSkinTone() != null && !character.getSkinTone().isEmpty()) {
+            prompt.append("肤色：").append(character.getSkinTone()).append("。");
+        }
+        if (character.getBodyType() != null && !character.getBodyType().isEmpty()) {
+            prompt.append("体型：").append(character.getBodyType()).append("。");
+        }
+        if (character.getHeight() != null && !character.getHeight().isEmpty()) {
+            prompt.append("身高：").append(character.getHeight()).append("。");
+        }
+        if (character.getClothingStyle() != null && !character.getClothingStyle().isEmpty()) {
+            prompt.append("服装：").append(character.getClothingStyle()).append("。");
+        }
+        if (character.getAppearance() != null && !character.getAppearance().isEmpty()) {
+            prompt.append("外貌补充：").append(character.getAppearance()).append("。");
+        }
+        if (character.getDistinguishingFeatures() != null && !character.getDistinguishingFeatures().isEmpty()) {
+            prompt.append("显著特征：").append(character.getDistinguishingFeatures()).append("。");
+        }
+        
+        prompt.append("高质量，细节丰富，角色清晰完整。");
+        
+        return prompt.toString();
+    }
+    
+    public String generateSceneFromBaseImage(Scene scene, String baseImageUrl, CharacterEntity character) {
+        if ("demo-key".equals(apiKey)) {
+            logger.info("[TextToImageService] Using demo mode for scene {} with base image", scene.getSceneNumber());
+            return createDemoImageUrl(scene);
+        }
+        
+        try {
+            String prompt = buildScenePromptForImageToImage(scene, character);
+            
+            logger.info("[TextToImageService] Generating scene {} from base image using Image-to-Image", scene.getSceneNumber());
+            String base64ImageData = callImageToImageApi(baseImageUrl, prompt);
+            
+            String filePrefix = "scene_" + scene.getSceneNumber() + "_" + System.currentTimeMillis();
+            String publicUrl = qiniuStorageService.uploadBase64Image(base64ImageData, filePrefix);
+            
+            return publicUrl;
+            
+        } catch (Exception e) {
+            logger.error("[TextToImageService] Failed to generate scene {} from base image", scene.getSceneNumber(), e);
+            throw new RuntimeException("场景图片生成失败: " + e.getMessage(), e);
+        }
+    }
+    
+    private String buildScenePromptForImageToImage(Scene scene, CharacterEntity character) {
+        StringBuilder prompt = new StringBuilder();
+        
+        prompt.append("保持角色外观完全一致。");
+        
+        if (scene.getVisualDescription() != null && !scene.getVisualDescription().isEmpty()) {
+            prompt.append("场景环境：").append(scene.getVisualDescription()).append("。");
+        }
+        if (scene.getAction() != null && !scene.getAction().isEmpty()) {
+            prompt.append("角色动作：").append(scene.getAction()).append("。");
+        }
+        if (scene.getAtmosphere() != null && !scene.getAtmosphere().isEmpty()) {
+            prompt.append("画面氛围：").append(scene.getAtmosphere()).append("。");
+        }
+        if (scene.getDialogue() != null && !scene.getDialogue().isEmpty()) {
+            prompt.append("对话内容：").append(scene.getDialogue()).append("。");
+        }
+        
+        prompt.append("动漫/漫画风格，高质量，细节丰富。");
+        prompt.append("角色的发型、发色、眼睛、脸型、服装必须与原图完全一致。");
+        
+        return prompt.toString();
+    }
+    
+    private String callImageToImageApi(String imageUrl, String prompt) throws Exception {
+        String url = "https://api.qnaigc.com/v1/images/edits";
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + apiKey);
+        headers.set("Content-Type", "application/json");
+        
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("model", modelName);
+        requestBody.put("image", imageUrl);
+        requestBody.put("prompt", prompt);
+        requestBody.put("n", 1);
+        
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+        
+        logger.info("[TextToImageService] Calling Image-to-Image API with prompt: {}", prompt);
+        
+        ResponseEntity<String> response = restTemplate.exchange(
+            url,
+            HttpMethod.POST,
+            entity,
+            String.class
+        );
+        
+        JsonNode responseJson = objectMapper.readTree(response.getBody());
+        JsonNode dataArray = responseJson.get("data");
+        
+        if (dataArray != null && dataArray.isArray() && dataArray.size() > 0) {
+            JsonNode firstImage = dataArray.get(0);
+            
+            if (firstImage.has("b64_json")) {
+                return "data:image/png;base64," + firstImage.get("b64_json").asText();
+            } else if (firstImage.has("url")) {
+                return firstImage.get("url").asText();
+            }
+        }
+        
+        throw new RuntimeException("Image-to-Image API 返回的响应中没有图片数据");
+    }
+    
     private static class ImageResult {
         private final int sceneNumber;
         private final String imageUrl;
