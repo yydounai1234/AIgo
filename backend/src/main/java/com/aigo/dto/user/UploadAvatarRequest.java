@@ -12,6 +12,4 @@ public class UploadAvatarRequest {
     
     @NotBlank(message = "头像数据不能为空")
     private String avatarData;
-    
-    private String avatarType;
 }

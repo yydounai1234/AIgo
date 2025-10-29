@@ -93,12 +93,12 @@ function Register() {
     }
   }
 
-  const handleAvatarConfirm = async (avatarData, avatarType) => {
+  const handleAvatarConfirm = async (avatarData) => {
     setLoading(true)
     setShowAvatarSelector(false)
     
     try {
-      const result = await api.uploadAvatar(avatarData, avatarType)
+      const result = await api.uploadAvatar(avatarData)
       
       if (result.success) {
         const updatedUser = { ...registeredUser, avatarUrl: result.data.avatarUrl }
@@ -117,6 +117,12 @@ function Register() {
       setLoading(false)
     }
   }
+
+  const handleAvatarCancel = () => {
+    setShowAvatarSelector(false)
+    login(registeredUser, registeredToken)
+    navigate('/', { replace: true })
+  }
   
   return (
     <>
@@ -124,6 +130,7 @@ function Register() {
         <AvatarSelector
           onConfirm={handleAvatarConfirm}
           onError={setError}
+          onCancel={handleAvatarCancel}
         />
       )}
       

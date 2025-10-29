@@ -12,8 +12,7 @@ const SYSTEM_AVATARS = [
   'https://api.dicebear.com/7.x/avataaars/svg?seed=Lucy'
 ]
 
-function AvatarSelector({ onConfirm, onError }) {
-  const [selectedType, setSelectedType] = useState(null)
+function AvatarSelector({ onConfirm, onError, onCancel }) {
   const [selectedAvatar, setSelectedAvatar] = useState(null)
   const [selectedAvatarUrl, setSelectedAvatarUrl] = useState(null)
   const [uploadedImage, setUploadedImage] = useState(null)
@@ -41,7 +40,6 @@ function AvatarSelector({ onConfirm, onError }) {
       setUploadedImage(base64Data)
       setSelectedAvatar(base64Data)
       setSelectedAvatarUrl(null)
-      setSelectedType('upload')
     }
     reader.readAsDataURL(file)
   }
@@ -80,7 +78,6 @@ function AvatarSelector({ onConfirm, onError }) {
               const base64Data = event.target.result
               setSelectedAvatar(base64Data)
               setSelectedAvatarUrl(avatarUrl)
-              setSelectedType('system')
               setUploadedImage(base64Data)
               setLoading(false)
             }
@@ -116,12 +113,23 @@ function AvatarSelector({ onConfirm, onError }) {
       onError?.('请选择或上传一个头像')
       return
     }
-    onConfirm(selectedAvatar, selectedType)
+    onConfirm(selectedAvatar)
+  }
+
+  const handleOverlayClick = (e) => {
+    if (e.target.className === 'avatar-selector-overlay') {
+      onCancel?.()  
+    }
   }
 
   return (
-    <div className="avatar-selector-overlay">
+    <div className="avatar-selector-overlay" onClick={handleOverlayClick}>
       <div className="avatar-selector-modal">
+        <button className="modal-close-btn" onClick={onCancel} aria-label="关闭">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+        </button>
         <h2>选择头像</h2>
         
         <div className="avatar-selector-content">
@@ -155,7 +163,7 @@ function AvatarSelector({ onConfirm, onError }) {
               {SYSTEM_AVATARS.map((avatarUrl, index) => (
                 <div
                   key={index}
-                  className={`system-avatar-item ${selectedType === 'system' && selectedAvatarUrl === avatarUrl ? 'selected' : ''}`}
+                  className={`system-avatar-item ${selectedAvatarUrl === avatarUrl ? 'selected' : ''}`}
                   onClick={() => handleSystemAvatarSelect(avatarUrl)}
                 >
                   <img src={avatarUrl} alt={`系统头像 ${index + 1}`} />

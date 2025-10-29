@@ -37,9 +37,9 @@ function Navigation({ userBalance }) {
     }
   }
   
-  const handleAvatarConfirm = async (avatarData, avatarType) => {
+  const handleAvatarConfirm = async (avatarData) => {
     try {
-      const result = await api.uploadAvatar(avatarData, avatarType)
+      const result = await api.uploadAvatar(avatarData)
       
       if (result.success) {
         const updatedUser = { ...user, avatarUrl: result.data.avatarUrl }
@@ -54,6 +54,10 @@ function Navigation({ userBalance }) {
       alert('头像上传失败，请重试')
     }
   }
+
+  const handleAvatarCancel = () => {
+    setShowAvatarSelector(false)
+  }
   
   return (
     <>
@@ -61,6 +65,7 @@ function Navigation({ userBalance }) {
         <AvatarSelector
           onConfirm={handleAvatarConfirm}
           onError={handleAvatarError}
+          onCancel={handleAvatarCancel}
         />
       )}
       

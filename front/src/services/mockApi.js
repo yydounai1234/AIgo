@@ -476,7 +476,7 @@ export const mockApi = {
     }
   },
 
-  async uploadAvatar(avatarData, avatarType) {
+  async uploadAvatar(avatarData) {
     await delay(500)
     return {
       success: true,
