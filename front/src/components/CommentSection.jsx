@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
@@ -12,25 +12,10 @@ function CommentSection({ targetType, targetId }) {
   const [error, setError] = useState('')
   const [commentText, setCommentText] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const isTypingRef = useRef(false)
-  const typingTimeoutRef = useRef(null)
 
   useEffect(() => {
     loadComments()
-    
-    const refreshInterval = setInterval(() => {
-      if (!isTypingRef.current && !submitting) {
-        loadComments(true)
-      }
-    }, 10000)
-
-    return () => {
-      clearInterval(refreshInterval)
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current)
-      }
-    }
-  }, [targetType, targetId, submitting])
+  }, [targetType, targetId])
 
   const loadComments = async (silent = false) => {
     if (!silent) {
@@ -137,18 +122,7 @@ function CommentSection({ targetType, targetId }) {
             className="comment-textarea"
             placeholder="写下你的评论..."
             value={commentText}
-            onChange={(e) => {
-              setCommentText(e.target.value)
-              isTypingRef.current = true
-              
-              if (typingTimeoutRef.current) {
-                clearTimeout(typingTimeoutRef.current)
-              }
-              
-              typingTimeoutRef.current = setTimeout(() => {
-                isTypingRef.current = false
-              }, 1000)
-            }}
+            onChange={(e) => setCommentText(e.target.value)}
             disabled={submitting}
           />
           <div className="comment-submit-row">
