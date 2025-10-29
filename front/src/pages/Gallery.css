@@ -192,7 +192,6 @@
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #e0e0e0;
 }
 
 .author-avatar-placeholder {
@@ -204,7 +203,6 @@
   align-items: center;
   justify-content: center;
   font-size: 1rem;
-  border: 2px solid #e0e0e0;
 }
 
 .author-name {

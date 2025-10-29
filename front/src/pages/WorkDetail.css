@@ -86,7 +86,6 @@
   height: 48px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #e0e0e0;
 }
 
 .author-avatar-placeholder-large {
@@ -98,7 +97,6 @@
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  border: 3px solid #e0e0e0;
 }
 
 .author-name-large {
