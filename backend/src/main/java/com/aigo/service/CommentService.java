@@ -1,5 +1,6 @@
 package com.aigo.service;
 
+import com.aigo.dto.ErrorCode;
 import com.aigo.dto.comment.CommentResponse;
 import com.aigo.dto.comment.CreateCommentRequest;
 import com.aigo.entity.Comment;
@@ -32,7 +33,7 @@ public class CommentService {
     @Transactional
     public CommentResponse createComment(CreateCommentRequest request, String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException("用户不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "用户不存在"));
         
         Comment comment = Comment.builder()
                 .targetType(request.getTargetType())
@@ -51,10 +52,10 @@ public class CommentService {
     @Transactional
     public void deleteComment(String commentId, String userId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new BusinessException("评论不存在"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "评论不存在"));
         
         if (!comment.getUserId().equals(userId)) {
-            throw new BusinessException("无权限删除此评论");
+            throw new BusinessException(ErrorCode.FORBIDDEN, "无权限删除此评论");
         }
         
         commentRepository.delete(comment);
