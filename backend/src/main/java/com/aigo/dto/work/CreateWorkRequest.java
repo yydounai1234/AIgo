@@ -19,4 +19,7 @@ public class CreateWorkRequest {
     
     @Size(max = 500, message = "封面图片URL不能超过500字符")
     private String coverImage;
+    
+    @Size(max = 20, message = "内容类型长度不能超过20字符")
+    private String contentType = "anime";
 }

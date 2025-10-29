@@ -32,6 +32,7 @@ public class EpisodeResponse {
     private String errorMessage;
     private String style;
     private String targetAudience;
+    private String videoUrl;
     private LocalDateTime createdAt;
     
     public static EpisodeResponse fromEntity(Episode episode) {
@@ -53,6 +54,7 @@ public class EpisodeResponse {
                 .errorMessage(episode.getErrorMessage())
                 .style(episode.getStyle())
                 .targetAudience(episode.getTargetAudience())
+                .videoUrl(episode.getVideoUrl())
                 .createdAt(episode.getCreatedAt())
                 .build();
     }

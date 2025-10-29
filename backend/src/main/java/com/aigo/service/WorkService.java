@@ -28,12 +28,21 @@ public class WorkService {
     
     @Transactional
     public WorkResponse createWork(String userId, CreateWorkRequest request) {
+        String contentType = request.getContentType();
+        if (contentType == null || contentType.isEmpty()) {
+            contentType = "anime";
+        }
+        if (!"anime".equals(contentType) && !"video".equals(contentType)) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "内容类型必须是 'anime' 或 'video'");
+        }
+        
         Work work = Work.builder()
                 .userId(userId)
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .isPublic(request.getIsPublic() != null ? request.getIsPublic() : false)
                 .coverImage(request.getCoverImage())
+                .contentType(contentType)
                 .build();
         
         work = workRepository.save(work);
