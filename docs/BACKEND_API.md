@@ -1150,6 +1150,120 @@ CREATE TABLE likes (
 );
 ```
 
+#### comments (评论表)
+```sql
+CREATE TABLE comments (
+  id VARCHAR(36) PRIMARY KEY,
+  target_type VARCHAR(20) NOT NULL,
+  target_id VARCHAR(36) NOT NULL,
+  user_id VARCHAR(36) NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_target (target_type, target_id),
+  INDEX idx_user_id (user_id),
+  INDEX idx_created_at (created_at)
+);
+```
+
+---
+
+## 9. 评论功能
+
+### 9.1 获取评论列表
+
+**端点**: `GET /api/comments/{targetType}/{targetId}`
+
+**描述**: 获取指定目标的所有评论
+
+**参数**:
+- `targetType` (path): 目标类型（work 或 episode）
+- `targetId` (path): 目标ID（作品ID或剧集ID）
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "string",
+      "targetType": "work",
+      "targetId": "string",
+      "userId": "string",
+      "username": "string",
+      "content": "string",
+      "createdAt": "2024-01-01T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+**说明**:
+- 评论按创建时间倒序排列（最新的在前）
+- 无需登录即可查看评论
+
+---
+
+### 9.2 发表评论
+
+**端点**: `POST /api/comments`
+
+**描述**: 为作品或剧集发表评论
+
+**认证**: 必需
+
+**请求体**:
+```json
+{
+  "targetType": "work",
+  "targetId": "string",
+  "content": "string (1-1000字符)"
+}
+```
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": {
+    "id": "string",
+    "targetType": "work",
+    "targetId": "string",
+    "userId": "string",
+    "username": "string",
+    "content": "string",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  }
+}
+```
+
+**说明**:
+- `targetType` 只能是 "work" 或 "episode"
+- 评论内容不能为空，最多1000字符
+
+---
+
+### 9.3 删除评论
+
+**端点**: `DELETE /api/comments/{commentId}`
+
+**描述**: 删除评论
+
+**认证**: 必需
+
+**参数**:
+- `commentId` (path): 评论ID
+
+**响应**:
+```json
+{
+  "success": true,
+  "data": "评论已删除"
+}
+```
+
+**权限**: 仅评论创建者可删除自己的评论
+
 ---
 
 ## 安全要求

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
+import CommentSection from '../components/CommentSection'
 import './WorkDetail.css'
 
 function WorkDetail() {
@@ -15,12 +16,8 @@ function WorkDetail() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (!isAuthenticated()) {
-      navigate('/login', { state: { returnTo: '/gallery' } })
-      return
-    }
     loadWorkDetail()
-  }, [workId, isAuthenticated, navigate])
+  }, [workId])
 
   const loadWorkDetail = async () => {
     setLoading(true)
@@ -228,6 +225,8 @@ function WorkDetail() {
             </div>
           )}
         </div>
+
+        <CommentSection targetType="WORK" targetId={workId} />
       </div>
     </div>
   )

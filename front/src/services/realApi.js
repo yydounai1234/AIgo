@@ -166,6 +166,23 @@ export const realApi = {
     })
   },
 
+  async getComments(targetType, targetId) {
+    return await request(`/api/comments/${targetType}/${targetId}`)
+  },
+
+  async createComment(targetType, targetId, content) {
+    return await request('/api/comments', {
+      method: 'POST',
+      body: JSON.stringify({ targetType, targetId, content })
+    })
+  },
+
+  async deleteComment(commentId) {
+    return await request(`/api/comments/${commentId}`, {
+      method: 'DELETE'
+    })
+  },
+
   async uploadAvatar(avatarData) {
     return await request('/api/user/avatar', {
       method: 'POST',
