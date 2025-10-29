@@ -41,6 +41,7 @@ public class TextToImageService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Map<String, String> characterDescriptions = new HashMap<>();
     private final Map<String, Map<String, Object>> characterEmbeddings = new HashMap<>();
+    private final Map<String, String> sceneContexts = new HashMap<>();
     private final QiniuStorageService qiniuStorageService;
     private final ExecutorService executorService = Executors.newFixedThreadPool(5);
     
@@ -164,28 +165,33 @@ public class TextToImageService {
         
         prompt.append("动漫/漫画风格插画。");
         
-        prompt.append("角色：").append(characterDescription)
-            .append("。重要提示：保持此角色外观与之前场景一致 - ");
-        
         String characterKey = scene.getCharacter();
-        if (characterDescriptions.containsKey(characterKey)) {
-            prompt.append("使用这个精确描述：").append(characterDescriptions.get(characterKey)).append("。");
+        
+        String sceneContextKey = extractSceneContextKey(scene);
+        if (sceneContexts.containsKey(sceneContextKey)) {
+            prompt.append("场景延续：").append(sceneContexts.get(sceneContextKey)).append("。");
         }
+        
+        prompt.append("角色：").append(characterDescription)
+            .append("。");
         
         if (characterEmbeddings.containsKey(characterKey)) {
             Map<String, Object> embedding = characterEmbeddings.get(characterKey);
-            prompt.append("参考角色特征：");
-            if (embedding.containsKey("visualStyle")) {
-                prompt.append("视觉风格: ").append(embedding.get("visualStyle")).append(", ");
+            
+            if (embedding.containsKey("strictFeatures")) {
+                prompt.append("【关键约束 - 必须遵守】: ").append(embedding.get("strictFeatures")).append("。");
             }
-            if (embedding.containsKey("keyFeatures")) {
-                prompt.append("关键特征: ").append(embedding.get("keyFeatures")).append("。");
+            
+            if (embedding.containsKey("consistencyPrompt")) {
+                prompt.append(embedding.get("consistencyPrompt")).append("。");
             }
-            prompt.append("严格保持与首次生成图像的一致性。");
+            
+            prompt.append("注意：角色的发色、发型、眼睛特征在所有画面中必须完全相同，不允许有任何变化。");
         }
         
         if (scene.getVisualDescription() != null && !scene.getVisualDescription().isEmpty()) {
             prompt.append("场景：").append(scene.getVisualDescription()).append("。");
+            updateSceneContext(sceneContextKey, scene.getVisualDescription());
         }
         
         if (scene.getAction() != null && !scene.getAction().isEmpty()) {
@@ -196,10 +202,38 @@ public class TextToImageService {
             prompt.append("氛围：").append(scene.getAtmosphere()).append("。");
         }
         
-        prompt.append("高质量、细节丰富、所有场景中保持一致的角色设计。");
-        prompt.append("角色").append(characterKey).append("保持相同的面部、发型和服装。");
+        prompt.append("高质量、细节丰富、所有场景中保持完全一致的角色外观设计。");
         
         return prompt.toString();
+    }
+    
+    private String extractSceneContextKey(Scene scene) {
+        if (scene.getVisualDescription() != null && !scene.getVisualDescription().isEmpty()) {
+            String desc = scene.getVisualDescription();
+            if (desc.contains("房间") || desc.contains("室内")) return "indoor";
+            if (desc.contains("街道") || desc.contains("户外") || desc.contains("外面")) return "outdoor";
+            if (desc.contains("学校") || desc.contains("教室")) return "school";
+            if (desc.contains("公园")) return "park";
+            if (desc.contains("咖啡") || desc.contains("餐厅")) return "cafe";
+        }
+        return "general_" + (scene.getSceneNumber() / 3);
+    }
+    
+    private void updateSceneContext(String contextKey, String visualDescription) {
+        if (!sceneContexts.containsKey(contextKey)) {
+            String context = "保持相同的场景背景和环境";
+            if (visualDescription.contains("房间")) {
+                context = "保持相同的房间布局、装饰和光照";
+            } else if (visualDescription.contains("街道")) {
+                context = "保持相同的街道环境、建筑和天气";
+            } else if (visualDescription.contains("学校") || visualDescription.contains("教室")) {
+                context = "保持相同的学校/教室环境和布置";
+            } else if (visualDescription.contains("公园")) {
+                context = "保持相同的公园景色和环境";
+            }
+            sceneContexts.put(contextKey, context);
+            logger.info("[TextToImageService] Created scene context for '{}': {}", contextKey, context);
+        }
     }
     
     private String callTextToImageApi(String prompt) throws Exception {
@@ -255,32 +289,118 @@ public class TextToImageService {
         embedding.put("visualStyle", "动漫风格");
         
         List<String> keyFeatures = new ArrayList<>();
-        if (characterDescription.contains("黑发") || characterDescription.contains("黑色头发")) {
-            keyFeatures.add("黑发");
+        List<String> strictFeatures = new ArrayList<>();
+        
+        String hairColor = extractHairColor(characterDescription);
+        if (hairColor != null) {
+            keyFeatures.add(hairColor);
+            strictFeatures.add("发色必须为" + hairColor);
         }
-        if (characterDescription.contains("棕发") || characterDescription.contains("棕色头发")) {
-            keyFeatures.add("棕发");
+        
+        String hairStyle = extractHairStyle(characterDescription);
+        if (hairStyle != null) {
+            keyFeatures.add(hairStyle);
+            strictFeatures.add("发型必须为" + hairStyle);
         }
-        if (characterDescription.contains("长发")) {
-            keyFeatures.add("长发");
+        
+        String eyeFeatures = extractEyeFeatures(characterDescription);
+        if (eyeFeatures != null) {
+            keyFeatures.add(eyeFeatures);
+            strictFeatures.add("眼睛特征: " + eyeFeatures);
         }
-        if (characterDescription.contains("短发")) {
-            keyFeatures.add("短发");
+        
+        String bodyType = extractBodyType(characterDescription);
+        if (bodyType != null) {
+            keyFeatures.add(bodyType);
+            strictFeatures.add("身材: " + bodyType);
         }
-        if (characterDescription.contains("眼睛")) {
-            keyFeatures.add("特征性眼睛");
+        
+        String clothingStyle = extractClothingStyle(characterDescription);
+        if (clothingStyle != null) {
+            keyFeatures.add(clothingStyle);
+            strictFeatures.add("服装风格: " + clothingStyle);
         }
-        if (characterDescription.contains("高挑") || characterDescription.contains("高")) {
-            keyFeatures.add("高挑身材");
-        }
-        if (characterDescription.contains("娇小") || characterDescription.contains("矮")) {
-            keyFeatures.add("娇小身材");
+        
+        String facialFeatures = extractFacialFeatures(characterDescription);
+        if (facialFeatures != null) {
+            keyFeatures.add(facialFeatures);
+            strictFeatures.add("面部特征: " + facialFeatures);
         }
         
         embedding.put("keyFeatures", String.join(", ", keyFeatures));
-        embedding.put("consistencyPrompt", "保持" + characterName + "的" + String.join("、", keyFeatures) + "特征不变");
+        embedding.put("strictFeatures", String.join("; ", strictFeatures));
+        embedding.put("consistencyPrompt", "严格保持" + characterName + "的固定特征: " + String.join("; ", strictFeatures) + "。这些特征在所有场景中都绝对不能改变。");
         
         return embedding;
+    }
+    
+    private String extractHairColor(String description) {
+        if (description.contains("黑发") || description.contains("黑色头发")) return "黑发";
+        if (description.contains("棕发") || description.contains("棕色头发")) return "棕发";
+        if (description.contains("金发") || description.contains("金色头发")) return "金发";
+        if (description.contains("银发") || description.contains("银色头发")) return "银发";
+        if (description.contains("白发") || description.contains("白色头发")) return "白发";
+        if (description.contains("红发") || description.contains("红色头发")) return "红发";
+        if (description.contains("蓝发") || description.contains("蓝色头发")) return "蓝发";
+        return null;
+    }
+    
+    private String extractHairStyle(String description) {
+        if (description.contains("长发")) return "长发";
+        if (description.contains("短发")) return "短发";
+        if (description.contains("中长发")) return "中长发";
+        if (description.contains("马尾")) return "马尾";
+        if (description.contains("双马尾")) return "双马尾";
+        if (description.contains("卷发")) return "卷发";
+        if (description.contains("直发")) return "直发";
+        if (description.contains("波浪")) return "波浪发";
+        return null;
+    }
+    
+    private String extractEyeFeatures(String description) {
+        List<String> eyeFeats = new ArrayList<>();
+        if (description.contains("蓝眼") || description.contains("蓝色眼睛")) eyeFeats.add("蓝色眼睛");
+        else if (description.contains("棕眼") || description.contains("棕色眼睛")) eyeFeats.add("棕色眼睛");
+        else if (description.contains("黑眼") || description.contains("黑色眼睛")) eyeFeats.add("黑色眼睛");
+        else if (description.contains("绿眼") || description.contains("绿色眼睛")) eyeFeats.add("绿色眼睛");
+        else if (description.contains("红眼") || description.contains("红色眼睛")) eyeFeats.add("红色眼睛");
+        
+        if (description.contains("大眼睛")) eyeFeats.add("大眼睛");
+        if (description.contains("细长眼")) eyeFeats.add("细长眼");
+        if (description.contains("圆眼")) eyeFeats.add("圆眼睛");
+        
+        return eyeFeats.isEmpty() ? null : String.join("、", eyeFeats);
+    }
+    
+    private String extractBodyType(String description) {
+        if (description.contains("高挑")) return "高挑身材";
+        if (description.contains("娇小")) return "娇小身材";
+        if (description.contains("苗条")) return "苗条身材";
+        if (description.contains("健壮")) return "健壮体型";
+        if (description.contains("匀称")) return "匀称体型";
+        return null;
+    }
+    
+    private String extractClothingStyle(String description) {
+        if (description.contains("西装")) return "西装";
+        if (description.contains("和服")) return "和服";
+        if (description.contains("校服")) return "校服";
+        if (description.contains("休闲装")) return "休闲装";
+        if (description.contains("运动装")) return "运动装";
+        if (description.contains("连衣裙")) return "连衣裙";
+        return null;
+    }
+    
+    private String extractFacialFeatures(String description) {
+        List<String> features = new ArrayList<>();
+        if (description.contains("圆脸")) features.add("圆脸");
+        else if (description.contains("瓜子脸")) features.add("瓜子脸");
+        else if (description.contains("方脸")) features.add("方脸");
+        
+        if (description.contains("高鼻梁")) features.add("高鼻梁");
+        if (description.contains("小鼻")) features.add("小巧鼻子");
+        
+        return features.isEmpty() ? null : String.join("、", features);
     }
     
     public Map<String, Map<String, Object>> getCharacterEmbeddings() {
