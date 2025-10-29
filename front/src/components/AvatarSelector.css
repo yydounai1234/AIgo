@@ -8,7 +8,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 2000;
 }
 
 .avatar-selector-modal {
@@ -19,6 +19,7 @@
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
+  position: relative;
 }
 
 .avatar-selector-modal h2 {
@@ -55,17 +56,19 @@
 
 .avatar-upload-btn {
   padding: 10px 20px;
-  background-color: #007bff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
-  transition: background-color 0.3s;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
 .avatar-upload-btn:hover {
-  background-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .avatar-upload-btn:disabled {
@@ -84,7 +87,7 @@
   height: 120px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #007bff;
+  border: 3px solid #667eea;
 }
 
 .avatar-divider {
@@ -146,7 +149,7 @@
 }
 
 .system-avatar-item.selected img {
-  border-color: #007bff;
+  border-color: #667eea;
 }
 
 .avatar-selector-actions {
@@ -166,26 +169,30 @@
 }
 
 .avatar-selector-actions .btn-cancel {
-  background-color: #f0f0f0;
-  color: #333;
+  background: rgba(255, 255, 255, 0.2);
+  color: #667eea;
+  border: 1px solid #667eea;
 }
 
 .avatar-selector-actions .btn-cancel:hover {
-  background-color: #e0e0e0;
+  background: rgba(102, 126, 234, 0.1);
 }
 
 .avatar-selector-actions .btn-confirm {
-  background-color: #28a745;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 }
 
 .avatar-selector-actions .btn-confirm:hover {
-  background-color: #218838;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .avatar-selector-actions .btn-confirm:disabled {
-  background-color: #ccc;
+  background: #ccc;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .error-message {
@@ -193,4 +200,28 @@
   text-align: center;
   margin-top: 10px;
   font-size: 14px;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  color: #666;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close-btn:hover {
+  color: #333;
+}
+
+.modal-close-btn svg {
+  width: 24px;
+  height: 24px;
 }
