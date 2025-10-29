@@ -15,11 +15,13 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.ByteArrayInputStream;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.Base64;
 
 @Service
 public class TextToImageService {
@@ -38,6 +40,7 @@ public class TextToImageService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Map<String, String> characterDescriptions = new HashMap<>();
+    private final Map<String, Map<String, Object>> characterEmbeddings = new HashMap<>();
     private final QiniuStorageService qiniuStorageService;
     private final ExecutorService executorService = Executors.newFixedThreadPool(5);
     
@@ -50,15 +53,21 @@ public class TextToImageService {
         this.qiniuStorageService = qiniuStorageService;
     }
     
-    public String generateImageForScene(Scene scene, Map<String, String> characterAppearances) {
+    public String generateImageForScene(Scene scene, Map<String, String> characterAppearances) {\n        return generateImageForScene(scene, characterAppearances, null);\n    }\n    \n    public String generateImageForScene(Scene scene, Map<String, String> characterAppearances, \n                                       Map<String, Map<String, Object>> existingEmbeddings) {
         if ("demo-key".equals(apiKey)) {
             logger.info("[TextToImageService] Using demo mode for scene {}", scene.getSceneNumber());
             return createDemoImageUrl(scene);
         }
         
         try {
-            String characterDesc = characterAppearances.getOrDefault(scene.getCharacter(), scene.getCharacter());
-            characterDescriptions.putIfAbsent(scene.getCharacter(), characterDesc);
+            String characterKey = scene.getCharacter();
+            String characterDesc = characterAppearances.getOrDefault(characterKey, characterKey);
+            characterDescriptions.putIfAbsent(characterKey, characterDesc);
+            
+            if (existingEmbeddings != null && existingEmbeddings.containsKey(characterKey)) {
+                characterEmbeddings.put(characterKey, existingEmbeddings.get(characterKey));
+                logger.info("[TextToImageService] Using existing character embedding for '{}'", characterKey);
+            }
             
             String prompt = buildImagePrompt(scene, characterDesc);
             
@@ -67,6 +76,12 @@ public class TextToImageService {
             
             String filePrefix = "scene_" + scene.getSceneNumber();
             String publicUrl = qiniuStorageService.uploadBase64Image(base64ImageData, filePrefix);
+            
+            if (!characterEmbeddings.containsKey(characterKey)) {
+                Map<String, Object> embedding = extractCharacterEmbedding(characterDesc, characterKey);
+                characterEmbeddings.put(characterKey, embedding);
+                logger.info("[TextToImageService] Extracted and stored character embedding for '{}'", characterKey);
+            }
             
             return publicUrl;
             
@@ -152,6 +167,18 @@ public class TextToImageService {
             prompt.append("使用这个精确描述：").append(characterDescriptions.get(characterKey)).append("。");
         }
         
+        if (characterEmbeddings.containsKey(characterKey)) {
+            Map<String, Object> embedding = characterEmbeddings.get(characterKey);
+            prompt.append("参考角色特征：");
+            if (embedding.containsKey("visualStyle")) {
+                prompt.append("视觉风格: ").append(embedding.get("visualStyle")).append(", ");
+            }
+            if (embedding.containsKey("keyFeatures")) {
+                prompt.append("关键特征: ").append(embedding.get("keyFeatures")).append("。");
+            }
+            prompt.append("严格保持与首次生成图像的一致性。");
+        }
+        
         if (scene.getVisualDescription() != null && !scene.getVisualDescription().isEmpty()) {
             prompt.append("场景：").append(scene.getVisualDescription()).append("。");
         }
@@ -213,6 +240,54 @@ public class TextToImageService {
         return "http://via.placeholder.com/1024x1024.png?text=Scene+" + scene.getSceneNumber() + ":" + scene.getCharacter();
     }
     
+    private Map<String, Object> extractCharacterEmbedding(String characterDescription, String characterName) {
+        Map<String, Object> embedding = new HashMap<>();
+        
+        embedding.put("characterName", characterName);
+        embedding.put("timestamp", System.currentTimeMillis());
+        embedding.put("description", characterDescription);
+        
+        embedding.put("visualStyle", "动漫风格");
+        
+        List<String> keyFeatures = new ArrayList<>();
+        if (characterDescription.contains("黑发") || characterDescription.contains("黑色头发")) {
+            keyFeatures.add("黑发");
+        }
+        if (characterDescription.contains("棕发") || characterDescription.contains("棕色头发")) {
+            keyFeatures.add("棕发");
+        }
+        if (characterDescription.contains("长发")) {
+            keyFeatures.add("长发");
+        }
+        if (characterDescription.contains("短发")) {
+            keyFeatures.add("短发");
+        }
+        if (characterDescription.contains("眼睛")) {
+            keyFeatures.add("特征性眼睛");
+        }
+        if (characterDescription.contains("高挑") || characterDescription.contains("高")) {
+            keyFeatures.add("高挑身材");
+        }
+        if (characterDescription.contains("娇小") || characterDescription.contains("矮")) {
+            keyFeatures.add("娇小身材");
+        }
+        
+        embedding.put("keyFeatures", String.join(", ", keyFeatures));
+        embedding.put("consistencyPrompt", "保持" + characterName + "的" + String.join("、", keyFeatures) + "特征不变");
+        
+        return embedding;
+    }
+    
+    public Map<String, Map<String, Object>> getCharacterEmbeddings() {
+        return new HashMap<>(characterEmbeddings);
+    }
+    
+    public void setCharacterEmbedding(String characterName, Map<String, Object> embedding) {
+        if (characterName != null && embedding != null) {
+            characterEmbeddings.put(characterName, embedding);
+            logger.info("[TextToImageService] Set character embedding for '{}'", characterName);
+        }
+    }
     private static class ImageResult {
         private final int sceneNumber;
         private final String imageUrl;

@@ -12,6 +12,7 @@ import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "characters")
@@ -89,6 +90,13 @@ public class CharacterEntity {
     
     @Column(name = "distinguishing_features", columnDefinition = "TEXT")
     private String distinguishingFeatures;
+    
+    @Column(name = "first_image_url", length = 500)
+    private String firstImageUrl;
+    
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "character_embedding", columnDefinition = "JSON")
+    private Map<String, Object> characterEmbedding;
     
     @Column(name = "is_placeholder_name")
     private Boolean isPlaceholderName = false;
