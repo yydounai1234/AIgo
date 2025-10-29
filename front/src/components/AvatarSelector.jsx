@@ -114,20 +114,9 @@ function AvatarSelector({ onConfirm }) {
     onConfirm(selectedAvatar, selectedType)
   }
 
-  const handleOverlayClick = (e) => {
-    if (e.target.className === 'avatar-selector-overlay') {
-      onCancel()
-    }
-  }
-
   return (
-    <div className="avatar-selector-overlay" onClick={handleOverlayClick}>
+    <div className="avatar-selector-overlay">
       <div className="avatar-selector-modal">
-        <button className="modal-close-btn" onClick={onCancel} aria-label="关闭">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-        </button>
         <h2>选择头像</h2>
         
         <div className="avatar-selector-content">
