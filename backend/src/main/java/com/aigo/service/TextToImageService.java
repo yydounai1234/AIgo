@@ -1,5 +1,6 @@
 package com.aigo.service;
 
+import com.aigo.entity.CharacterEntity;
 import com.aigo.model.Scene;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -98,10 +99,22 @@ public class TextToImageService {
     }
     
     public List<String> generateImagesForScenes(List<Scene> scenes, Map<String, String> characterAppearances) {
+        return generateImagesForScenes(scenes, characterAppearances, null);
+    }
+    
+    public List<String> generateImagesForScenes(List<Scene> scenes, Map<String, String> characterAppearances,
+                                                Map<String, Map<String, Object>> existingEmbeddings) {
         logger.info("[TextToImageService] Generating images for {} scenes in parallel", scenes.size());
         
         if (scenes.isEmpty()) {
             return new ArrayList<>();
+        }
+        
+        if (existingEmbeddings != null && !existingEmbeddings.isEmpty()) {
+            for (Map.Entry<String, Map<String, Object>> entry : existingEmbeddings.entrySet()) {
+                characterEmbeddings.put(entry.getKey(), entry.getValue());
+            }
+            logger.info("[TextToImageService] Loaded {} existing character embeddings", existingEmbeddings.size());
         }
         
         List<CompletableFuture<ImageResult>> futures = scenes.stream()
@@ -179,14 +192,46 @@ public class TextToImageService {
             Map<String, Object> embedding = characterEmbeddings.get(characterKey);
             
             if (embedding.containsKey("strictFeatures")) {
-                prompt.append("【关键约束 - 必须遵守】: ").append(embedding.get("strictFeatures")).append("。");
+                prompt.append("\n\n【关键约束 - 必须遵守】: ").append(embedding.get("strictFeatures")).append("。");
+            }
+            
+            prompt.append("\n\n参考角色特征数据库：");
+            if (embedding.containsKey("visualStyle")) {
+                prompt.append("\n- 视觉风格: ").append(embedding.get("visualStyle"));
+            }
+            if (embedding.containsKey("keyFeatures")) {
+                prompt.append("\n- 关键特征: ").append(embedding.get("keyFeatures"));
+            }
+            if (embedding.containsKey("hairColor")) {
+                prompt.append("\n- 发色: ").append(embedding.get("hairColor"));
+            }
+            if (embedding.containsKey("hairType")) {
+                prompt.append("\n- 发型: ").append(embedding.get("hairType"));
+            }
+            if (embedding.containsKey("eyeColor")) {
+                prompt.append("\n- 眼睛颜色: ").append(embedding.get("eyeColor"));
+            }
+            if (embedding.containsKey("eyeType")) {
+                prompt.append("\n- 眼型: ").append(embedding.get("eyeType"));
+            }
+            if (embedding.containsKey("faceShape")) {
+                prompt.append("\n- 脸型: ").append(embedding.get("faceShape"));
+            }
+            if (embedding.containsKey("skinTone")) {
+                prompt.append("\n- 肤色: ").append(embedding.get("skinTone"));
+            }
+            if (embedding.containsKey("bodyType")) {
+                prompt.append("\n- 体型: ").append(embedding.get("bodyType"));
+            }
+            if (embedding.containsKey("clothingStyle")) {
+                prompt.append("\n- 服装风格: ").append(embedding.get("clothingStyle"));
             }
             
             if (embedding.containsKey("consistencyPrompt")) {
-                prompt.append(embedding.get("consistencyPrompt")).append("。");
+                prompt.append("\n\n").append(embedding.get("consistencyPrompt"));
             }
             
-            prompt.append("注意：角色的发色、发型、眼睛特征在所有画面中必须完全相同，不允许有任何变化。");
+            prompt.append("\n\n注意：角色的发色、发型、眼睛特征在所有画面中必须完全相同，不允许有任何变化。");
         }
         
         if (scene.getVisualDescription() != null && !scene.getVisualDescription().isEmpty()) {
@@ -334,6 +379,7 @@ public class TextToImageService {
         return embedding;
     }
     
+<<<<<<< HEAD
     private String extractHairColor(String description) {
         if (description.contains("黑发") || description.contains("黑色头发")) return "黑发";
         if (description.contains("棕发") || description.contains("棕色头发")) return "棕发";
@@ -401,6 +447,107 @@ public class TextToImageService {
         if (description.contains("小鼻")) features.add("小巧鼻子");
         
         return features.isEmpty() ? null : String.join("、", features);
+    }
+    
+    public Map<String, Object> extractCharacterEmbeddingFromEntity(CharacterEntity character) {
+        if (character == null) {
+            return new HashMap<>();
+        }
+        
+        Map<String, Object> embedding = new HashMap<>();
+        
+        embedding.put("characterName", character.getName());
+        embedding.put("timestamp", System.currentTimeMillis());
+        
+        StringBuilder fullDescription = new StringBuilder();
+        if (character.getAppearance() != null && !character.getAppearance().isEmpty()) {
+            fullDescription.append(character.getAppearance());
+        }
+        if (character.getDescription() != null && !character.getDescription().isEmpty()) {
+            if (fullDescription.length() > 0) fullDescription.append(". ");
+            fullDescription.append(character.getDescription());
+        }
+        embedding.put("description", fullDescription.toString());
+        
+        embedding.put("visualStyle", "动漫风格");
+        
+        List<String> keyFeatures = new ArrayList<>();
+        List<String> strictFeatures = new ArrayList<>();
+        
+        if (character.getHairColor() != null && !character.getHairColor().isEmpty()) {
+            keyFeatures.add(character.getHairColor() + "头发");
+            strictFeatures.add("发色必须为" + character.getHairColor());
+            embedding.put("hairColor", character.getHairColor());
+        }
+        
+        if (character.getHairType() != null && !character.getHairType().isEmpty()) {
+            keyFeatures.add(character.getHairType());
+            strictFeatures.add("发型必须为" + character.getHairType());
+            embedding.put("hairType", character.getHairType());
+        }
+        
+        if (character.getEyeColor() != null && !character.getEyeColor().isEmpty()) {
+            keyFeatures.add(character.getEyeColor() + "眼睛");
+            strictFeatures.add("眼睛颜色必须为" + character.getEyeColor());
+            embedding.put("eyeColor", character.getEyeColor());
+        }
+        
+        if (character.getEyeType() != null && !character.getEyeType().isEmpty()) {
+            keyFeatures.add(character.getEyeType());
+            strictFeatures.add("眼型必须为" + character.getEyeType());
+            embedding.put("eyeType", character.getEyeType());
+        }
+        
+        if (character.getFaceShape() != null && !character.getFaceShape().isEmpty()) {
+            keyFeatures.add(character.getFaceShape());
+            embedding.put("faceShape", character.getFaceShape());
+        }
+        
+        if (character.getSkinTone() != null && !character.getSkinTone().isEmpty()) {
+            keyFeatures.add(character.getSkinTone() + "肤色");
+            embedding.put("skinTone", character.getSkinTone());
+        }
+        
+        if (character.getHeight() != null && !character.getHeight().isEmpty()) {
+            keyFeatures.add(character.getHeight());
+            embedding.put("height", character.getHeight());
+        }
+        
+        if (character.getBuild() != null && !character.getBuild().isEmpty()) {
+            keyFeatures.add(character.getBuild());
+            embedding.put("build", character.getBuild());
+        }
+        
+        if (character.getBodyType() != null && !character.getBodyType().isEmpty()) {
+            keyFeatures.add(character.getBodyType());
+            embedding.put("bodyType", character.getBodyType());
+        }
+        
+        if (character.getClothingStyle() != null && !character.getClothingStyle().isEmpty()) {
+            keyFeatures.add(character.getClothingStyle());
+            embedding.put("clothingStyle", character.getClothingStyle());
+        }
+        
+        if (character.getDistinguishingFeatures() != null && !character.getDistinguishingFeatures().isEmpty()) {
+            keyFeatures.add(character.getDistinguishingFeatures());
+            embedding.put("distinguishingFeatures", character.getDistinguishingFeatures());
+        }
+        
+        if (character.getFacialFeatures() != null && !character.getFacialFeatures().isEmpty()) {
+            embedding.put("facialFeatures", character.getFacialFeatures());
+        }
+        
+        embedding.put("keyFeatures", String.join(", ", keyFeatures));
+        embedding.put("strictFeatures", strictFeatures);
+        
+        String consistencyPrompt = "【关键约束 - 必须遵守】角色" + character.getName() + "的以下特征在所有场景中绝对不能改变: " + 
+            String.join("; ", strictFeatures.isEmpty() ? Collections.singletonList("保持整体外观一致") : strictFeatures);
+        embedding.put("consistencyPrompt", consistencyPrompt);
+        
+        logger.info("[TextToImageService] Extracted detailed embedding for '{}' with {} key features and {} strict constraints",
+            character.getName(), keyFeatures.size(), strictFeatures.size());
+        
+        return embedding;
     }
     
     public Map<String, Map<String, Object>> getCharacterEmbeddings() {

@@ -58,7 +58,7 @@ public class NovelParseService {
         if ("demo-key".equals(apiKey)) {
             logger.info("[NovelParseService] Using demo mode");
             AnimeSegment segment = createDemoResponse(text);
-            generateImagesForSegment(segment);
+            generateImagesForSegment(segment, workId);
             generateAudioForSegment(segment);
             return segment;
         }
@@ -98,7 +98,7 @@ public class NovelParseService {
             assignPlaceholderNames(segment, workId);
             resolvePronounsInScenes(segment, workCharacters);
             enrichSegmentWithWorkCharacters(segment, workId);
-            generateImagesForSegment(segment);
+            generateImagesForSegment(segment, workId);
             generateAudioForSegment(segment);
             
             return segment;
@@ -109,7 +109,7 @@ public class NovelParseService {
         }
     }
     
-    private void generateImagesForSegment(AnimeSegment segment) {
+    private void generateImagesForSegment(AnimeSegment segment, String workId) {
         if (segment.getScenes() == null || segment.getScenes().isEmpty()) {
             return;
         }
@@ -117,40 +117,93 @@ public class NovelParseService {
         logger.info("[NovelParseService] Generating images for {} scenes", segment.getScenes().size());
         
         Map<String, String> characterAppearances = new HashMap<>();
-        if (segment.getCharacters() != null) {
-            for (Character character : segment.getCharacters()) {
-                StringBuilder descBuilder = new StringBuilder();
-                if (character.getAppearance() != null && !character.getAppearance().isEmpty()) {
-                    descBuilder.append(character.getAppearance());
+        Map<String, Map<String, Object>> characterEmbeddings = new HashMap<>();
+        
+        if (workId != null) {
+            try {
+                List<com.aigo.entity.CharacterEntity> workCharacters = characterService.getCharactersByWorkId(workId);
+                Map<String, com.aigo.entity.CharacterEntity> workCharacterMap = new HashMap<>();
+                for (com.aigo.entity.CharacterEntity workChar : workCharacters) {
+                    workCharacterMap.put(workChar.getName(), workChar);
+                    
+                    if (workChar.getCharacterEmbedding() != null && !workChar.getCharacterEmbedding().isEmpty()) {
+                        characterEmbeddings.put(workChar.getName(), workChar.getCharacterEmbedding());
+                        logger.info("[NovelParseService] Loaded existing embedding for character '{}' from database", workChar.getName());
+                    } else {
+                        Map<String, Object> embedding = textToImageService.extractCharacterEmbeddingFromEntity(workChar);
+                        characterEmbeddings.put(workChar.getName(), embedding);
+                        textToImageService.setCharacterEmbedding(workChar.getName(), embedding);
+                        logger.info("[NovelParseService] Generated new embedding for character '{}' from database fields", workChar.getName());
+                    }
                 }
-                if (character.getBodyType() != null && !character.getBodyType().isEmpty()) {
-                    if (descBuilder.length() > 0) descBuilder.append(", ");
-                    descBuilder.append("体型: ").append(character.getBodyType());
+                
+                if (segment.getCharacters() != null) {
+                    for (Character character : segment.getCharacters()) {
+                        com.aigo.entity.CharacterEntity existingChar = workCharacterMap.get(character.getName());
+                        if (existingChar != null) {
+                            StringBuilder descBuilder = new StringBuilder();
+                            if (existingChar.getAppearance() != null && !existingChar.getAppearance().isEmpty()) {
+                                descBuilder.append(existingChar.getAppearance());
+                            }
+                            if (existingChar.getHairColor() != null && !existingChar.getHairColor().isEmpty()) {
+                                if (descBuilder.length() > 0) descBuilder.append(", ");
+                                descBuilder.append("发色: ").append(existingChar.getHairColor());
+                            }
+                            if (existingChar.getHairType() != null && !existingChar.getHairType().isEmpty()) {
+                                if (descBuilder.length() > 0) descBuilder.append(", ");
+                                descBuilder.append("发型: ").append(existingChar.getHairType());
+                            }
+                            if (existingChar.getEyeColor() != null && !existingChar.getEyeColor().isEmpty()) {
+                                if (descBuilder.length() > 0) descBuilder.append(", ");
+                                descBuilder.append("眼色: ").append(existingChar.getEyeColor());
+                            }
+                            if (existingChar.getEyeType() != null && !existingChar.getEyeType().isEmpty()) {
+                                if (descBuilder.length() > 0) descBuilder.append(", ");
+                                descBuilder.append("眼型: ").append(existingChar.getEyeType());
+                            }
+                            if (existingChar.getBodyType() != null && !existingChar.getBodyType().isEmpty()) {
+                                if (descBuilder.length() > 0) descBuilder.append(", ");
+                                descBuilder.append("体型: ").append(existingChar.getBodyType());
+                            }
+                            if (existingChar.getFacialFeatures() != null && !existingChar.getFacialFeatures().isEmpty()) {
+                                if (descBuilder.length() > 0) descBuilder.append(", ");
+                                descBuilder.append("面部: ").append(existingChar.getFacialFeatures());
+                            }
+                            if (existingChar.getClothingStyle() != null && !existingChar.getClothingStyle().isEmpty()) {
+                                if (descBuilder.length() > 0) descBuilder.append(", ");
+                                descBuilder.append("服装: ").append(existingChar.getClothingStyle());
+                            }
+                            if (existingChar.getDistinguishingFeatures() != null && !existingChar.getDistinguishingFeatures().isEmpty()) {
+                                if (descBuilder.length() > 0) descBuilder.append(", ");
+                                descBuilder.append("特征: ").append(existingChar.getDistinguishingFeatures());
+                            }
+                            characterAppearances.put(character.getName(), descBuilder.toString());
+                        } else {
+                            buildAppearanceFromSegmentCharacter(character, characterAppearances);
+                        }
+                    }
                 }
-                if (character.getFacialFeatures() != null && !character.getFacialFeatures().isEmpty()) {
-                    if (descBuilder.length() > 0) descBuilder.append(", ");
-                    descBuilder.append("面部: ").append(character.getFacialFeatures());
+            } catch (Exception e) {
+                logger.warn("[NovelParseService] Failed to load work characters, falling back to segment data", e);
+                if (segment.getCharacters() != null) {
+                    for (Character character : segment.getCharacters()) {
+                        buildAppearanceFromSegmentCharacter(character, characterAppearances);
+                    }
                 }
-                if (character.getClothingStyle() != null && !character.getClothingStyle().isEmpty()) {
-                    if (descBuilder.length() > 0) descBuilder.append(", ");
-                    descBuilder.append("服装: ").append(character.getClothingStyle());
+            }
+        } else {
+            if (segment.getCharacters() != null) {
+                for (Character character : segment.getCharacters()) {
+                    buildAppearanceFromSegmentCharacter(character, characterAppearances);
                 }
-                if (character.getDistinguishingFeatures() != null && !character.getDistinguishingFeatures().isEmpty()) {
-                    if (descBuilder.length() > 0) descBuilder.append(", ");
-                    descBuilder.append("特征: ").append(character.getDistinguishingFeatures());
-                }
-                if (character.getDescription() != null && !character.getDescription().isEmpty()) {
-                    if (descBuilder.length() > 0) descBuilder.append(", ");
-                    descBuilder.append(character.getDescription());
-                }
-                characterAppearances.put(character.getName(), descBuilder.toString());
             }
         }
         
         try {
             List<String> imageUrls = textToImageService.generateImagesForScenes(
                 segment.getScenes(), 
-                characterAppearances
+                characterAppearances,
+                characterEmbeddings
             );
             
             for (int i = 0; i < segment.getScenes().size() && i < imageUrls.size(); i++) {
@@ -161,6 +214,34 @@ public class NovelParseService {
         } catch (Exception e) {
             logger.error("[NovelParseService] Failed to generate images", e);
         }
+    }
+    
+    private void buildAppearanceFromSegmentCharacter(Character character, Map<String, String> characterAppearances) {
+        StringBuilder descBuilder = new StringBuilder();
+        if (character.getAppearance() != null && !character.getAppearance().isEmpty()) {
+            descBuilder.append(character.getAppearance());
+        }
+        if (character.getBodyType() != null && !character.getBodyType().isEmpty()) {
+            if (descBuilder.length() > 0) descBuilder.append(", ");
+            descBuilder.append("体型: ").append(character.getBodyType());
+        }
+        if (character.getFacialFeatures() != null && !character.getFacialFeatures().isEmpty()) {
+            if (descBuilder.length() > 0) descBuilder.append(", ");
+            descBuilder.append("面部: ").append(character.getFacialFeatures());
+        }
+        if (character.getClothingStyle() != null && !character.getClothingStyle().isEmpty()) {
+            if (descBuilder.length() > 0) descBuilder.append(", ");
+            descBuilder.append("服装: ").append(character.getClothingStyle());
+        }
+        if (character.getDistinguishingFeatures() != null && !character.getDistinguishingFeatures().isEmpty()) {
+            if (descBuilder.length() > 0) descBuilder.append(", ");
+            descBuilder.append("特征: ").append(character.getDistinguishingFeatures());
+        }
+        if (character.getDescription() != null && !character.getDescription().isEmpty()) {
+            if (descBuilder.length() > 0) descBuilder.append(", ");
+            descBuilder.append(character.getDescription());
+        }
+        characterAppearances.put(character.getName(), descBuilder.toString());
     }
     
     private void generateAudioForSegment(AnimeSegment segment) {
