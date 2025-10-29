@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
 import Modal from '../components/Modal'
+import CommentSection from '../components/CommentSection'
 import './EpisodeViewer.css'
 
 function EpisodeViewer() {
@@ -777,6 +778,12 @@ function EpisodeViewer() {
           </>
         )}
       </div>
+
+      {!needsPurchase && episode?.status === 'COMPLETED' && (
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+          <CommentSection targetType="EPISODE" targetId={episodeId} />
+        </div>
+      )}
 
       <Modal
         isOpen={modal.isOpen}

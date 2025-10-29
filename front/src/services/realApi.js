@@ -164,5 +164,22 @@ export const realApi = {
       method: 'POST',
       body: JSON.stringify({ amount })
     })
+  },
+
+  async getComments(targetType, targetId) {
+    return await request(`/api/comments/${targetType}/${targetId}`)
+  },
+
+  async createComment(targetType, targetId, content) {
+    return await request('/api/comments', {
+      method: 'POST',
+      body: JSON.stringify({ targetType, targetId, content })
+    })
+  },
+
+  async deleteComment(commentId) {
+    return await request(`/api/comments/${commentId}`, {
+      method: 'DELETE'
+    })
   }
 }

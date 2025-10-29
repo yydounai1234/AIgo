@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
+import CommentSection from '../components/CommentSection'
 import './WorkDetail.css'
 
 function WorkDetail() {
@@ -228,6 +229,8 @@ function WorkDetail() {
             </div>
           )}
         </div>
+
+        <CommentSection targetType="WORK" targetId={workId} />
       </div>
     </div>
   )
