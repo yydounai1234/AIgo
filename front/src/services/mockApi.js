@@ -474,5 +474,16 @@ export const mockApi = {
       success: true,
       data: updated
     }
+  },
+
+  async uploadAvatar(avatarData) {
+    await delay(500)
+    return {
+      success: true,
+      data: {
+        avatarUrl: avatarData,
+        message: '头像上传成功'
+      }
+    }
   }
 }

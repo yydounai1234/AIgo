@@ -4,6 +4,8 @@ import com.aigo.dto.ApiResponse;
 import com.aigo.dto.user.BalanceResponse;
 import com.aigo.dto.user.RechargeRequest;
 import com.aigo.dto.user.RechargeResponse;
+import com.aigo.dto.user.UploadAvatarRequest;
+import com.aigo.dto.user.UploadAvatarResponse;
 import com.aigo.security.JwtUtil;
 import com.aigo.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,6 +46,14 @@ public class UserController {
                                                          HttpServletRequest httpRequest) {
         String userId = getUserIdFromRequest(httpRequest);
         RechargeResponse response = userService.rechargeCoins(userId, request.getAmount());
+        return ApiResponse.success(response);
+    }
+    
+    @PostMapping("/avatar")
+    public ApiResponse<UploadAvatarResponse> uploadAvatar(@Valid @RequestBody UploadAvatarRequest request,
+                                                            HttpServletRequest httpRequest) {
+        String userId = getUserIdFromRequest(httpRequest);
+        UploadAvatarResponse response = userService.uploadAvatar(userId, request.getAvatarData());
         return ApiResponse.success(response);
     }
 }
