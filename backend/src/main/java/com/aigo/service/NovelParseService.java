@@ -260,19 +260,36 @@ public class NovelParseService {
             
             for (Scene scene : segment.getScenes()) {
                 String characterName = scene.getCharacter();
+                String bestMatchCharacter = null;
                 
-                if (characterName != null && baseImageUrls.containsKey(characterName) && 
-                    characterEntityMap.containsKey(characterName)) {
+                if (characterName != null && baseImageUrls.containsKey(characterName)) {
+                    bestMatchCharacter = characterName;
+                } else {
+                    String visualDescription = scene.getVisualDescription();
+                    if (visualDescription != null && !visualDescription.isEmpty()) {
+                        for (String charName : baseImageUrls.keySet()) {
+                            if (visualDescription.contains(charName)) {
+                                bestMatchCharacter = charName;
+                                logger.info("[NovelParseService] Detected character '{}' in scene {} visual description", 
+                                    charName, scene.getSceneNumber());
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                if (bestMatchCharacter != null && baseImageUrls.containsKey(bestMatchCharacter) && 
+                    characterEntityMap.containsKey(bestMatchCharacter)) {
                     try {
-                        String baseImageUrl = baseImageUrls.get(characterName);
-                        com.aigo.entity.CharacterEntity entity = characterEntityMap.get(characterName);
+                        String baseImageUrl = baseImageUrls.get(bestMatchCharacter);
+                        com.aigo.entity.CharacterEntity entity = characterEntityMap.get(bestMatchCharacter);
                         
                         String sceneImageUrl = textToImageService.generateSceneFromBaseImage(
                             scene, baseImageUrl, entity);
                         scene.setImageUrl(sceneImageUrl);
                         
                         logger.info("[NovelParseService] Generated scene {} for character '{}' using Image-to-Image", 
-                            scene.getSceneNumber(), characterName);
+                            scene.getSceneNumber(), bestMatchCharacter);
                     } catch (Exception e) {
                         logger.error("[NovelParseService] Failed to generate scene {} with Image-to-Image, falling back to text-to-image", 
                             scene.getSceneNumber(), e);
