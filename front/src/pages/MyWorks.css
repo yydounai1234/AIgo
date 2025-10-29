@@ -230,19 +230,22 @@
   color: #4a4d8c;
 }
 
-.btn-link {
-  background: none;
+.btn-view {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
   border: none;
-  color: #667eea;
   cursor: pointer;
-  font-size: 0.85rem;
-  padding: 0.25rem 0.5rem;
-  text-decoration: underline;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
   white-space: nowrap;
+  transition: all 0.3s ease;
+  font-weight: 500;
 }
 
-.btn-link:hover {
-  color: #764ba2;
+.btn-view:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
 }
 
 .no-episodes {

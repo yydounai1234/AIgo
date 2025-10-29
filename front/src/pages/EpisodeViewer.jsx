@@ -500,7 +500,11 @@ function EpisodeViewer() {
             </p>
             {isInsufficient && (
               <div className="insufficient-warning">
-                ⚠️ 金币余额不足，请先充值
+                <svg className="warning-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2L2 20h20L12 2z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                  <path d="M12 9v4M12 17h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+                金币余额不足，请先充值
               </div>
             )}
             <div className="purchase-actions">
@@ -735,6 +739,10 @@ function EpisodeViewer() {
                   />
                   <span>自动播放</span>
                 </label>
+              </div>}
+              
+              {isFullscreen && <div className={`fullscreen-scene-text ${!showControls ? 'hidden' : ''}`}>
+                <p className="scene-content">{currentSceneData?.text}</p>
               </div>}
               
               {!isFullscreen && <div className="scene-text">

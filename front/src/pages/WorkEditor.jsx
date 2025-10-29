@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { EffectCoverflow } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/effect-coverflow'
 import api from '../services/api'
 import Modal from '../components/Modal'
 import './WorkEditor.css'
@@ -306,9 +310,24 @@ function WorkEditor() {
           {characters.length === 0 ? (
             <p className="empty-message">还没有角色信息，创建并处理集数后会自动提取角色</p>
           ) : (
-            <div className="characters-grid">
+            <Swiper
+              effect={'coverflow'}
+              grabCursor={true}
+              centeredSlides={true}
+              slidesPerView={'auto'}
+              coverflowEffect={{
+                rotate: 50,
+                stretch: 0,
+                depth: 100,
+                modifier: 1,
+                slideShadows: true,
+              }}
+              modules={[EffectCoverflow]}
+              className="characters-swiper"
+            >
               {characters.map(character => (
-                <div key={character.id} className="character-card">
+                <SwiperSlide key={character.id} className="character-swiper-slide">
+                  <div className="character-card">
                   {character.firstImageUrl && (
                     <div className="character-image">
                       <img src={character.firstImageUrl} alt={character.name} />
@@ -390,9 +409,10 @@ function WorkEditor() {
                       </div>
                     </div>
                   )}
-                </div>
+                  </div>
+                </SwiperSlide>
               ))}
-            </div>
+            </Swiper>
           )}
         </div>
         

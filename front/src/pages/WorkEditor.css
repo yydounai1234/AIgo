@@ -37,10 +37,14 @@
   font-size: 0.95rem;
 }
 
-.characters-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+.characters-swiper {
+  padding: 2rem 0 3rem;
+  width: 100%;
+}
+
+.character-swiper-slide {
+  width: 280px;
+  background: transparent;
 }
 
 .character-card {
@@ -58,17 +62,19 @@
 }
 
 .character-image {
-  width: 100%;
+  width: 80px;
+  height: 80px;
   margin-bottom: 1rem;
-  border-radius: 8px;
+  border-radius: 50%;
   overflow: hidden;
   background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 .character-image img {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
   object-fit: cover;
 }

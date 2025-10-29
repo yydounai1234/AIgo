@@ -106,8 +106,20 @@ function Recharge() {
           </div>
 
           <div className="recharge-notice">
-            <p><span className="notice-icon">💡</span> 提示：目前为测试阶段，支付功能尚未打通，您可以免费充值金币用于体验功能</p>
-            <p><span className="notice-icon">⚠️</span> 单次充值上限：1000 金币</p>
+            <p>
+              <svg className="notice-icon icon-info" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                <path d="M12 16v-4M12 8h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              提示：目前为测试阶段，支付功能尚未打通，您可以免费充值金币用于体验功能
+            </p>
+            <p>
+              <svg className="notice-icon icon-warning" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L2 20h20L12 2z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
+                <path d="M12 9v4M12 17h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              单次充值上限：1000 金币
+            </p>
           </div>
 
           <div className="preset-amounts">
