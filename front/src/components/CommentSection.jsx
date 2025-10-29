@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
@@ -12,13 +12,30 @@ function CommentSection({ targetType, targetId }) {
   const [error, setError] = useState('')
   const [commentText, setCommentText] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const isTypingRef = useRef(false)
+  const typingTimeoutRef = useRef(null)
 
   useEffect(() => {
     loadComments()
-  }, [targetType, targetId])
+    
+    const refreshInterval = setInterval(() => {
+      if (!isTypingRef.current && !submitting) {
+        loadComments(true)
+      }
+    }, 10000)
 
-  const loadComments = async () => {
-    setLoading(true)
+    return () => {
+      clearInterval(refreshInterval)
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current)
+      }
+    }
+  }, [targetType, targetId, submitting])
+
+  const loadComments = async (silent = false) => {
+    if (!silent) {
+      setLoading(true)
+    }
     setError('')
     
     try {
@@ -32,7 +49,9 @@ function CommentSection({ targetType, targetId }) {
     } catch (err) {
       setError('加载评论时发生错误')
     } finally {
-      setLoading(false)
+      if (!silent) {
+        setLoading(false)
+      }
     }
   }
 
@@ -112,7 +131,18 @@ function CommentSection({ targetType, targetId }) {
             className="comment-textarea"
             placeholder="写下你的评论..."
             value={commentText}
-            onChange={(e) => setCommentText(e.target.value)}
+            onChange={(e) => {
+              setCommentText(e.target.value)
+              isTypingRef.current = true
+              
+              if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current)
+              }
+              
+              typingTimeoutRef.current = setTimeout(() => {
+                isTypingRef.current = false
+              }, 1000)
+            }}
             disabled={submitting}
           />
           <div className="comment-submit-row">
