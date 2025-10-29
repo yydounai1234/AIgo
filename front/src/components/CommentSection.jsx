@@ -66,18 +66,21 @@ function CommentSection({ targetType, targetId }) {
     }
 
     setSubmitting(true)
+    const content = commentText.trim()
+    setCommentText('')
 
     try {
-      const result = await api.createComment(targetType, targetId, commentText.trim())
+      const result = await api.createComment(targetType, targetId, content)
       
-      if (result.success) {
-        setCommentText('')
-        await loadComments()
+      if (result.success && result.data) {
+        setComments(prevComments => [result.data, ...prevComments])
       } else {
         setError(result.error?.message || '发表评论失败')
+        setCommentText(content)
       }
     } catch (err) {
       setError('发表评论时发生错误')
+      setCommentText(content)
     } finally {
       setSubmitting(false)
     }
@@ -88,15 +91,18 @@ function CommentSection({ targetType, targetId }) {
       return
     }
 
+    const previousComments = comments
+    setComments(prevComments => prevComments.filter(c => c.id !== commentId))
+
     try {
       const result = await api.deleteComment(commentId)
       
-      if (result.success) {
-        await loadComments()
-      } else {
+      if (!result.success) {
+        setComments(previousComments)
         setError(result.error?.message || '删除评论失败')
       }
     } catch (err) {
+      setComments(previousComments)
       setError('删除评论时发生错误')
     }
   }
