@@ -94,6 +94,8 @@ function Register() {
   }
 
   const handleAvatarConfirm = async (avatarData) => {
+    login(registeredUser, registeredToken)
+    
     setLoading(true)
     setShowAvatarSelector(false)
     
