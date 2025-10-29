@@ -57,6 +57,7 @@ public class AuthService {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .coinBalance(user.getCoinBalance())
+                .avatarUrl(user.getAvatarUrl())
                 .createdAt(user.getCreatedAt().format(DATE_FORMATTER))
                 .build())
             .token(token)
@@ -82,6 +83,7 @@ public class AuthService {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .coinBalance(user.getCoinBalance())
+                .avatarUrl(user.getAvatarUrl())
                 .build())
             .token(token)
             .build();

@@ -33,7 +33,7 @@ function Navigation({ userBalance }) {
   
   const handleAvatarConfirm = async (avatarData, avatarType) => {
     try {
-      const result = await api.uploadAvatar(avatarData)
+      const result = await api.uploadAvatar(avatarData, avatarType)
       
       if (result.success) {
         const updatedUser = { ...user, avatarUrl: result.data.avatarUrl }
@@ -49,16 +49,11 @@ function Navigation({ userBalance }) {
     }
   }
   
-  const handleAvatarCancel = () => {
-    setShowAvatarSelector(false)
-  }
-  
   return (
     <>
       {showAvatarSelector && (
         <AvatarSelector
           onConfirm={handleAvatarConfirm}
-          onCancel={handleAvatarCancel}
         />
       )}
       

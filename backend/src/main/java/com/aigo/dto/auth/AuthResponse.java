@@ -22,6 +22,7 @@ public class AuthResponse {
         private String username;
         private String email;
         private Integer coinBalance;
+        private String avatarUrl;
         private String createdAt;
     }
 }

@@ -12,7 +12,7 @@ const SYSTEM_AVATARS = [
   'https://api.dicebear.com/7.x/avataaars/svg?seed=Lucy'
 ]
 
-function AvatarSelector({ onConfirm, onCancel }) {
+function AvatarSelector({ onConfirm }) {
   const [selectedType, setSelectedType] = useState(null)
   const [selectedAvatar, setSelectedAvatar] = useState(null)
   const [selectedAvatarUrl, setSelectedAvatarUrl] = useState(null)
@@ -173,9 +173,6 @@ function AvatarSelector({ onConfirm, onCancel }) {
           {error && <div className="error-message">{error}</div>}
 
           <div className="avatar-selector-actions">
-            <button className="btn-cancel" onClick={onCancel}>
-              跳过
-            </button>
             <button
               className="btn-confirm"
               onClick={handleConfirm}

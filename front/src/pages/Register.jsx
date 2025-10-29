@@ -98,27 +98,24 @@ function Register() {
     setShowAvatarSelector(false)
     
     try {
-      login(registeredUser, registeredToken)
-      
       const result = await api.uploadAvatar(avatarData, avatarType)
       
       if (result.success) {
-        console.log('头像上传成功:', result.data.avatarUrl)
+        const updatedUser = { ...registeredUser, avatarUrl: result.data.avatarUrl }
+        login(updatedUser, registeredToken)
+        navigate('/', { replace: true })
       } else {
         console.error('头像上传失败:', result.error)
+        setError('头像上传失败，请重试')
+        setShowAvatarSelector(true)
+        setLoading(false)
       }
-      
-      navigate('/', { replace: true })
     } catch (err) {
       console.error('头像上传失败:', err)
-      navigate('/', { replace: true })
+      setError('头像上传失败，请重试')
+      setShowAvatarSelector(true)
+      setLoading(false)
     }
-  }
-
-  const handleAvatarCancel = () => {
-    setShowAvatarSelector(false)
-    login(registeredUser, registeredToken)
-    navigate('/', { replace: true })
   }
   
   return (
@@ -126,7 +123,6 @@ function Register() {
       {showAvatarSelector && (
         <AvatarSelector
           onConfirm={handleAvatarConfirm}
-          onCancel={handleAvatarCancel}
         />
       )}
       
