@@ -566,22 +566,42 @@ public class TextToImageService {
             return "http://via.placeholder.com/1024x1024.png?text=Character+" + character.getName();
         }
         
-        try {
-            String prompt = buildBaseCharacterPrompt(character);
-            
-            logger.info("[TextToImageService] Generating base image for character '{}'", character.getName());
-            String base64ImageData = callTextToImageApi(prompt);
-            
-            String filePrefix = "character_base_" + character.getName() + "_" + System.currentTimeMillis();
-            String publicUrl = qiniuStorageService.uploadBase64Image(base64ImageData, filePrefix);
-            
-            logger.info("[TextToImageService] Base character image generated: {}", publicUrl);
-            return publicUrl;
-            
-        } catch (Exception e) {
-            logger.error("[TextToImageService] Failed to generate base character image for '{}'", character.getName(), e);
-            throw new RuntimeException("基础角色图片生成失败: " + e.getMessage(), e);
+        int maxRetries = 5;
+        int retryDelaySeconds = 30;
+        Exception lastException = null;
+        
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                String prompt = buildBaseCharacterPrompt(character);
+                
+                logger.info("[TextToImageService] Generating base image for character '{}' (attempt {}/{})", 
+                    character.getName(), attempt, maxRetries);
+                String base64ImageData = callTextToImageApi(prompt);
+                
+                String filePrefix = "character_base_" + character.getName() + "_" + System.currentTimeMillis();
+                String publicUrl = qiniuStorageService.uploadBase64Image(base64ImageData, filePrefix);
+                
+                logger.info("[TextToImageService] Base character image generated: {}", publicUrl);
+                return publicUrl;
+                
+            } catch (Exception e) {
+                lastException = e;
+                logger.error("[TextToImageService] Failed to generate base character image for '{}' (attempt {}/{})", 
+                    character.getName(), attempt, maxRetries, e);
+                
+                if (attempt < maxRetries) {
+                    try {
+                        logger.info("[TextToImageService] Retrying in {} seconds...", retryDelaySeconds);
+                        Thread.sleep(retryDelaySeconds * 1000L);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException("重试被中断: " + ie.getMessage(), ie);
+                    }
+                }
+            }
         }
+        
+        throw new RuntimeException("基础角色图片生成失败，已重试" + maxRetries + "次: " + lastException.getMessage(), lastException);
     }
     
     private String buildBaseCharacterPrompt(CharacterEntity character) {
