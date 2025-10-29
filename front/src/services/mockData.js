@@ -121,27 +121,6 @@ let likes = [
   { id: '1', userId: '1', workId: '2', createdAt: '2024-02-06T10:00:00Z' }
 ]
 
-let comments = [
-  { 
-    id: '1', 
-    userId: '1', 
-    username: 'demo_user',
-    targetType: 'WORK', 
-    targetId: '1', 
-    content: '这个作品太棒了！很期待后续的剧情！', 
-    createdAt: '2024-01-20T10:00:00Z' 
-  },
-  { 
-    id: '2', 
-    userId: '1', 
-    username: 'demo_user',
-    targetType: 'EPISODE', 
-    targetId: '1', 
-    content: '第一集就很精彩，画面和配音都很赞！', 
-    createdAt: '2024-01-16T14:00:00Z' 
-  }
-]
-
 export const mockData = {
   getCurrentUser: () => ({ ...currentUser }),
   
@@ -283,38 +262,5 @@ export const mockData = {
       return { newBalance: currentUser.coinBalance }
     }
     return null
-  },
-
-  getComments: (targetType, targetId) => {
-    return comments
-      .filter(c => c.targetType === targetType && c.targetId === targetId)
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-  },
-
-  getComment: (commentId) => {
-    return comments.find(c => c.id === commentId)
-  },
-
-  addComment: (targetType, targetId, content) => {
-    const newComment = {
-      id: String(comments.length + 1),
-      userId: currentUser.id,
-      username: currentUser.username,
-      targetType,
-      targetId,
-      content,
-      createdAt: new Date().toISOString()
-    }
-    comments.push(newComment)
-    return newComment
-  },
-
-  deleteComment: (commentId) => {
-    const index = comments.findIndex(c => c.id === commentId)
-    if (index !== -1) {
-      comments.splice(index, 1)
-      return true
-    }
-    return false
   }
 }

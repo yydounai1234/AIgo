@@ -474,58 +474,5 @@ export const mockApi = {
       success: true,
       data: updated
     }
-  },
-
-  async getComments(targetType, targetId) {
-    await delay(300)
-    const comments = mockData.getComments(targetType, targetId)
-    return {
-      success: true,
-      data: comments
-    }
-  },
-
-  async createComment(targetType, targetId, content) {
-    await delay(400)
-    const user = mockData.getCurrentUser()
-    
-    if (!content || content.trim() === '') {
-      return {
-        success: false,
-        error: { message: '评论内容不能为空', code: 'INVALID_CONTENT' }
-      }
-    }
-    
-    const comment = mockData.addComment(targetType, targetId, content)
-    return {
-      success: true,
-      data: comment
-    }
-  },
-
-  async deleteComment(commentId) {
-    await delay(300)
-    const user = mockData.getCurrentUser()
-    const comment = mockData.getComment(commentId)
-    
-    if (!comment) {
-      return {
-        success: false,
-        error: { message: '评论不存在', code: 'NOT_FOUND' }
-      }
-    }
-    
-    if (comment.userId !== user.id) {
-      return {
-        success: false,
-        error: { message: '无权限删除此评论', code: 'FORBIDDEN' }
-      }
-    }
-    
-    mockData.deleteComment(commentId)
-    return {
-      success: true,
-      data: { message: '删除成功' }
-    }
   }
 }
