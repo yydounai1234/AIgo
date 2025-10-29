@@ -53,7 +53,7 @@ function CommentSection({ targetType, targetId }) {
       
       if (result.success) {
         setCommentText('')
-        await loadComments()
+        setComments([result.data, ...comments])
       } else {
         setError(result.error?.message || '发表评论失败')
       }
@@ -73,7 +73,7 @@ function CommentSection({ targetType, targetId }) {
       const result = await api.deleteComment(commentId)
       
       if (result.success) {
-        await loadComments()
+        setComments(comments.filter(comment => comment.id !== commentId))
       } else {
         setError(result.error?.message || '删除评论失败')
       }
