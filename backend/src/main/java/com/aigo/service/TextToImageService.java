@@ -379,7 +379,6 @@ public class TextToImageService {
         return embedding;
     }
     
-<<<<<<< HEAD
     private String extractHairColor(String description) {
         if (description.contains("黑发") || description.contains("黑色头发")) return "黑发";
         if (description.contains("棕发") || description.contains("棕色头发")) return "棕发";
