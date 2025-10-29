@@ -230,19 +230,23 @@
   color: #4a4d8c;
 }
 
-.btn-link {
-  background: none;
+.btn-view {
+  background: #667eea;
   border: none;
-  color: #667eea;
+  color: white;
   cursor: pointer;
-  font-size: 0.85rem;
-  padding: 0.25rem 0.5rem;
-  text-decoration: underline;
+  font-size: 0.75rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
   white-space: nowrap;
+  transition: all 0.3s ease;
+  font-weight: 500;
 }
 
-.btn-link:hover {
-  color: #764ba2;
+.btn-view:hover {
+  background: #764ba2;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
 }
 
 .no-episodes {

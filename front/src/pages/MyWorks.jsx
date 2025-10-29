@@ -183,7 +183,7 @@ function MyWorks() {
                             </div>
                             <button
                               onClick={() => handleViewEpisode(episode.id)}
-                              className="btn-link"
+                              className="btn-view"
                             >
                               查看
                             </button>
