@@ -1,0 +1,196 @@
+.avatar-selector-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.avatar-selector-modal {
+  background: white;
+  border-radius: 8px;
+  padding: 30px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.avatar-selector-modal h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 24px;
+  text-align: center;
+  color: #333;
+}
+
+.avatar-selector-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.avatar-upload-section {
+  padding: 20px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.avatar-upload-section h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #666;
+}
+
+.avatar-upload-input {
+  display: none;
+}
+
+.avatar-upload-btn {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.avatar-upload-btn:hover {
+  background-color: #0056b3;
+}
+
+.avatar-upload-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.avatar-preview {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+}
+
+.avatar-preview img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #007bff;
+}
+
+.avatar-divider {
+  text-align: center;
+  color: #999;
+  position: relative;
+  margin: 10px 0;
+}
+
+.avatar-divider::before,
+.avatar-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 45%;
+  height: 1px;
+  background-color: #ddd;
+}
+
+.avatar-divider::before {
+  left: 0;
+}
+
+.avatar-divider::after {
+  right: 0;
+}
+
+.system-avatars-section h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 16px;
+  color: #666;
+  text-align: center;
+}
+
+.system-avatars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 15px;
+  padding: 10px;
+}
+
+.system-avatar-item {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.system-avatar-item img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.system-avatar-item:hover img {
+  transform: scale(1.1);
+}
+
+.system-avatar-item.selected img {
+  border-color: #007bff;
+}
+
+.avatar-selector-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  justify-content: flex-end;
+}
+
+.avatar-selector-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.avatar-selector-actions .btn-cancel {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.avatar-selector-actions .btn-cancel:hover {
+  background-color: #e0e0e0;
+}
+
+.avatar-selector-actions .btn-confirm {
+  background-color: #28a745;
+  color: white;
+}
+
+.avatar-selector-actions .btn-confirm:hover {
+  background-color: #218838;
+}
+
+.avatar-selector-actions .btn-confirm:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #dc3545;
+  text-align: center;
+  margin-top: 10px;
+  font-size: 14px;
+}
