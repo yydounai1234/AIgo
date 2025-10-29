@@ -53,7 +53,7 @@ public class UserController {
     public ApiResponse<UploadAvatarResponse> uploadAvatar(@Valid @RequestBody UploadAvatarRequest request,
                                                             HttpServletRequest httpRequest) {
         String userId = getUserIdFromRequest(httpRequest);
-        UploadAvatarResponse response = userService.uploadAvatar(userId, request.getAvatarData());
+        UploadAvatarResponse response = userService.uploadAvatar(userId, request.getAvatarData(), request.getAvatarType());
         return ApiResponse.success(response);
     }
 }

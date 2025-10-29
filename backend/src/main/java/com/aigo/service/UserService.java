@@ -51,7 +51,7 @@ public class UserService {
     }
     
     @Transactional
-    public UploadAvatarResponse uploadAvatar(String userId, String avatarData) {
+    public UploadAvatarResponse uploadAvatar(String userId, String avatarData, String avatarType) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "用户不存在"));
         
@@ -59,7 +59,12 @@ public class UserService {
             throw new BusinessException(ErrorCode.BAD_REQUEST, "头像数据不能为空");
         }
         
-        String avatarUrl = qiniuStorageService.uploadBase64Image(avatarData, "avatar");
+        String avatarUrl;
+        if ("system".equals(avatarType)) {
+            avatarUrl = avatarData;
+        } else {
+            avatarUrl = qiniuStorageService.uploadBase64Image(avatarData, "avatar");
+        }
         
         user.setAvatarUrl(avatarUrl);
         userRepository.save(user);

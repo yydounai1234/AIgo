@@ -166,10 +166,10 @@ export const realApi = {
     })
   },
 
-  async uploadAvatar(avatarData) {
+  async uploadAvatar(avatarData, avatarType) {
     return await request('/api/user/avatar', {
       method: 'POST',
-      body: JSON.stringify({ avatarData })
+      body: JSON.stringify({ avatarData, avatarType })
     })
   }
 }

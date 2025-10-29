@@ -100,7 +100,7 @@ function Register() {
     try {
       login(registeredUser, registeredToken)
       
-      const result = await api.uploadAvatar(avatarData)
+      const result = await api.uploadAvatar(avatarData, avatarType)
       
       if (result.success) {
         console.log('头像上传成功:', result.data.avatarUrl)
