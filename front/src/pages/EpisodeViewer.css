@@ -436,7 +436,8 @@
   background: rgba(0, 0, 0, 0.75);
   padding: 1rem 1.5rem;
   border-radius: 8px;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  opacity: 1;
+  visibility: visible;
 }
 
 .fullscreen-scene-text .scene-content {

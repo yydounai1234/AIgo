@@ -741,7 +741,7 @@ function EpisodeViewer() {
                 </label>
               </div>}
               
-              {isFullscreen && <div className={`fullscreen-scene-text ${!showControls ? 'hidden' : ''}`}>
+              {isFullscreen && <div className="fullscreen-scene-text">
                 <p className="scene-content">{currentSceneData?.text}</p>
               </div>}
               
