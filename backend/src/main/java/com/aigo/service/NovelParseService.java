@@ -196,17 +196,15 @@ public class NovelParseService {
         }
         
         Set<String> charactersNeedingBaseImage = new HashSet<>();
-        for (Scene scene : segment.getScenes()) {
-            String characterName = scene.getCharacter();
-            if (characterName != null && !characterName.isEmpty() && 
-                characterEntityMap.containsKey(characterName) && 
-                !baseImageUrls.containsKey(characterName)) {
+        for (Map.Entry<String, com.aigo.entity.CharacterEntity> entry : characterEntityMap.entrySet()) {
+            String characterName = entry.getKey();
+            if (!baseImageUrls.containsKey(characterName)) {
                 charactersNeedingBaseImage.add(characterName);
             }
         }
         
         if (!charactersNeedingBaseImage.isEmpty()) {
-            logger.info("[NovelParseService] Generating base images for {} characters: {}", 
+            logger.info("[NovelParseService] Generating base images for ALL {} characters upfront: {}", 
                 charactersNeedingBaseImage.size(), charactersNeedingBaseImage);
             
             for (String characterName : charactersNeedingBaseImage) {
