@@ -1,13 +1,16 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import AvatarSelector from './AvatarSelector'
+import api from '../services/api'
 import './Navigation.css'
 
 function Navigation({ userBalance }) {
   const location = useLocation()
   const navigate = useNavigate()
-  const { user, isAuthenticated, logout } = useAuth()
+  const { user, isAuthenticated, logout, updateUser } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [showAvatarSelector, setShowAvatarSelector] = useState(false)
   
   const isActive = (path) => {
     return location.pathname === path ? 'active' : ''
@@ -23,8 +26,43 @@ function Navigation({ userBalance }) {
     setMobileMenuOpen(false)
   }
   
+  const handleAvatarClick = () => {
+    setShowAvatarSelector(true)
+    setMobileMenuOpen(false)
+  }
+  
+  const handleAvatarConfirm = async (avatarData, avatarType) => {
+    try {
+      const result = await api.uploadAvatar(avatarData)
+      
+      if (result.success) {
+        const updatedUser = { ...user, avatarUrl: result.data.avatarUrl }
+        updateUser(updatedUser)
+        setShowAvatarSelector(false)
+      } else {
+        console.error('头像上传失败:', result.error)
+        alert('头像上传失败，请重试')
+      }
+    } catch (err) {
+      console.error('头像上传失败:', err)
+      alert('头像上传失败，请重试')
+    }
+  }
+  
+  const handleAvatarCancel = () => {
+    setShowAvatarSelector(false)
+  }
+  
   return (
-    <nav className="navigation">
+    <>
+      {showAvatarSelector && (
+        <AvatarSelector
+          onConfirm={handleAvatarConfirm}
+          onCancel={handleAvatarCancel}
+        />
+      )}
+      
+      <nav className="navigation">
       <div className="nav-container">
         <div className="nav-brand">
           <Link to="/" onClick={handleLinkClick}>
@@ -73,11 +111,15 @@ function Navigation({ userBalance }) {
         <div className={`nav-user ${mobileMenuOpen ? 'mobile-open' : ''}`}>
           {isAuthenticated() ? (
             <>
-              <span className="user-info">
-                <svg className="user-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M4 20C4 16.6863 6.68629 14 10 14H14C17.3137 14 20 16.6863 20 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
+              <span className="user-info" onClick={handleAvatarClick} style={{ cursor: 'pointer' }}>
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="用户头像" className="user-avatar" />
+                ) : (
+                  <svg className="user-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M4 20C4 16.6863 6.68629 14 10 14H14C17.3137 14 20 16.6863 20 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                )}
                 {user?.username}
               </span>
               <Link to="/recharge" className="coin-balance" onClick={handleLinkClick}>
@@ -107,6 +149,7 @@ function Navigation({ userBalance }) {
         </div>
       </div>
     </nav>
+    </>
   )
 }
 

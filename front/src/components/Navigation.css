@@ -67,12 +67,30 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  transition: opacity 0.3s ease;
+}
+
+.user-info:hover {
+  opacity: 0.8;
 }
 
 .user-icon {
   width: 20px;
   height: 20px;
   color: white;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: border-color 0.3s ease;
+}
+
+.user-info:hover .user-avatar {
+  border-color: rgba(255, 255, 255, 0.8);
 }
 
 .coin-icon {
