@@ -68,7 +68,7 @@ public class VideoGenerationService {
     }
     
     private String createVideoGenerationTask(String imageUrl, String prompt) throws Exception {
-        String url = baseUrl + "/v1/videos/generations";
+        String url = baseUrl + "/v1/video/generations";
         
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + apiKey);
@@ -105,7 +105,7 @@ public class VideoGenerationService {
     }
     
     private String pollVideoGenerationStatus(String taskId) throws Exception {
-        String url = baseUrl + "/v1/videos/generations/" + taskId;
+        String url = baseUrl + "/v1/video/generations/" + taskId;
         
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + apiKey);
