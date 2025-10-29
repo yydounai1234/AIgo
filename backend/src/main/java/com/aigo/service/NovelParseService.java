@@ -176,6 +176,11 @@ public class NovelParseService {
                     for (Character character : segment.getCharacters()) {
                         if (!characterEntityMap.containsKey(character.getName())) {
                             buildAppearanceFromSegmentCharacter(character, characterAppearances);
+                            
+                            com.aigo.entity.CharacterEntity tempEntity = createTempCharacterEntity(character, workId);
+                            characterEntityMap.put(character.getName(), tempEntity);
+                            logger.info("[NovelParseService] Added new segment character '{}' to characterEntityMap for base image generation", 
+                                character.getName());
                         }
                     }
                 }
@@ -184,6 +189,9 @@ public class NovelParseService {
                 if (segment.getCharacters() != null) {
                     for (Character character : segment.getCharacters()) {
                         buildAppearanceFromSegmentCharacter(character, characterAppearances);
+                        
+                        com.aigo.entity.CharacterEntity tempEntity = createTempCharacterEntity(character, workId);
+                        characterEntityMap.put(character.getName(), tempEntity);
                     }
                 }
             }
@@ -191,6 +199,9 @@ public class NovelParseService {
             if (segment.getCharacters() != null) {
                 for (Character character : segment.getCharacters()) {
                     buildAppearanceFromSegmentCharacter(character, characterAppearances);
+                    
+                    com.aigo.entity.CharacterEntity tempEntity = createTempCharacterEntity(character, null);
+                    characterEntityMap.put(character.getName(), tempEntity);
                 }
             }
         }
@@ -810,5 +821,21 @@ public class NovelParseService {
         }
         
         return response;
+    }
+    
+    private com.aigo.entity.CharacterEntity createTempCharacterEntity(Character character, String workId) {
+        com.aigo.entity.CharacterEntity entity = new com.aigo.entity.CharacterEntity();
+        entity.setName(character.getName());
+        entity.setDescription(character.getDescription());
+        entity.setAppearance(character.getAppearance());
+        entity.setPersonality(character.getPersonality());
+        entity.setGender(character.getGender());
+        entity.setBodyType(character.getBodyType());
+        entity.setFacialFeatures(character.getFacialFeatures());
+        entity.setClothingStyle(character.getClothingStyle());
+        entity.setDistinguishingFeatures(character.getDistinguishingFeatures());
+        entity.setWorkId(workId);
+        
+        return entity;
     }
 }
