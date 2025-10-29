@@ -177,10 +177,15 @@ public class NovelParseService {
                         if (!characterEntityMap.containsKey(character.getName())) {
                             buildAppearanceFromSegmentCharacter(character, characterAppearances);
                             
-                            com.aigo.entity.CharacterEntity tempEntity = createTempCharacterEntity(character, workId);
-                            characterEntityMap.put(character.getName(), tempEntity);
-                            logger.info("[NovelParseService] Added new segment character '{}' to characterEntityMap for base image generation", 
-                                character.getName());
+                            // Create and save new character entity to database
+                            com.aigo.entity.CharacterEntity newEntity = characterService.createOrUpdateWorkCharacter(
+                                workId, character.getName(), character.getDescription(), character.getAppearance(),
+                                character.getPersonality(), character.getGender(), false,
+                                character.getBodyType(), character.getFacialFeatures(),
+                                character.getClothingStyle(), character.getDistinguishingFeatures(), false);
+                            characterEntityMap.put(character.getName(), newEntity);
+                            logger.info("[NovelParseService] Created and saved new character entity '{}' with ID: {}", 
+                                character.getName(), newEntity.getId());
                         }
                     }
                 }
@@ -190,20 +195,28 @@ public class NovelParseService {
                     for (Character character : segment.getCharacters()) {
                         buildAppearanceFromSegmentCharacter(character, characterAppearances);
                         
-                        com.aigo.entity.CharacterEntity tempEntity = createTempCharacterEntity(character, workId);
-                        characterEntityMap.put(character.getName(), tempEntity);
+                        // Create and save new character entity to database
+                        if (workId != null && !characterEntityMap.containsKey(character.getName())) {
+                            com.aigo.entity.CharacterEntity newEntity = characterService.createOrUpdateWorkCharacter(
+                                workId, character.getName(), character.getDescription(), character.getAppearance(),
+                                character.getPersonality(), character.getGender(), false,
+                                character.getBodyType(), character.getFacialFeatures(),
+                                character.getClothingStyle(), character.getDistinguishingFeatures(), false);
+                            characterEntityMap.put(character.getName(), newEntity);
+                            logger.info("[NovelParseService] Created and saved new character entity '{}' with ID: {}", 
+                                character.getName(), newEntity.getId());
+                        }
                     }
                 }
             }
         } else {
+            // No workId - characters cannot be saved to database, so they won't get base images
             if (segment.getCharacters() != null) {
                 for (Character character : segment.getCharacters()) {
                     buildAppearanceFromSegmentCharacter(character, characterAppearances);
-                    
-                    com.aigo.entity.CharacterEntity tempEntity = createTempCharacterEntity(character, null);
-                    characterEntityMap.put(character.getName(), tempEntity);
                 }
             }
+            logger.info("[NovelParseService] No workId provided - characters will not have base images generated");
         }
         
         Set<String> charactersNeedingBaseImage = new HashSet<>();
@@ -221,6 +234,14 @@ public class NovelParseService {
             for (String characterName : charactersNeedingBaseImage) {
                 try {
                     com.aigo.entity.CharacterEntity entity = characterEntityMap.get(characterName);
+                    
+                    // Safety check: ensure entity has been saved to database
+                    if (entity.getId() == null) {
+                        logger.error("[NovelParseService] Cannot generate base image for character '{}': entity has no ID (not saved to database)", 
+                            characterName);
+                        continue;
+                    }
+                    
                     String baseImageUrl = textToImageService.generateBaseCharacterImage(entity);
                     baseImageUrls.put(characterName, baseImageUrl);
                     characterService.saveBaseImage(entity.getId(), baseImageUrl);
@@ -821,21 +842,5 @@ public class NovelParseService {
         }
         
         return response;
-    }
-    
-    private com.aigo.entity.CharacterEntity createTempCharacterEntity(Character character, String workId) {
-        com.aigo.entity.CharacterEntity entity = new com.aigo.entity.CharacterEntity();
-        entity.setName(character.getName());
-        entity.setDescription(character.getDescription());
-        entity.setAppearance(character.getAppearance());
-        entity.setPersonality(character.getPersonality());
-        entity.setGender(character.getGender());
-        entity.setBodyType(character.getBodyType());
-        entity.setFacialFeatures(character.getFacialFeatures());
-        entity.setClothingStyle(character.getClothingStyle());
-        entity.setDistinguishingFeatures(character.getDistinguishingFeatures());
-        entity.setWorkId(workId);
-        
-        return entity;
     }
 }
