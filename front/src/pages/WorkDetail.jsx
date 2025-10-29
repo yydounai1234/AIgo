@@ -144,7 +144,7 @@ function WorkDetail() {
               ) : (
                 <div className="author-avatar-placeholder-large">👤</div>
               )}
-              <span className="author-name-large">作者：{work.authorName || '匿名作者'}</span>
+              <span className="author-name-large">{work.authorName || '匿名作者'}</span>
             </div>
             <h1 className="work-title">{work.title}</h1>
             

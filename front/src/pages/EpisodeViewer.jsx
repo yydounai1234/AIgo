@@ -626,7 +626,7 @@ function EpisodeViewer() {
                 ) : (
                   <div className="episode-author-avatar-placeholder">👤</div>
                 )}
-                <span className="episode-author-name">作者：{episode.authorName || '匿名作者'}</span>
+                <span className="episode-author-name">{episode.authorName || '匿名作者'}</span>
               </div>
             )}
           </div>

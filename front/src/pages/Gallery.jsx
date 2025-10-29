@@ -149,7 +149,7 @@ function Gallery() {
                     ) : (
                       <div className="author-avatar-placeholder">👤</div>
                     )}
-                    <span className="author-name">作者：{work.authorName || '匿名作者'}</span>
+                    <span className="author-name">{work.authorName || '匿名作者'}</span>
                   </div>
                   <h3>{work.title}</h3>
                   {work.description && (
