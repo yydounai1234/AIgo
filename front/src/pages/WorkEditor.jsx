@@ -55,14 +55,14 @@ function WorkEditor() {
     
     try {
       const workResult = await api.getWork(workId)
-      if (workResult.success) {
+      if (workResult.success && workResult.data) {
         setWork(workResult.data)
-        setWorkTitle(workResult.data.title)
+        setWorkTitle(workResult.data.title || '')
         setWorkDescription(workResult.data.description || '')
-        setIsPublic(workResult.data.isPublic)
+        setIsPublic(workResult.data.isPublic || false)
         
         const myWorksResult = await api.getMyWorks()
-        if (myWorksResult.success) {
+        if (myWorksResult.success && myWorksResult.data) {
           const currentWork = myWorksResult.data.find(w => w.id === workId)
           if (currentWork) {
             setEpisodes(currentWork.episodes || [])
@@ -70,14 +70,15 @@ function WorkEditor() {
         }
         
         const charactersResult = await api.getWorkCharacters(workId)
-        if (charactersResult.success) {
+        if (charactersResult.success && charactersResult.data) {
           setCharacters(charactersResult.data || [])
         }
       } else {
         setError(workResult.error?.message || '加载失败')
       }
     } catch (err) {
-      setError('加载作品时发生错误')
+      console.error('Load work error:', err)
+      setError('加载作品时发生错误: ' + (err.message || '未知错误'))
     } finally {
       setLoading(false)
     }
@@ -294,6 +295,9 @@ function WorkEditor() {
         if (result.success) {
           await loadWork()
           setShowCharacterForm(false)
+          setEditingCharacter(null)
+          setCharacterName('')
+          setCharacterDescription('')
           setModal({ isOpen: true, type: 'alert', title: '成功', message: '角色信息已更新', onConfirm: null })
         } else {
           setError(result.error?.message || '更新失败')
@@ -309,13 +313,18 @@ function WorkEditor() {
         if (result.success) {
           await loadWork()
           setShowCharacterForm(false)
+          setCharacterName('')
+          setCharacterDescription('')
+          setCharacterGender('male')
+          setGenerateImageOnCreate(true)
           setModal({ isOpen: true, type: 'alert', title: '成功', message: '角色已创建', onConfirm: null })
         } else {
           setError(result.error?.message || '创建失败')
         }
       }
     } catch (err) {
-      setError('保存角色时发生错误')
+      console.error('Save character error:', err)
+      setError('保存角色时发生错误: ' + (err.message || '未知错误'))
     } finally {
       setActionLoading(false)
     }
@@ -333,9 +342,13 @@ function WorkEditor() {
         setModal({ isOpen: true, type: 'alert', title: '成功', message: '角色图片已重新生成', onConfirm: null })
       } else {
         setError(result.error?.message || '生成失败')
+        setModal({ isOpen: true, type: 'alert', title: '错误', message: result.error?.message || '生成图片失败', onConfirm: null })
       }
     } catch (err) {
-      setError('生成图片时发生错误')
+      console.error('Regenerate image error:', err)
+      const errorMessage = '生成图片时发生错误: ' + (err.message || '未知错误')
+      setError(errorMessage)
+      setModal({ isOpen: true, type: 'alert', title: '错误', message: errorMessage, onConfirm: null })
     } finally {
       setCharacterImageLoading(false)
     }
@@ -492,7 +505,7 @@ function WorkEditor() {
             </div>
           )}
           
-          {characters.length === 0 ? (
+          {!characters || characters.length === 0 ? (
             <p className="empty-message">还没有角色信息，点击"新增角色"手动创建，或创建并处理集数后会自动提取角色</p>
           ) : (
             <div className="character-gallery">
@@ -502,7 +515,7 @@ function WorkEditor() {
                 modules={[FreeMode, Navigation, Thumbs]}
                 className="character-main-swiper"
               >
-                {characters.map(character => (
+                {characters.filter(c => c && c.id).map(character => (
                   <SwiperSlide key={character.id}>
                     <div className="character-card">
                       <div className="character-card-content">
@@ -619,7 +632,7 @@ function WorkEditor() {
                 modules={[FreeMode, Navigation, Thumbs]}
                 className="character-thumbs-swiper"
               >
-                {characters.map(character => (
+                {characters.filter(c => c && c.id).map(character => (
                   <SwiperSlide key={character.id}>
                     <div className="character-thumb">
                       {character.firstImageUrl && (
