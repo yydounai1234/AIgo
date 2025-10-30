@@ -78,7 +78,7 @@
 .character-card-content {
   display: flex;
   gap: 2rem;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .character-image-large {

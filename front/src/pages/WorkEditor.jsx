@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { FreeMode, Thumbs } from 'swiper/modules'
+import { FreeMode, Navigation, Thumbs } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/free-mode'
+import 'swiper/css/navigation'
 import 'swiper/css/thumbs'
 import api from '../services/api'
 import Modal from '../components/Modal'
@@ -316,7 +317,7 @@ function WorkEditor() {
               <Swiper
                 spaceBetween={10}
                 thumbs={{ swiper: thumbsSwiper }}
-                modules={[FreeMode, Thumbs]}
+                modules={[FreeMode, Navigation, Thumbs]}
                 className="character-main-swiper"
               >
                 {characters.map(character => (
