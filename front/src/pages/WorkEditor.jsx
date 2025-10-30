@@ -458,7 +458,7 @@ function WorkEditor() {
                   type="text"
                   value={episodeTitle}
                   onChange={(e) => setEpisodeTitle(e.target.value)}
-                  placeholder="例如：第一集：开始的冒险"
+                  placeholder="例如：开始的冒险"
                   disabled={actionLoading}
                 />
               </div>
