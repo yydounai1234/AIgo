@@ -186,6 +186,7 @@
   height: 200px;
   overflow: hidden;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
 }
 
 .work-cover img {
@@ -207,6 +208,27 @@
   height: 4rem;
   color: white;
   opacity: 0.8;
+}
+
+.content-type-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.content-type-badge.anime {
+  background: rgba(102, 126, 234, 0.9);
+}
+
+.content-type-badge.video {
+  background: rgba(255, 71, 87, 0.9);
 }
 
 .work-content {

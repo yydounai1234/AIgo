@@ -168,6 +168,9 @@ function Gallery() {
                       </svg>
                     </div>
                   )}
+                  <div className={`content-type-badge ${work.contentType === 'video' ? 'video' : 'anime'}`}>
+                    {work.contentType === 'video' ? '视频' : '动漫'}
+                  </div>
                 </div>
 
                 <div className="work-content">
