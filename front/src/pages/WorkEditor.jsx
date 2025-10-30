@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { FreeMode, Navigation, Thumbs } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/free-mode'
+import 'swiper/css/navigation'
+import 'swiper/css/thumbs'
 import api from '../services/api'
 import Modal from '../components/Modal'
 import './WorkEditor.css'
@@ -28,6 +34,7 @@ function WorkEditor() {
   const [actionLoading, setActionLoading] = useState(false)
   
   const [modal, setModal] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null })
+  const [thumbsSwiper, setThumbsSwiper] = useState(null)
   
 
   useEffect(() => {
@@ -306,92 +313,125 @@ function WorkEditor() {
           {characters.length === 0 ? (
             <p className="empty-message">还没有角色信息，创建并处理集数后会自动提取角色</p>
           ) : (
-            <div className="characters-grid">
-              {characters.map(character => (
-                <div key={character.id} className="character-card">
-                  {character.firstImageUrl && (
-                    <div className="character-image">
-                      <img src={character.firstImageUrl} alt={character.name} />
+            <div className="character-gallery">
+              <Swiper
+                spaceBetween={10}
+                thumbs={{ swiper: thumbsSwiper }}
+                modules={[FreeMode, Navigation, Thumbs]}
+                className="character-main-swiper"
+              >
+                {characters.map(character => (
+                  <SwiperSlide key={character.id}>
+                    <div className="character-card">
+                      <div className="character-card-content">
+                        {character.firstImageUrl && (
+                          <div className="character-image-large">
+                            <img src={character.firstImageUrl} alt={character.name} />
+                          </div>
+                        )}
+                        <div className="character-info">
+                          <div className="character-header">
+                            <h3>{character.name}</h3>
+                            <div className="character-badges">
+                              {character.isProtagonist && <span className="badge badge-primary">主角</span>}
+                              {character.gender && (
+                                <span className={`gender-badge ${character.gender}`}>
+                                  {character.gender === 'male' ? '男' : character.gender === 'female' ? '女' : ''}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          {character.appearance && (
+                            <div className="character-field">
+                              <strong>外貌：</strong>{character.appearance}
+                            </div>
+                          )}
+                          <div className="character-detailed-features">
+                            {(character.hairType || character.hairColor) && (
+                              <div className="character-feature-item">
+                                <strong>发型/发色：</strong>
+                                {[character.hairType, character.hairColor].filter(Boolean).join(' / ')}
+                              </div>
+                            )}
+                            {character.faceShape && (
+                              <div className="character-feature-item">
+                                <strong>脸型：</strong>{character.faceShape}
+                              </div>
+                            )}
+                            {(character.eyeType || character.eyeColor) && (
+                              <div className="character-feature-item">
+                                <strong>眼睛：</strong>
+                                {[character.eyeType, character.eyeColor].filter(Boolean).join(' / ')}
+                              </div>
+                            )}
+                            {character.noseType && (
+                              <div className="character-feature-item">
+                                <strong>鼻子：</strong>{character.noseType}
+                              </div>
+                            )}
+                            {character.mouthType && (
+                              <div className="character-feature-item">
+                                <strong>嘴型：</strong>{character.mouthType}
+                              </div>
+                            )}
+                            {character.skinTone && (
+                              <div className="character-feature-item">
+                                <strong>肤色：</strong>{character.skinTone}
+                              </div>
+                            )}
+                            {(character.height || character.build) && (
+                              <div className="character-feature-item">
+                                <strong>身高/体型：</strong>
+                                {[character.height, character.build].filter(Boolean).join(' / ')}
+                              </div>
+                            )}
+                          </div>
+                          {character.description && (
+                            <div className="character-field">
+                              <strong>描述：</strong>{character.description}
+                            </div>
+                          )}
+                          {character.personality && (
+                            <div className="character-field">
+                              <strong>性格：</strong>{character.personality}
+                            </div>
+                          )}
+                          {character.nicknames && character.nicknames.length > 0 && (
+                            <div className="character-field">
+                              <strong>别名：</strong>
+                              <div className="character-nicknames">
+                                {character.nicknames.map((nickname, index) => (
+                                  <span key={index} className="nickname-tag">{nickname}</span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  )}
-                  <div className="character-header">
-                    <h3>{character.name}</h3>
-                    <div className="character-badges">
-                      {character.isProtagonist && <span className="badge badge-primary">主角</span>}
-                      {character.gender && (
-                        <span className={`gender-badge ${character.gender}`}>
-                          {character.gender === 'male' ? '男' : character.gender === 'female' ? '女' : ''}
-                        </span>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+              <Swiper
+                onSwiper={setThumbsSwiper}
+                spaceBetween={10}
+                slidesPerView={4}
+                freeMode={true}
+                watchSlidesProgress={true}
+                modules={[FreeMode, Navigation, Thumbs]}
+                className="character-thumbs-swiper"
+              >
+                {characters.map(character => (
+                  <SwiperSlide key={character.id}>
+                    <div className="character-thumb">
+                      {character.firstImageUrl && (
+                        <img src={character.firstImageUrl} alt={character.name} />
                       )}
+                      <span className="character-thumb-name">{character.name}</span>
                     </div>
-                  </div>
-                  {character.appearance && (
-                    <div className="character-field">
-                      <strong>外貌：</strong>{character.appearance}
-                    </div>
-                  )}
-                  <div className="character-detailed-features">
-                    {(character.hairType || character.hairColor) && (
-                      <div className="character-feature-item">
-                        <strong>发型/发色：</strong>
-                        {[character.hairType, character.hairColor].filter(Boolean).join(' / ')}
-                      </div>
-                    )}
-                    {character.faceShape && (
-                      <div className="character-feature-item">
-                        <strong>脸型：</strong>{character.faceShape}
-                      </div>
-                    )}
-                    {(character.eyeType || character.eyeColor) && (
-                      <div className="character-feature-item">
-                        <strong>眼睛：</strong>
-                        {[character.eyeType, character.eyeColor].filter(Boolean).join(' / ')}
-                      </div>
-                    )}
-                    {character.noseType && (
-                      <div className="character-feature-item">
-                        <strong>鼻子：</strong>{character.noseType}
-                      </div>
-                    )}
-                    {character.mouthType && (
-                      <div className="character-feature-item">
-                        <strong>嘴型：</strong>{character.mouthType}
-                      </div>
-                    )}
-                    {character.skinTone && (
-                      <div className="character-feature-item">
-                        <strong>肤色：</strong>{character.skinTone}
-                      </div>
-                    )}
-                    {(character.height || character.build) && (
-                      <div className="character-feature-item">
-                        <strong>身高/体型：</strong>
-                        {[character.height, character.build].filter(Boolean).join(' / ')}
-                      </div>
-                    )}
-                  </div>
-                  {character.description && (
-                    <div className="character-field">
-                      <strong>描述：</strong>{character.description}
-                    </div>
-                  )}
-                  {character.personality && (
-                    <div className="character-field">
-                      <strong>性格：</strong>{character.personality}
-                    </div>
-                  )}
-                  {character.nicknames && character.nicknames.length > 0 && (
-                    <div className="character-field">
-                      <strong>别名：</strong>
-                      <div className="character-nicknames">
-                        {character.nicknames.map((nickname, index) => (
-                          <span key={index} className="nickname-tag">{nickname}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                  </SwiperSlide>
+                ))}
+              </Swiper>
             </div>
           )}
         </div>
@@ -418,7 +458,7 @@ function WorkEditor() {
                   type="text"
                   value={episodeTitle}
                   onChange={(e) => setEpisodeTitle(e.target.value)}
-                  placeholder="例如：第一集：开始的冒险"
+                  placeholder="例如：开始的冒险"
                   disabled={actionLoading}
                 />
               </div>
