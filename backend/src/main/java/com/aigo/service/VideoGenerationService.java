@@ -132,8 +132,8 @@ public class VideoGenerationService {
                 if ("Completed".equals(status)) {
                     JsonNode videos = jsonResponse.at("/data/videos");
                     if (videos.isArray() && videos.size() > 0) {
-                        String url = videos.get(0).get("url").asText();
-                        return url;
+                        String videoUrl = videos.get(0).get("url").asText();
+                        return videoUrl;
                     } else {
                         throw new RuntimeException("No video generated in response");
                     }
