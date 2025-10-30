@@ -146,9 +146,39 @@ public class EpisodeAsyncService {
             throw new RuntimeException("No base image available for video generation");
         }
         
+        java.util.Map<String, com.aigo.model.Character> characterMap = new java.util.HashMap<>();
+        if (segment.getCharacters() != null) {
+            for (com.aigo.model.Character character : segment.getCharacters()) {
+                characterMap.put(character.getName(), character);
+            }
+        }
+        
         java.util.List<String> scenePrompts = segment.getScenes().stream()
             .map(scene -> {
                 StringBuilder prompt = new StringBuilder();
+                
+                if (scene.getCharacter() != null && characterMap.containsKey(scene.getCharacter())) {
+                    com.aigo.model.Character character = characterMap.get(scene.getCharacter());
+                    if (character.getGender() != null && !character.getGender().isEmpty()) {
+                        String genderDesc = "";
+                        if ("male".equalsIgnoreCase(character.getGender())) {
+                            genderDesc = "男性";
+                        } else if ("female".equalsIgnoreCase(character.getGender())) {
+                            genderDesc = "女性";
+                        }
+                        if (!genderDesc.isEmpty()) {
+                            prompt.append("角色(").append(genderDesc);
+                            if (character.getDescription() != null && !character.getDescription().isEmpty()) {
+                                String ageInfo = extractAgeInfo(character.getDescription());
+                                if (ageInfo != null && !ageInfo.isEmpty()) {
+                                    prompt.append(", ").append(ageInfo);
+                                }
+                            }
+                            prompt.append("): ");
+                        }
+                    }
+                }
+                
                 if (scene.getVisualDescription() != null && !scene.getVisualDescription().isEmpty()) {
                     prompt.append(scene.getVisualDescription());
                 }
@@ -165,5 +195,42 @@ public class EpisodeAsyncService {
             .collect(Collectors.toList());
         
         return videoGenerationService.generateVideoFromScenes(scenePrompts, baseImageUrl);
+    }
+    
+    private String extractAgeInfo(String description) {
+        if (description == null || description.isEmpty()) {
+            return null;
+        }
+        
+        String lowerDesc = description.toLowerCase();
+        
+        if (lowerDesc.contains("老") || lowerDesc.contains("年迈") || lowerDesc.contains("苍老") || 
+            lowerDesc.contains("爷爷") || lowerDesc.contains("奶奶")) {
+            return "老年";
+        }
+        if (lowerDesc.contains("中年") || lowerDesc.contains("40") || lowerDesc.contains("50")) {
+            return "中年";
+        }
+        if (lowerDesc.contains("青年") || lowerDesc.contains("年轻") || lowerDesc.contains("20") || 
+            lowerDesc.contains("30")) {
+            return "青年";
+        }
+        if (lowerDesc.contains("少年") || lowerDesc.contains("少女") || lowerDesc.contains("青春") || 
+            lowerDesc.contains("学生") || lowerDesc.contains("十几岁")) {
+            return "少年";
+        }
+        if (lowerDesc.contains("儿童") || lowerDesc.contains("孩子") || lowerDesc.contains("小孩")) {
+            return "儿童";
+        }
+        
+        if (description.matches(".*\\d+岁.*")) {
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(\\d+)岁");
+            java.util.regex.Matcher matcher = pattern.matcher(description);
+            if (matcher.find()) {
+                return matcher.group(0);
+            }
+        }
+        
+        return null;
     }
 }
