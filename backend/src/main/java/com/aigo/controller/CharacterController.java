@@ -1,8 +1,12 @@
 package com.aigo.controller;
 
 import com.aigo.dto.ApiResponse;
+import com.aigo.dto.character.CharacterCreateRequest;
+import com.aigo.dto.character.CharacterDescriptionUpdateRequest;
+import com.aigo.dto.character.CharacterImageGenerateRequest;
 import com.aigo.entity.CharacterEntity;
 import com.aigo.service.CharacterService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,5 +70,48 @@ public class CharacterController {
     public ResponseEntity<ApiResponse<List<CharacterEntity>>> getCharactersByWork(@PathVariable String workId) {
         List<CharacterEntity> characters = characterService.getCharactersByWorkId(workId);
         return ResponseEntity.ok(ApiResponse.success(characters));
+    }
+    
+    @PostMapping("/work/{workId}/manual")
+    public ResponseEntity<ApiResponse<CharacterEntity>> createManualCharacter(
+            @PathVariable String workId,
+            @Valid @RequestBody CharacterCreateRequest request) {
+        CharacterEntity created = characterService.createManualCharacter(
+            workId, 
+            request.getName(), 
+            request.getDescription(),
+            request.getGender(),
+            request.getGenerateImage()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(created));
+    }
+    
+    @PostMapping("/{id}/generate-image")
+    public ResponseEntity<ApiResponse<CharacterEntity>> generateCharacterImage(
+            @PathVariable Long id,
+            @Valid @RequestBody CharacterImageGenerateRequest request) {
+        CharacterEntity character = characterService.getCharacterById(id);
+        character.setDescription(request.getDescription());
+        CharacterEntity updated = characterService.generateAndSaveCharacterImage(id);
+        return ResponseEntity.ok(ApiResponse.success(updated));
+    }
+    
+    @PutMapping("/{id}/regenerate-image")
+    public ResponseEntity<ApiResponse<CharacterEntity>> regenerateCharacterImage(@PathVariable Long id) {
+        CharacterEntity updated = characterService.regenerateCharacterImage(id);
+        return ResponseEntity.ok(ApiResponse.success(updated));
+    }
+    
+    @PutMapping("/{id}/description")
+    public ResponseEntity<ApiResponse<CharacterEntity>> updateCharacterDescription(
+            @PathVariable Long id,
+            @Valid @RequestBody CharacterDescriptionUpdateRequest request) {
+        CharacterEntity updated = characterService.updateCharacterDescription(
+            id, 
+            request.getDescription(), 
+            request.getRegenerateImage()
+        );
+        return ResponseEntity.ok(ApiResponse.success(updated));
     }
 }

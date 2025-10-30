@@ -13,6 +13,7 @@ function EpisodeViewer() {
   
   const [episode, setEpisode] = useState(null)
   const [work, setWork] = useState(null)
+  const [episodes, setEpisodes] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [needsPurchase, setNeedsPurchase] = useState(false)
@@ -213,6 +214,14 @@ function EpisodeViewer() {
           const workResult = await api.getWork(result.data.workId)
           if (workResult.success) {
             setWork(workResult.data)
+          }
+          
+          const myWorksResult = await api.getMyWorks()
+          if (myWorksResult.success && myWorksResult.data) {
+            const currentWork = myWorksResult.data.find(w => w.id === result.data.workId)
+            if (currentWork && currentWork.episodes) {
+              setEpisodes(currentWork.episodes)
+            }
           }
         }
         
@@ -447,6 +456,41 @@ function EpisodeViewer() {
     if (isFullscreen) {
       resetHideControlsTimer()
     }
+  }
+
+  const handlePrevEpisode = () => {
+    if (!episode || !episodes || episodes.length === 0) return
+    
+    const currentIndex = episodes.findIndex(ep => ep.id === episode.id)
+    if (currentIndex > 0) {
+      const prevEpisode = episodes[currentIndex - 1]
+      navigate(`/episode/${prevEpisode.id}`)
+    }
+  }
+
+  const handleNextEpisode = () => {
+    if (!episode || !episodes || episodes.length === 0) return
+    
+    const currentIndex = episodes.findIndex(ep => ep.id === episode.id)
+    if (currentIndex >= 0 && currentIndex < episodes.length - 1) {
+      const nextEpisode = episodes[currentIndex + 1]
+      navigate(`/episode/${nextEpisode.id}`)
+    }
+  }
+
+  const getCurrentEpisodeIndex = () => {
+    if (!episode || !episodes || episodes.length === 0) return -1
+    return episodes.findIndex(ep => ep.id === episode.id)
+  }
+
+  const hasPrevEpisode = () => {
+    const index = getCurrentEpisodeIndex()
+    return index > 0
+  }
+
+  const hasNextEpisode = () => {
+    const index = getCurrentEpisodeIndex()
+    return index >= 0 && index < episodes.length - 1
   }
 
   useEffect(() => {
@@ -788,6 +832,24 @@ function EpisodeViewer() {
                   <p className="playback-tip">
                     {autoPlay ? '✓ 音频结束后自动切换到下一场景' : '音频结束后需手动切换场景'}
                   </p>
+                </div>
+                <div className="episode-navigation">
+                  <button
+                    onClick={handlePrevEpisode}
+                    className="btn btn-secondary btn-episode-nav"
+                    disabled={!hasPrevEpisode()}
+                    title={hasPrevEpisode() ? '上一集' : '没有上一集'}
+                  >
+                    ← 上一集
+                  </button>
+                  <button
+                    onClick={handleNextEpisode}
+                    className="btn btn-secondary btn-episode-nav"
+                    disabled={!hasNextEpisode()}
+                    title={hasNextEpisode() ? '下一集' : '没有下一集'}
+                  >
+                    下一集 →
+                  </button>
                 </div>
               </div>}
               
