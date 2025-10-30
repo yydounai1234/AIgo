@@ -49,6 +49,10 @@ public class Work {
     @Column(name = "cover_image", length = 500)
     private String coverImage;
     
+    @Column(name = "content_type", length = 20, nullable = false)
+    @Builder.Default
+    private String contentType = "anime";
+    
     @Column(name = "likes_count", nullable = false)
     @Builder.Default
     private Integer likesCount = 0;

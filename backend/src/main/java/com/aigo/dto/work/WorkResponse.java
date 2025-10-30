@@ -22,6 +22,7 @@ public class WorkResponse {
     private String description;
     private Boolean isPublic;
     private String coverImage;
+    private String contentType;
     private Integer likesCount;
     private Integer viewsCount;
     private Boolean isLiked;
@@ -39,6 +40,7 @@ public class WorkResponse {
                 .description(work.getDescription())
                 .isPublic(work.getIsPublic())
                 .coverImage(work.getCoverImage())
+                .contentType(work.getContentType())
                 .likesCount(work.getLikesCount())
                 .viewsCount(work.getViewsCount())
                 .createdAt(work.getCreatedAt())

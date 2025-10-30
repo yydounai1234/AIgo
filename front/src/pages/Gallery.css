@@ -14,10 +14,46 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .gallery-header h1 {
   color: #333;
+}
+
+.filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.filter-btn {
+  padding: 0.5rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.filter-btn.active {
+  border-color: #667eea;
+  background: #667eea;
+  color: white;
 }
 
 .sort-controls {
@@ -150,6 +186,7 @@
   height: 200px;
   overflow: hidden;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
 }
 
 .work-cover img {
@@ -171,6 +208,27 @@
   height: 4rem;
   color: white;
   opacity: 0.8;
+}
+
+.content-type-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.content-type-badge.anime {
+  background: rgba(102, 126, 234, 0.9);
+}
+
+.content-type-badge.video {
+  background: rgba(255, 71, 87, 0.9);
 }
 
 .work-content {

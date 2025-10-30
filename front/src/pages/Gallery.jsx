@@ -10,13 +10,14 @@ function Gallery() {
   const { isAuthenticated } = useAuth()
   const [works, setWorks] = useState([])
   const [sortBy, setSortBy] = useState('latest')
+  const [contentType, setContentType] = useState('all')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [dropdownOpen, setDropdownOpen] = useState(false)
 
   useEffect(() => {
     loadGallery()
-  }, [sortBy])
+  }, [sortBy, contentType])
 
   const loadGallery = async () => {
     setLoading(true)
@@ -26,7 +27,11 @@ function Gallery() {
       const result = await api.getGallery({ sortBy })
       
       if (result.success) {
-        setWorks(result.data)
+        let filteredWorks = result.data
+        if (contentType !== 'all') {
+          filteredWorks = filteredWorks.filter(work => work.contentType === contentType)
+        }
+        setWorks(filteredWorks)
       } else {
         setError(result.error?.message || '加载失败')
       }
@@ -88,6 +93,29 @@ function Gallery() {
       <div className="gallery-container">
         <div className="gallery-header">
           <h1>作品广场</h1>
+          <div className="filter-controls">
+            <label>类型：</label>
+            <div className="filter-buttons">
+              <button 
+                className={`filter-btn ${contentType === 'all' ? 'active' : ''}`}
+                onClick={() => setContentType('all')}
+              >
+                全部
+              </button>
+              <button 
+                className={`filter-btn ${contentType === 'anime' ? 'active' : ''}`}
+                onClick={() => setContentType('anime')}
+              >
+                动漫
+              </button>
+              <button 
+                className={`filter-btn ${contentType === 'video' ? 'active' : ''}`}
+                onClick={() => setContentType('video')}
+              >
+                视频
+              </button>
+            </div>
+          </div>
           <div className="sort-controls">
             <label>排序：</label>
             <div className="custom-dropdown">
@@ -140,6 +168,9 @@ function Gallery() {
                       </svg>
                     </div>
                   )}
+                  <div className={`content-type-badge ${work.contentType === 'video' ? 'video' : 'anime'}`}>
+                    {work.contentType === 'video' ? '视频' : '动漫'}
+                  </div>
                 </div>
 
                 <div className="work-content">

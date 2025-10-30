@@ -608,6 +608,57 @@ function EpisodeViewer() {
 
   const scenes = episode.scenes || []
   const currentSceneData = scenes[currentScene]
+  const hasVideo = episode.videoUrl && episode.videoUrl.trim() !== ''
+
+  if (hasVideo) {
+    return (
+      <div className="episode-viewer-page">
+        <div className="viewer-container">
+          <div className="viewer-header">
+            <button onClick={() => navigate(-1)} className="btn-back">
+              ← 返回
+            </button>
+            <div className="episode-info">
+              {work && <span className="work-title">{work.title}</span>}
+              <h2>第{episode.episodeNumber}集：{episode.title}</h2>
+            </div>
+            <div className="episode-meta">
+              {episode.isFree ? (
+                <span className="badge badge-success">免费</span>
+              ) : (
+                <span className="badge badge-primary">
+                  <svg className="coin-icon-badge" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
+                    <path d="M12 6v12M9 9h4.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5H9m0 3h4.5c.83 0 1.5-.67 1.5-1.5S14.33 12 13.5 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                  {episode.coinPrice}
+                </span>
+              )}
+            </div>
+          </div>
+          
+          <div className="video-player-container">
+            <video 
+              controls 
+              autoPlay={autoPlay}
+              className="episode-video-player"
+              poster={scenes[0]?.imageUrl}
+            >
+              <source src={episode.videoUrl} type="video/mp4" />
+              您的浏览器不支持视频播放。
+            </video>
+          </div>
+          
+          {episode.plotSummary && (
+            <div className="video-description">
+              <h3>剧情简介</h3>
+              <p>{episode.plotSummary}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="episode-viewer-page">

@@ -93,6 +93,9 @@ public class Episode {
     @Column(name = "target_audience", length = 100)
     private String targetAudience;
     
+    @Column(name = "video_url", length = 500)
+    private String videoUrl;
+    
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     

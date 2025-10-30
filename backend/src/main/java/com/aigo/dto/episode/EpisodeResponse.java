@@ -32,6 +32,7 @@ public class EpisodeResponse {
     private String errorMessage;
     private String style;
     private String targetAudience;
+    private String videoUrl;
     private LocalDateTime createdAt;
     private String authorName;
     private String authorAvatar;
@@ -55,6 +56,7 @@ public class EpisodeResponse {
                 .errorMessage(episode.getErrorMessage())
                 .style(episode.getStyle())
                 .targetAudience(episode.getTargetAudience())
+                .videoUrl(episode.getVideoUrl())
                 .createdAt(episode.getCreatedAt())
                 .authorName(episode.getWork() != null && episode.getWork().getUser() != null ? episode.getWork().getUser().getUsername() : null)
                 .authorAvatar(episode.getWork() != null && episode.getWork().getUser() != null ? episode.getWork().getUser().getAvatarUrl() : null)
