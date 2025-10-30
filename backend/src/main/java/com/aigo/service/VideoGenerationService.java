@@ -86,6 +86,7 @@ public class VideoGenerationService {
         parameters.put("durationSeconds", 8);
         parameters.put("sampleCount", 1);
         parameters.put("aspectRatio", "16:9");
+        parameters.put("generateAudio", true);
         
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("instances", Collections.singletonList(instance));
@@ -125,14 +126,14 @@ public class VideoGenerationService {
                 JsonNode jsonResponse = objectMapper.readTree(response.getBody());
                 
                 String status = jsonResponse.get("status").asText();
-                logger.info("[VideoGenerationService] Task {} status: {} (attempt {}/{})", 
-                    taskId, status, attemptCount, maxAttempts);
+                logger.info("[VideoGenerationService] Task {} status: {} (attempt {}/{}), jsonResponse: {}", 
+                    taskId, status, attemptCount, maxAttempts, jsonResponse);
                 
                 if ("Completed".equals(status)) {
                     JsonNode videos = jsonResponse.at("/data/videos");
                     if (videos.isArray() && videos.size() > 0) {
-                        String downloadUrl = videos.get(0).get("downloadUrl").asText();
-                        return downloadUrl;
+                        String url = videos.get(0).get("url").asText();
+                        return url;
                     } else {
                         throw new RuntimeException("No video generated in response");
                     }
