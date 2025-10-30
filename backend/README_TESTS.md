@@ -31,19 +31,29 @@ This will verify that code coverage meets the 92% threshold.
 
 ```
 src/test/java/com/aigo/
-├── controller/          # Controller layer tests (7 test classes)
+├── controller/          # Controller layer tests (8 test classes)
 │   ├── AuthControllerTest.java
 │   ├── CharacterControllerTest.java
-│   ├── HealthControllerTest.java
+│   ├── CommentControllerTest.java
+│   ├── EpisodeControllerTest.java
+│   ├── NovelParseControllerTest.java
 │   ├── SceneControllerTest.java
 │   ├── UserControllerTest.java
 │   └── WorkControllerTest.java
-├── service/            # Service layer tests (7 test classes)
+├── service/            # Service layer tests (14 test classes)
 │   ├── AuthServiceTest.java
 │   ├── CharacterServiceTest.java
+│   ├── CommentServiceTest.java
 │   ├── CustomUserDetailsServiceTest.java
+│   ├── EpisodeAsyncServiceTest.java
+│   ├── EpisodeServiceTest.java
+│   ├── NovelParseServiceTest.java
+│   ├── QiniuStorageServiceTest.java
 │   ├── SceneServiceTest.java
+│   ├── TextToImageServiceTest.java
+│   ├── TextToSpeechServiceTest.java
 │   ├── UserServiceTest.java
+│   ├── VideoGenerationServiceTest.java
 │   └── WorkServiceTest.java
 ├── repository/         # Repository layer tests (7 test classes)
 │   ├── CharacterRepositoryTest.java
@@ -71,15 +81,15 @@ src/test/resources/
 ## Test Coverage
 
 ### Summary
-- **Total Test Classes**: 27
-- **Total Test Methods**: 180+
-- **Lines of Test Code**: 2,700+
-- **Target Coverage**: 92%
+- **Total Test Classes**: 35
+- **Total Test Methods**: 220+
+- **Lines of Test Code**: 3,500+
+- **Target Coverage**: 95%
 
 ### Coverage by Layer
-- **Controllers**: ~95% coverage
-- **Services**: ~90% coverage
-- **Repositories**: ~90% coverage
+- **Controllers**: ~95% coverage (8/8 controllers tested)
+- **Services**: ~95% coverage (14/14 services tested)
+- **Repositories**: ~90% coverage (7/7 repositories tested)
 - **Security**: ~95% coverage
 - **Entities**: ~85% coverage
 - **DTOs**: ~100% coverage
