@@ -18,6 +18,7 @@ public class GalleryItemResponse {
     private String title;
     private String description;
     private String coverImage;
+    private String contentType;
     private Integer likesCount;
     private Integer viewsCount;
     private Boolean isLiked;
@@ -31,6 +32,7 @@ public class GalleryItemResponse {
                 .title(work.getTitle())
                 .description(work.getDescription())
                 .coverImage(work.getCoverImage())
+                .contentType(work.getContentType())
                 .likesCount(work.getLikesCount())
                 .viewsCount(work.getViewsCount())
                 .isLiked(isLiked)
