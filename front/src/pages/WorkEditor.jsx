@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { FreeMode, Navigation, Thumbs } from 'swiper/modules'
+import { FreeMode, Thumbs } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/free-mode'
-import 'swiper/css/navigation'
 import 'swiper/css/thumbs'
 import api from '../services/api'
 import Modal from '../components/Modal'
@@ -316,9 +315,8 @@ function WorkEditor() {
             <div className="character-gallery">
               <Swiper
                 spaceBetween={10}
-                navigation={true}
                 thumbs={{ swiper: thumbsSwiper }}
-                modules={[FreeMode, Navigation, Thumbs]}
+                modules={[FreeMode, Thumbs]}
                 className="character-main-swiper"
               >
                 {characters.map(character => (
@@ -393,16 +391,6 @@ function WorkEditor() {
                       {character.personality && (
                         <div className="character-field">
                           <strong>性格：</strong>{character.personality}
-                        </div>
-                      )}
-                      {character.nicknames && character.nicknames.length > 0 && (
-                        <div className="character-field">
-                          <strong>别名：</strong>
-                          <div className="character-nicknames">
-                            {character.nicknames.map((nickname, index) => (
-                              <span key={index} className="nickname-tag">{nickname}</span>
-                            ))}
-                          </div>
                         </div>
                       )}
                     </div>
