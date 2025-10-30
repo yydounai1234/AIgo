@@ -293,7 +293,10 @@ function WorkEditor() {
         )
         
         if (result.success) {
-          await loadWork()
+          const charactersResult = await api.getWorkCharacters(workId)
+          if (charactersResult.success && charactersResult.data) {
+            setCharacters(charactersResult.data || [])
+          }
           setShowCharacterForm(false)
           setEditingCharacter(null)
           setCharacterName('')
@@ -311,7 +314,10 @@ function WorkEditor() {
         })
         
         if (result.success) {
-          await loadWork()
+          const charactersResult = await api.getWorkCharacters(workId)
+          if (charactersResult.success && charactersResult.data) {
+            setCharacters(charactersResult.data || [])
+          }
           setShowCharacterForm(false)
           setCharacterName('')
           setCharacterDescription('')
@@ -338,7 +344,10 @@ function WorkEditor() {
       const result = await api.regenerateCharacterImage(characterId)
       
       if (result.success) {
-        await loadWork()
+        const charactersResult = await api.getWorkCharacters(workId)
+        if (charactersResult.success && charactersResult.data) {
+          setCharacters(charactersResult.data || [])
+        }
         setModal({ isOpen: true, type: 'alert', title: '成功', message: '角色图片已重新生成', onConfirm: null })
       } else {
         setError(result.error?.message || '生成失败')
