@@ -36,6 +36,14 @@ function WorkEditor() {
   const [modal, setModal] = useState({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null })
   const [thumbsSwiper, setThumbsSwiper] = useState(null)
   
+  const [showCharacterForm, setShowCharacterForm] = useState(false)
+  const [editingCharacter, setEditingCharacter] = useState(null)
+  const [characterName, setCharacterName] = useState('')
+  const [characterDescription, setCharacterDescription] = useState('')
+  const [characterGender, setCharacterGender] = useState('male')
+  const [generateImageOnCreate, setGenerateImageOnCreate] = useState(true)
+  const [characterImageLoading, setCharacterImageLoading] = useState(false)
+  
 
   useEffect(() => {
     loadWork()
@@ -244,6 +252,94 @@ function WorkEditor() {
     navigate(`/episode/${episodeId}`)
   }
 
+  const handleCreateCharacter = () => {
+    setEditingCharacter(null)
+    setCharacterName('')
+    setCharacterDescription('')
+    setCharacterGender('male')
+    setGenerateImageOnCreate(true)
+    setShowCharacterForm(true)
+  }
+
+  const handleEditCharacter = (character) => {
+    setEditingCharacter(character)
+    setCharacterName(character.name)
+    setCharacterDescription(character.description || '')
+    setCharacterGender(character.gender || 'male')
+    setShowCharacterForm(true)
+  }
+
+  const handleSaveCharacter = async () => {
+    if (!characterName.trim()) {
+      setError('请输入角色名称')
+      return
+    }
+    
+    if (!characterDescription.trim()) {
+      setError('请输入角色描述')
+      return
+    }
+    
+    setActionLoading(true)
+    setError('')
+    
+    try {
+      if (editingCharacter) {
+        const result = await api.updateCharacterDescription(
+          editingCharacter.id,
+          characterDescription,
+          false
+        )
+        
+        if (result.success) {
+          await loadWork()
+          setShowCharacterForm(false)
+          setModal({ isOpen: true, type: 'alert', title: '成功', message: '角色信息已更新', onConfirm: null })
+        } else {
+          setError(result.error?.message || '更新失败')
+        }
+      } else {
+        const result = await api.createManualCharacter(workId, {
+          name: characterName.trim(),
+          description: characterDescription.trim(),
+          gender: characterGender,
+          generateImage: generateImageOnCreate
+        })
+        
+        if (result.success) {
+          await loadWork()
+          setShowCharacterForm(false)
+          setModal({ isOpen: true, type: 'alert', title: '成功', message: '角色已创建', onConfirm: null })
+        } else {
+          setError(result.error?.message || '创建失败')
+        }
+      }
+    } catch (err) {
+      setError('保存角色时发生错误')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleRegenerateCharacterImage = async (characterId) => {
+    setCharacterImageLoading(true)
+    setError('')
+    
+    try {
+      const result = await api.regenerateCharacterImage(characterId)
+      
+      if (result.success) {
+        await loadWork()
+        setModal({ isOpen: true, type: 'alert', title: '成功', message: '角色图片已重新生成', onConfirm: null })
+      } else {
+        setError(result.error?.message || '生成失败')
+      }
+    } catch (err) {
+      setError('生成图片时发生错误')
+    } finally {
+      setCharacterImageLoading(false)
+    }
+  }
 
   if (loading) {
     return <div className="loading-page">加载中...</div>
@@ -308,10 +404,96 @@ function WorkEditor() {
         </div>
         
         <div className="characters-section">
-          <h2>角色库</h2>
-          <p className="section-description">作品中出现的所有角色，确保角色在各集中保持一致性</p>
+          <div className="section-header">
+            <div>
+              <h2>角色库</h2>
+              <p className="section-description">作品中出现的所有角色，确保角色在各集中保持一致性</p>
+            </div>
+            <button
+              onClick={handleCreateCharacter}
+              className="btn btn-success"
+              disabled={actionLoading || showCharacterForm}
+            >
+              + 新增角色
+            </button>
+          </div>
+          
+          {showCharacterForm && (
+            <div className="episode-form-card">
+              <h3>{editingCharacter ? '编辑角色' : '新增角色'}</h3>
+              
+              <div className="form-group">
+                <label>角色名称 *</label>
+                <input
+                  type="text"
+                  value={characterName}
+                  onChange={(e) => setCharacterName(e.target.value)}
+                  placeholder="例如：张三"
+                  disabled={actionLoading || !!editingCharacter}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>角色描述 *</label>
+                <textarea
+                  value={characterDescription}
+                  onChange={(e) => setCharacterDescription(e.target.value)}
+                  placeholder="详细描述角色的外貌特征，例如：一个20岁左右的年轻男性，黑色短发，棕色眼睛，身高180cm左右，身材匀称..."
+                  rows={6}
+                  disabled={actionLoading}
+                />
+                <small>提示：详细的外貌描述可以帮助生成更准确的角色图片</small>
+              </div>
+              
+              {!editingCharacter && (
+                <>
+                  <div className="form-group">
+                    <label>性别</label>
+                    <select
+                      value={characterGender}
+                      onChange={(e) => setCharacterGender(e.target.value)}
+                      disabled={actionLoading}
+                    >
+                      <option value="male">男</option>
+                      <option value="female">女</option>
+                    </select>
+                  </div>
+                  
+                  <div className="form-group checkbox-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={generateImageOnCreate}
+                        onChange={(e) => setGenerateImageOnCreate(e.target.checked)}
+                        disabled={actionLoading}
+                      />
+                      自动生成角色基础图片
+                    </label>
+                  </div>
+                </>
+              )}
+              
+              <div className="form-actions">
+                <button
+                  onClick={handleSaveCharacter}
+                  className="btn btn-primary btn-fixed-width"
+                  disabled={actionLoading}
+                >
+                  {actionLoading ? '保存中...' : '保存'}
+                </button>
+                <button
+                  onClick={() => setShowCharacterForm(false)}
+                  className="btn btn-secondary btn-fixed-width"
+                  disabled={actionLoading}
+                >
+                  取消
+                </button>
+              </div>
+            </div>
+          )}
+          
           {characters.length === 0 ? (
-            <p className="empty-message">还没有角色信息，创建并处理集数后会自动提取角色</p>
+            <p className="empty-message">还没有角色信息，点击"新增角色"手动创建，或创建并处理集数后会自动提取角色</p>
           ) : (
             <div className="character-gallery">
               <Swiper
@@ -406,6 +588,22 @@ function WorkEditor() {
                               </div>
                             </div>
                           )}
+                          <div className="character-actions">
+                            <button
+                              onClick={() => handleEditCharacter(character)}
+                              className="btn btn-sm btn-secondary"
+                              disabled={actionLoading || showCharacterForm}
+                            >
+                              编辑描述
+                            </button>
+                            <button
+                              onClick={() => handleRegenerateCharacterImage(character.id)}
+                              className="btn btn-sm btn-primary"
+                              disabled={characterImageLoading || actionLoading}
+                            >
+                              {characterImageLoading ? '生成中...' : '重新生成图片'}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>

@@ -159,6 +159,33 @@ export const realApi = {
     })
   },
 
+  async createManualCharacter(workId, characterData) {
+    return await request(`/api/characters/work/${workId}/manual`, {
+      method: 'POST',
+      body: JSON.stringify(characterData)
+    })
+  },
+
+  async generateCharacterImage(characterId, description) {
+    return await request(`/api/characters/${characterId}/generate-image`, {
+      method: 'POST',
+      body: JSON.stringify({ description })
+    })
+  },
+
+  async regenerateCharacterImage(characterId) {
+    return await request(`/api/characters/${characterId}/regenerate-image`, {
+      method: 'PUT'
+    })
+  },
+
+  async updateCharacterDescription(characterId, description, regenerateImage = true) {
+    return await request(`/api/characters/${characterId}/description`, {
+      method: 'PUT',
+      body: JSON.stringify({ description, regenerateImage })
+    })
+  },
+
   async rechargeCoins(amount) {
     return await request('/api/user/recharge', {
       method: 'POST',

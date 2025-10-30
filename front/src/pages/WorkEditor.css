@@ -569,3 +569,30 @@
     width: 100%;
   }
 }
+
+.character-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.character-actions .btn {
+  flex: 1;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.section-header > div {
+  flex: 1;
+}
+
+.section-header .btn {
+  margin-left: 1rem;
+}

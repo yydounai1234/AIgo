@@ -29,6 +29,7 @@ public class CharacterService {
     private static final Logger logger = LoggerFactory.getLogger(CharacterService.class);
     
     private final CharacterRepository characterRepository;
+    private final TextToImageService textToImageService;
     private final ObjectMapper objectMapper = new ObjectMapper();
     
     @Value("${deepseek.api.key}")
@@ -572,5 +573,95 @@ public class CharacterService {
         }
         
         return response;
+    }
+    
+    @Transactional
+    public CharacterEntity createManualCharacter(String workId, String name, String description, 
+                                                String gender, Boolean generateImage) {
+        Optional<CharacterEntity> existing = characterRepository.findByWorkIdAndName(workId, name);
+        if (existing.isPresent()) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "该作品中已存在同名角色");
+        }
+        
+        CharacterEntity character = new CharacterEntity();
+        character.setWorkId(workId);
+        character.setName(name);
+        character.setDescription(description);
+        character.setGender(gender);
+        character.setIsProtagonist(false);
+        
+        ensureCompleteCharacterFeatures(character, workId);
+        
+        CharacterEntity savedCharacter = characterRepository.save(character);
+        logger.info("[CharacterService] Created manual character '{}' in work '{}'", name, workId);
+        
+        if (generateImage != null && generateImage) {
+            try {
+                String imageUrl = textToImageService.generateBaseCharacterImage(savedCharacter);
+                savedCharacter.setFirstImageUrl(imageUrl);
+                savedCharacter = characterRepository.save(savedCharacter);
+                logger.info("[CharacterService] Generated and saved base image for character '{}'", name);
+            } catch (Exception e) {
+                logger.error("[CharacterService] Failed to generate base image for character '{}'", name, e);
+            }
+        }
+        
+        return savedCharacter;
+    }
+    
+    @Transactional
+    public CharacterEntity generateAndSaveCharacterImage(Long characterId) {
+        CharacterEntity character = getCharacterById(characterId);
+        
+        try {
+            String imageUrl = textToImageService.generateBaseCharacterImage(character);
+            character.setFirstImageUrl(imageUrl);
+            CharacterEntity saved = characterRepository.save(character);
+            logger.info("[CharacterService] Generated and saved base image for character '{}'", character.getName());
+            return saved;
+        } catch (Exception e) {
+            logger.error("[CharacterService] Failed to generate base image for character '{}'", character.getName(), e);
+            throw new BusinessException(ErrorCode.INTERNAL_ERROR, "生成角色图片失败: " + e.getMessage());
+        }
+    }
+    
+    @Transactional
+    public CharacterEntity regenerateCharacterImage(Long characterId) {
+        CharacterEntity character = getCharacterById(characterId);
+        
+        try {
+            String imageUrl = textToImageService.generateBaseCharacterImage(character);
+            character.setFirstImageUrl(imageUrl);
+            CharacterEntity saved = characterRepository.save(character);
+            logger.info("[CharacterService] Regenerated base image for character '{}'", character.getName());
+            return saved;
+        } catch (Exception e) {
+            logger.error("[CharacterService] Failed to regenerate base image for character '{}'", character.getName(), e);
+            throw new BusinessException(ErrorCode.INTERNAL_ERROR, "重新生成角色图片失败: " + e.getMessage());
+        }
+    }
+    
+    @Transactional
+    public CharacterEntity updateCharacterDescription(Long characterId, String description, Boolean regenerateImage) {
+        CharacterEntity character = getCharacterById(characterId);
+        character.setDescription(description);
+        
+        ensureCompleteCharacterFeatures(character, character.getWorkId());
+        
+        CharacterEntity saved = characterRepository.save(character);
+        logger.info("[CharacterService] Updated description for character '{}'", character.getName());
+        
+        if (regenerateImage != null && regenerateImage) {
+            try {
+                String imageUrl = textToImageService.generateBaseCharacterImage(saved);
+                saved.setFirstImageUrl(imageUrl);
+                saved = characterRepository.save(saved);
+                logger.info("[CharacterService] Regenerated base image after description update for character '{}'", character.getName());
+            } catch (Exception e) {
+                logger.error("[CharacterService] Failed to regenerate base image for character '{}'", character.getName(), e);
+            }
+        }
+        
+        return saved;
     }
 }
