@@ -75,10 +75,15 @@
   border-color: #d0d0d0;
 }
 
+.character-card-content {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
 .character-image-large {
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 1.5rem;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
   overflow: hidden;
   background: #f5f5f5;
@@ -91,6 +96,11 @@
   height: 100%;
   display: block;
   object-fit: cover;
+}
+
+.character-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .character-thumb {
