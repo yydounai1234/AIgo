@@ -248,6 +248,24 @@
   background: #2a2a2a;
   display: flex;
   align-items: flex-start;
+  justify-content: space-between;
+}
+
+.episode-navigation {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn-episode-nav {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.btn-episode-nav:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .scene-text {
