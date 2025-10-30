@@ -188,7 +188,13 @@ function WorkEditor() {
         })
         
         if (result.success) {
-          await loadWork()
+          const myWorksResult = await api.getMyWorks()
+          if (myWorksResult.success && myWorksResult.data) {
+            const currentWork = myWorksResult.data.find(w => w.id === workId)
+            if (currentWork) {
+              setEpisodes(currentWork.episodes || [])
+            }
+          }
           setShowEpisodeForm(false)
           setModal({ isOpen: true, type: 'alert', title: '成功', message: '集数已更新', onConfirm: null })
         } else {
@@ -204,7 +210,13 @@ function WorkEditor() {
         })
         
         if (result.success) {
-          await loadWork()
+          const myWorksResult = await api.getMyWorks()
+          if (myWorksResult.success && myWorksResult.data) {
+            const currentWork = myWorksResult.data.find(w => w.id === workId)
+            if (currentWork) {
+              setEpisodes(currentWork.episodes || [])
+            }
+          }
           setShowEpisodeForm(false)
           navigate(`/episode/${result.data.id}`)
         } else {
