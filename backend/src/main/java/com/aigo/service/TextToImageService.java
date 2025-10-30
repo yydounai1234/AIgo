@@ -657,17 +657,18 @@ public class TextToImageService {
         return prompt.toString();
     }
     
-    public String generateSceneFromBaseImage(Scene scene, String baseImageUrl, CharacterEntity character) {
+    public String generateSceneFromBaseImage(Scene scene, List<String> baseImageUrls, List<CharacterEntity> characters) {
         if ("demo-key".equals(apiKey)) {
             logger.info("[TextToImageService] Using demo mode for scene {} with base image", scene.getSceneNumber());
             return createDemoImageUrl(scene);
         }
         
         try {
-            String prompt = buildScenePromptForImageToImage(scene, character);
+            String prompt = buildScenePromptForImageToImage(scene, characters);
             
-            logger.info("[TextToImageService] Generating scene {} from base image using Image-to-Image", scene.getSceneNumber());
-            String base64ImageData = callImageToImageApi(baseImageUrl, prompt);
+            logger.info("[TextToImageService] Generating scene {} from {} base image(s) using Image-to-Image", 
+                scene.getSceneNumber(), baseImageUrls.size());
+            String base64ImageData = callImageToImageApi(baseImageUrls, prompt);
             
             String filePrefix = "scene_" + scene.getSceneNumber() + "_" + System.currentTimeMillis();
             String publicUrl = qiniuStorageService.uploadBase64Image(base64ImageData, filePrefix);
@@ -680,10 +681,20 @@ public class TextToImageService {
         }
     }
     
-    private String buildScenePromptForImageToImage(Scene scene, CharacterEntity character) {
+    private String buildScenePromptForImageToImage(Scene scene, List<CharacterEntity> characters) {
         StringBuilder prompt = new StringBuilder();
         
-        prompt.append("保持角色外观完全一致。");
+        if (characters != null && characters.size() > 1) {
+            prompt.append("保持所有角色外观完全一致，严格参考提供的基础图片。");
+            prompt.append("画面中包含多个角色：");
+            for (CharacterEntity character : characters) {
+                prompt.append(character.getName()).append("、");
+            }
+            prompt.setLength(prompt.length() - 1);
+            prompt.append("。");
+        } else {
+            prompt.append("保持角色外观完全一致。");
+        }
         
         if (scene.getVisualDescription() != null && !scene.getVisualDescription().isEmpty()) {
             prompt.append("场景环境：").append(scene.getVisualDescription()).append("。");
@@ -699,12 +710,12 @@ public class TextToImageService {
         }
         
         prompt.append("动漫/漫画风格，高质量，细节丰富。");
-        prompt.append("角色的发型、发色、眼睛、脸型、服装必须与原图完全一致。");
+        prompt.append("所有角色的发型、发色、眼睛、脸型、服装必须与提供的基础图片完全一致。");
         
         return prompt.toString();
     }
     
-    private String callImageToImageApi(String imageUrl, String prompt) throws Exception {
+    private String callImageToImageApi(List<String> imageUrls, String prompt) throws Exception {
         String url = "https://api.qnaigc.com/v1/images/edits";
         
         HttpHeaders headers = new HttpHeaders();
@@ -713,13 +724,20 @@ public class TextToImageService {
         
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", modelName);
-        requestBody.put("image", imageUrl);
+        
+        if (imageUrls.size() == 1) {
+            requestBody.put("image", imageUrls.get(0));
+        } else {
+            requestBody.put("image", imageUrls);
+        }
+        
         requestBody.put("prompt", prompt);
         requestBody.put("n", 1);
         
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
         
-        logger.info("[TextToImageService] Calling Image-to-Image API with prompt: {}", prompt);
+        logger.info("[TextToImageService] Calling Image-to-Image API with {} base image(s) and prompt: {}", 
+            imageUrls.size(), prompt);
         
         ResponseEntity<String> response = restTemplate.exchange(
             url,

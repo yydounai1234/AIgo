@@ -260,36 +260,43 @@ public class NovelParseService {
             
             for (Scene scene : segment.getScenes()) {
                 String characterName = scene.getCharacter();
-                String bestMatchCharacter = null;
+                String visualDescription = scene.getVisualDescription();
+                
+                List<String> sceneCharacterNames = new ArrayList<>();
+                List<String> sceneBaseImageUrls = new ArrayList<>();
+                List<com.aigo.entity.CharacterEntity> sceneCharacterEntities = new ArrayList<>();
                 
                 if (characterName != null && baseImageUrls.containsKey(characterName)) {
-                    bestMatchCharacter = characterName;
-                } else {
-                    String visualDescription = scene.getVisualDescription();
-                    if (visualDescription != null && !visualDescription.isEmpty()) {
-                        for (String charName : baseImageUrls.keySet()) {
-                            if (visualDescription.contains(charName)) {
-                                bestMatchCharacter = charName;
-                                logger.info("[NovelParseService] Detected character '{}' in scene {} visual description", 
-                                    charName, scene.getSceneNumber());
-                                break;
+                    sceneCharacterNames.add(characterName);
+                    sceneBaseImageUrls.add(baseImageUrls.get(characterName));
+                    if (characterEntityMap.containsKey(characterName)) {
+                        sceneCharacterEntities.add(characterEntityMap.get(characterName));
+                    }
+                }
+                
+                if (visualDescription != null && !visualDescription.isEmpty()) {
+                    for (Map.Entry<String, String> entry : baseImageUrls.entrySet()) {
+                        String charName = entry.getKey();
+                        if (!sceneCharacterNames.contains(charName) && visualDescription.contains(charName)) {
+                            sceneCharacterNames.add(charName);
+                            sceneBaseImageUrls.add(entry.getValue());
+                            if (characterEntityMap.containsKey(charName)) {
+                                sceneCharacterEntities.add(characterEntityMap.get(charName));
                             }
+                            logger.info("[NovelParseService] Detected additional character '{}' in scene {} visual description", 
+                                charName, scene.getSceneNumber());
                         }
                     }
                 }
                 
-                if (bestMatchCharacter != null && baseImageUrls.containsKey(bestMatchCharacter) && 
-                    characterEntityMap.containsKey(bestMatchCharacter)) {
+                if (!sceneBaseImageUrls.isEmpty() && !sceneCharacterEntities.isEmpty()) {
                     try {
-                        String baseImageUrl = baseImageUrls.get(bestMatchCharacter);
-                        com.aigo.entity.CharacterEntity entity = characterEntityMap.get(bestMatchCharacter);
-                        
                         String sceneImageUrl = textToImageService.generateSceneFromBaseImage(
-                            scene, baseImageUrl, entity);
+                            scene, sceneBaseImageUrls, sceneCharacterEntities);
                         scene.setImageUrl(sceneImageUrl);
                         
-                        logger.info("[NovelParseService] Generated scene {} for character '{}' using Image-to-Image", 
-                            scene.getSceneNumber(), bestMatchCharacter);
+                        logger.info("[NovelParseService] Generated scene {} with {} character(s) using Image-to-Image: {}", 
+                            scene.getSceneNumber(), sceneCharacterNames.size(), sceneCharacterNames);
                     } catch (Exception e) {
                         logger.error("[NovelParseService] Failed to generate scene {} with Image-to-Image, falling back to text-to-image", 
                             scene.getSceneNumber(), e);
